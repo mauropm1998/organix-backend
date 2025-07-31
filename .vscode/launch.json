@@ -1,0 +1,17 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Launch Organix Backend",
+            "request": "launch",
+            "mainClass": "com.organixui.organixbackend.OrganixBackendApplication",
+            "projectName": "organix-backend",
+            "args": "--spring.profiles.active=dev",
+            "vmArgs": "-Dspring.profiles.active=dev",
+            "env": {
+                "SPRING_PROFILES_ACTIVE": "dev"
+            }
+        }
+    ]
+}

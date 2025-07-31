@@ -1,0 +1,20 @@
+{
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "java.import.maven.enabled": true,
+    "java.compile.nullAnalysis.mode": "automatic",
+    "java.codeGeneration.hashCodeEquals.useJava7Objects": true,
+    "java.codeGeneration.generateComments": true,
+    "java.saveActions.organizeImports": true,
+    "java.format.settings.url": null,
+    "java.format.settings.profile": null,
+    "java.maven.downloadSources": true,
+    "java.maven.downloadJavadoc": true,
+    "spring-boot.ls.logfile": {
+        "name": "spring-boot-language-server.log"
+    },
+    "files.exclude": {
+        "**/target": true,
+        "**/.git": true,
+        "**/.DS_Store": true
+    }
+}
