@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
@@ -146,6 +147,38 @@ public class GlobalExceptionHandler {
         );
         
         return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
+    
+    /**
+     * Trata erros de JSON malformado na requisição.
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleJsonParseException(HttpMessageNotReadableException ex, HttpServletRequest request) {
+        log.error("JSON parse error: {}", ex.getMessage());
+        
+        String message = "Formato JSON inválido na requisição";
+        String rootCauseMessage = ex.getRootCause() != null ? ex.getRootCause().getMessage() : ex.getMessage();
+        
+        // Extrai informações específicas do erro de parsing
+        if (rootCauseMessage != null) {
+            if (rootCauseMessage.contains("Unexpected character")) {
+                message = "JSON malformado: " + rootCauseMessage;
+            } else if (rootCauseMessage.contains("was expecting double-quote")) {
+                message = "JSON malformado: Nome de campo deve estar entre aspas duplas";
+            } else if (rootCauseMessage.contains("Unexpected end-of-input")) {
+                message = "JSON incompleto: Estrutura não foi fechada corretamente";
+            }
+        }
+        
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                message,
+                request.getRequestURI(),
+                "INVALID_JSON_FORMAT"
+        );
+        
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
     
     /**

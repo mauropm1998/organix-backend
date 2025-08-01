@@ -34,6 +34,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NonNull HttpServletRequest request, 
                                   @NonNull HttpServletResponse response, 
                                   @NonNull FilterChain filterChain) throws ServletException, IOException {
+        
+        // Pula o processamento JWT para rotas públicas
+        if (isPublicPath(request.getRequestURI())) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+        
         try {
             String jwt = getJwtFromRequest(request);
             
@@ -63,5 +70,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return bearerToken.substring(7);
         }
         return null;
+    }
+    
+    /**
+     * Verifica se o caminho da requisição é público (não requer autenticação).
+     */
+    private boolean isPublicPath(String requestURI) {
+        return requestURI.startsWith("/api/auth/") ||
+               requestURI.startsWith("/api/health/") ||
+               requestURI.startsWith("/h2-console/") ||
+               requestURI.startsWith("/swagger-ui/") ||
+               requestURI.equals("/swagger-ui.html") ||
+               requestURI.startsWith("/v3/api-docs/") ||
+               requestURI.startsWith("/api-docs/") ||
+               requestURI.startsWith("/swagger-resources/") ||
+               requestURI.startsWith("/webjars/");
     }
 }

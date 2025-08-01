@@ -2,7 +2,7 @@ package com.organixui.organixbackend.draft.service;
 
 import com.organixui.organixbackend.common.exception.BusinessException;
 import com.organixui.organixbackend.common.exception.ResourceNotFoundException;
-import com.organixui.organixbackend.security.SecurityUtils;
+import com.organixui.organixbackend.common.security.SecurityUtils;
 import com.organixui.organixbackend.draft.dto.CreateDraftRequest;
 import com.organixui.organixbackend.draft.dto.DraftResponse;
 import com.organixui.organixbackend.draft.dto.UpdateDraftRequest;

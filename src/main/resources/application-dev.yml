@@ -10,3 +10,9 @@ spring:
 jwt:
   secret: mySecretKey123456789012345678901234567890
   expiration: 86400000 # 1 day in milliseconds
+
+application:
+  uploads:
+    path: ./uploads
+  backend:
+    url: http://localhost:8080

@@ -2,7 +2,7 @@ package com.organixui.organixbackend.content.service;
 
 import com.organixui.organixbackend.common.exception.BusinessException;
 import com.organixui.organixbackend.common.exception.ResourceNotFoundException;
-import com.organixui.organixbackend.security.SecurityUtils;
+import com.organixui.organixbackend.common.security.SecurityUtils;
 import com.organixui.organixbackend.content.dto.ContentRequest;
 import com.organixui.organixbackend.content.dto.ContentResponse;
 import com.organixui.organixbackend.content.model.Content;

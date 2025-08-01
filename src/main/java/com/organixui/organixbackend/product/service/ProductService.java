@@ -1,7 +1,7 @@
 package com.organixui.organixbackend.product.service;
 
 import com.organixui.organixbackend.common.exception.ResourceNotFoundException;
-import com.organixui.organixbackend.security.SecurityUtils;
+import com.organixui.organixbackend.common.security.SecurityUtils;
 import com.organixui.organixbackend.product.dto.CreateProductRequest;
 import com.organixui.organixbackend.product.dto.ProductResponse;
 import com.organixui.organixbackend.product.dto.UpdateProductRequest;

@@ -8,7 +8,7 @@ import com.organixui.organixbackend.calendar.model.EventType;
 import com.organixui.organixbackend.calendar.repository.CalendarEventRepository;
 import com.organixui.organixbackend.common.exception.BusinessException;
 import com.organixui.organixbackend.common.exception.ResourceNotFoundException;
-import com.organixui.organixbackend.security.SecurityUtils;
+import com.organixui.organixbackend.common.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

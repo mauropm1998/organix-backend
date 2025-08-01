@@ -2,7 +2,7 @@ package com.organixui.organixbackend.user.service;
 
 import com.organixui.organixbackend.common.exception.BusinessException;
 import com.organixui.organixbackend.common.exception.ResourceNotFoundException;
-import com.organixui.organixbackend.security.SecurityUtils;
+import com.organixui.organixbackend.common.security.SecurityUtils;
 import com.organixui.organixbackend.company.model.Company;
 import com.organixui.organixbackend.company.repository.CompanyRepository;
 import com.organixui.organixbackend.user.dto.CreateUserRequest;

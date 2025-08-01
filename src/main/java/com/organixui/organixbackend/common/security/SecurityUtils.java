@@ -35,6 +35,13 @@ public class SecurityUtils {
     }
     
     /**
+     * Obtém o username do usuário atualmente autenticado.
+     */
+    public static String getCurrentUsername() {
+        return getCurrentUser().getUsername();
+    }
+    
+    /**
      * Obtém o email do usuário atualmente autenticado.
      */
     public static String getCurrentUserEmail() {

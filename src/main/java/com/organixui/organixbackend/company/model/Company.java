@@ -40,7 +40,7 @@ public class Company {
     @Column(length = 500)
     private String description;
     
-    @Column(name = "admin_id", nullable = false)
+    @Column(name = "admin_id")
     private UUID adminId;
     
     @CreationTimestamp

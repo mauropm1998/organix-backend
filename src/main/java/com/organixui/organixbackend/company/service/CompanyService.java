@@ -1,7 +1,7 @@
 package com.organixui.organixbackend.company.service;
 
 import com.organixui.organixbackend.common.exception.ResourceNotFoundException;
-import com.organixui.organixbackend.security.SecurityUtils;
+import com.organixui.organixbackend.common.security.SecurityUtils;
 import com.organixui.organixbackend.company.dto.CompanyResponse;
 import com.organixui.organixbackend.company.dto.UpdateCompanyRequest;
 import com.organixui.organixbackend.company.model.Company;
