@@ -1,11 +1,10 @@
 package com.organixui.organixbackend.common.exception;
 
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
@@ -14,8 +13,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Manipulador global de exceções para toda a aplicação.
@@ -63,7 +62,7 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 HttpStatus.BAD_REQUEST.getReasonPhrase(),
-                "Validation failed",
+                "Falha na validação dos dados",
                 request.getRequestURI(),
                 "VALIDATION_ERROR"
         );
@@ -82,7 +81,7 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.UNAUTHORIZED.value(),
                 HttpStatus.UNAUTHORIZED.getReasonPhrase(),
-                "Authentication failed",
+                "Falha na autenticação",
                 request.getRequestURI(),
                 "AUTHENTICATION_ERROR"
         );
@@ -100,7 +99,7 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.UNAUTHORIZED.value(),
                 HttpStatus.UNAUTHORIZED.getReasonPhrase(),
-                "Invalid email or password",
+                "Email ou palavra-passe incorretos",
                 request.getRequestURI(),
                 "INVALID_CREDENTIALS"
         );
@@ -118,67 +117,12 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.FORBIDDEN.value(),
                 HttpStatus.FORBIDDEN.getReasonPhrase(),
-                "Access denied",
+                "Accesso negado",
                 request.getRequestURI(),
                 "ACCESS_DENIED"
         );
         
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
-    }
-    
-    /**
-     * Trata violações de integridade do banco de dados.
-     */
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<ErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException ex, HttpServletRequest request) {
-        log.error("Data integrity violation: {}", ex.getMessage());
-        
-        String message = "Data integrity violation";
-        if (ex.getMessage() != null && ex.getMessage().contains("email")) {
-            message = "Email already exists";
-        }
-        
-        ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.CONFLICT.value(),
-                HttpStatus.CONFLICT.getReasonPhrase(),
-                message,
-                request.getRequestURI(),
-                "DATA_INTEGRITY_VIOLATION"
-        );
-        
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
-    }
-    
-    /**
-     * Trata erros de JSON malformado na requisição.
-     */
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorResponse> handleJsonParseException(HttpMessageNotReadableException ex, HttpServletRequest request) {
-        log.error("JSON parse error: {}", ex.getMessage());
-        
-        String message = "Formato JSON inválido na requisição";
-        String rootCauseMessage = ex.getRootCause() != null ? ex.getRootCause().getMessage() : ex.getMessage();
-        
-        // Extrai informações específicas do erro de parsing
-        if (rootCauseMessage != null) {
-            if (rootCauseMessage.contains("Unexpected character")) {
-                message = "JSON malformado: " + rootCauseMessage;
-            } else if (rootCauseMessage.contains("was expecting double-quote")) {
-                message = "JSON malformado: Nome de campo deve estar entre aspas duplas";
-            } else if (rootCauseMessage.contains("Unexpected end-of-input")) {
-                message = "JSON incompleto: Estrutura não foi fechada corretamente";
-            }
-        }
-        
-        ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.BAD_REQUEST.value(),
-                HttpStatus.BAD_REQUEST.getReasonPhrase(),
-                message,
-                request.getRequestURI(),
-                "INVALID_JSON_FORMAT"
-        );
-        
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
     
     /**
@@ -191,7 +135,7 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
-                "An unexpected error occurred",
+                "Ocorreu um erro não esperado",
                 request.getRequestURI(),
                 "INTERNAL_SERVER_ERROR"
         );

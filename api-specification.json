@@ -1,0 +1,3933 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Organix Backend API",
+    "description": "API RESTful para sistema de gestão de conteúdo multi-tenant",
+    "contact": {
+      "name": "Organix Team",
+      "email": "contact@organix.com"
+    },
+    "license": {
+      "name": "MIT License",
+      "url": "https://opensource.org/licenses/MIT"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Generated server url"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Draft Management",
+      "description": "Operações de gerenciamento de rascunhos"
+    },
+    {
+      "name": "Product Management",
+      "description": "Operações de gerenciamento de produtos"
+    },
+    {
+      "name": "Authentication",
+      "description": "Operações de autenticação e registro"
+    },
+    {
+      "name": "User Management",
+      "description": "Operações de gerenciamento de usuários"
+    },
+    {
+      "name": "Company Management",
+      "description": "Operações de gerenciamento da empresa"
+    },
+    {
+      "name": "Content",
+      "description": "Content management endpoints"
+    },
+    {
+      "name": "Performance",
+      "description": "Content performance and metrics endpoints"
+    },
+    {
+      "name": "Calendar",
+      "description": "Calendar and event management endpoints"
+    }
+  ],
+  "paths": {
+    "/api/users/{id}": {
+      "get": {
+        "tags": [
+          "User Management"
+        ],
+        "summary": "Buscar usuário por ID",
+        "description": "Busca um usuário específico por ID",
+        "operationId": "getUserById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID do usuário",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Usuário não encontrado",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Usuário encontrado",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado - usuários só podem ver seus próprios dados",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "User Management"
+        ],
+        "summary": "Atualizar usuário",
+        "description": "Atualiza os dados de um usuário existente",
+        "operationId": "updateUser",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID do usuário",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Dados inválidos ou email já em uso",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Usuário atualizado com sucesso",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuário não encontrado",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado - usuários só podem atualizar seus próprios dados",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "User Management"
+        ],
+        "summary": "Excluir usuário",
+        "description": "Exclui um usuário da empresa",
+        "operationId": "deleteUser",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID do usuário",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Usuário excluído com sucesso"
+          },
+          "403": {
+            "description": "Acesso negado - apenas administradores podem excluir usuários"
+          },
+          "404": {
+            "description": "Usuário não encontrado"
+          },
+          "400": {
+            "description": "Não é possível excluir o administrador da empresa"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/products/{id}": {
+      "get": {
+        "tags": [
+          "Product Management"
+        ],
+        "summary": "Buscar produto por ID",
+        "description": "Busca um produto específico por ID",
+        "operationId": "getProductById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID do produto",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Produto não encontrado",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Produto encontrado",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Product Management"
+        ],
+        "summary": "Atualizar produto",
+        "description": "Atualiza os dados de um produto existente",
+        "operationId": "updateProduct",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID do produto",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProductRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Produto atualizado com sucesso",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Produto não encontrado",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado - apenas administradores podem atualizar produtos",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Product Management"
+        ],
+        "summary": "Excluir produto",
+        "description": "Exclui um produto da empresa",
+        "operationId": "deleteProduct",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID do produto",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Produto excluído com sucesso"
+          },
+          "404": {
+            "description": "Produto não encontrado"
+          },
+          "403": {
+            "description": "Acesso negado - apenas administradores podem excluir produtos"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/drafts/{id}": {
+      "get": {
+        "tags": [
+          "Draft Management"
+        ],
+        "summary": "Buscar rascunho por ID",
+        "description": "Busca um rascunho específico por ID",
+        "operationId": "getDraftById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID do rascunho",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Rascunho encontrado",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Rascunho não encontrado",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Draft Management"
+        ],
+        "summary": "Atualizar rascunho",
+        "description": "Atualiza os dados de um rascunho existente",
+        "operationId": "updateDraft",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID do rascunho",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDraftRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Rascunho atualizado com sucesso",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Rascunho não encontrado",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sem permissão para atualizar este rascunho",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Draft Management"
+        ],
+        "summary": "Excluir rascunho",
+        "description": "Exclui um rascunho",
+        "operationId": "deleteDraft",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID do rascunho",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Rascunho não encontrado"
+          },
+          "204": {
+            "description": "Rascunho excluído com sucesso"
+          },
+          "403": {
+            "description": "Sem permissão para excluir este rascunho"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/content/{id}": {
+      "get": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Get content by ID",
+        "operationId": "getContentById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Update content",
+        "operationId": "updateContent",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Delete content",
+        "operationId": "deleteContent",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/company": {
+      "get": {
+        "tags": [
+          "Company Management"
+        ],
+        "summary": "Buscar informações da empresa",
+        "description": "Retorna as informações da empresa do usuário autenticado",
+        "operationId": "getCompanyInfo",
+        "responses": {
+          "404": {
+            "description": "Empresa não encontrada",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Informações da empresa retornadas com sucesso",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Company Management"
+        ],
+        "summary": "Atualizar informações da empresa",
+        "description": "Atualiza as informações da empresa (apenas administradores)",
+        "operationId": "updateCompany",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCompanyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Empresa atualizada com sucesso",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Empresa não encontrada",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado - apenas administradores podem atualizar a empresa",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/calendar/events/{id}": {
+      "get": {
+        "tags": [
+          "Calendar"
+        ],
+        "summary": "Get calendar event by ID",
+        "operationId": "getEventById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarEventResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Calendar"
+        ],
+        "summary": "Update calendar event",
+        "operationId": "updateEvent",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalendarEventRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarEventResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Calendar"
+        ],
+        "summary": "Delete calendar event",
+        "operationId": "deleteEvent",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users": {
+      "get": {
+        "tags": [
+          "User Management"
+        ],
+        "summary": "Listar usuários",
+        "description": "Lista todos os usuários da empresa",
+        "operationId": "getAllUsers",
+        "responses": {
+          "403": {
+            "description": "Acesso negado - apenas administradores podem listar usuários",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserResponse"
+                  }
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Lista de usuários retornada com sucesso",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "User Management"
+        ],
+        "summary": "Criar usuário",
+        "description": "Cria um novo usuário na empresa",
+        "operationId": "createUser",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Dados inválidos ou email já em uso",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Usuário criado com sucesso",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado - apenas administradores podem criar usuários",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/products": {
+      "get": {
+        "tags": [
+          "Product Management"
+        ],
+        "summary": "Listar produtos",
+        "description": "Lista todos os produtos da empresa",
+        "operationId": "getAllProducts",
+        "responses": {
+          "200": {
+            "description": "Lista de produtos retornada com sucesso",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProductResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Product Management"
+        ],
+        "summary": "Criar produto",
+        "description": "Cria um novo produto na empresa",
+        "operationId": "createProduct",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProductRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Dados inválidos",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado - apenas administradores podem criar produtos",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponse"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Produto criado com sucesso",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/performance/metrics": {
+      "get": {
+        "tags": [
+          "Performance"
+        ],
+        "summary": "Get all metrics with pagination and filtering",
+        "operationId": "getAllMetrics",
+        "parameters": [
+          {
+            "name": "contentId",
+            "in": "query",
+            "description": "Filter by content ID",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "productId",
+            "in": "query",
+            "description": "Filter by product ID",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "description": "Start date for filtering",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "description": "End date for filtering",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageContentMetricsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Performance"
+        ],
+        "summary": "Update content metrics",
+        "operationId": "updateMetrics",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContentMetricsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentMetricsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/performance/metrics/bulk-update": {
+      "post": {
+        "tags": [
+          "Performance"
+        ],
+        "summary": "Bulk update metrics for multiple content",
+        "operationId": "bulkUpdateMetrics",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ContentMetricsRequest"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ContentMetricsResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/drafts": {
+      "get": {
+        "tags": [
+          "Draft Management"
+        ],
+        "summary": "Listar rascunhos",
+        "description": "Lista rascunhos do usuário ou todos (se ADMIN)",
+        "operationId": "getAllDrafts",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filtrar por status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "productId",
+            "in": "query",
+            "description": "Filtrar por produto",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de rascunhos retornada com sucesso",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DraftResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Draft Management"
+        ],
+        "summary": "Criar rascunho",
+        "description": "Cria um novo rascunho",
+        "operationId": "createDraft",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDraftRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Dados inválidos",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftResponse"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Rascunho criado com sucesso",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/content": {
+      "get": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Get all content with pagination and filtering",
+        "operationId": "getAllContent",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "query",
+            "description": "Filter by product ID",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "published",
+            "in": "query",
+            "description": "Filter by publication status",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "channel",
+            "in": "query",
+            "description": "Filter by channel",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageContentResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Create content directly (Admin only)",
+        "operationId": "createContent",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/{id}/unpublish": {
+      "post": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Unpublish content from channels",
+        "operationId": "unpublishContent",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "channels",
+            "in": "query",
+            "description": "Specific channels to unpublish from",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/{id}/schedule": {
+      "post": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Schedule content for future publication",
+        "operationId": "scheduleContent",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "scheduledDate",
+            "in": "query",
+            "description": "Scheduled publication date (ISO format)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channels",
+            "in": "query",
+            "description": "Channels to publish to",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/{id}/publish": {
+      "post": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Publish content to channels",
+        "operationId": "publishContent",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "channels",
+            "in": "query",
+            "description": "Channels to publish to",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/from-draft/{draftId}": {
+      "post": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Create content from approved draft",
+        "operationId": "createContentFromDraft",
+        "parameters": [
+          {
+            "name": "draftId",
+            "in": "path",
+            "description": "ID of the approved draft",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/calendar/events": {
+      "get": {
+        "tags": [
+          "Calendar"
+        ],
+        "summary": "Get all calendar events with pagination and filtering",
+        "operationId": "getAllEvents",
+        "parameters": [
+          {
+            "name": "eventType",
+            "in": "query",
+            "description": "Filter by event type",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "CONTENT_PLANNING",
+                "CONTENT_CREATION",
+                "CONTENT_REVIEW",
+                "CONTENT_APPROVAL",
+                "CONTENT_PUBLICATION",
+                "CAMPAIGN_LAUNCH",
+                "MEETING",
+                "DEADLINE",
+                "REMINDER",
+                "OTHER"
+              ]
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by event status",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "SCHEDULED",
+                "IN_PROGRESS",
+                "COMPLETED",
+                "CANCELLED",
+                "POSTPONED",
+                "DRAFT"
+              ]
+            }
+          },
+          {
+            "name": "productId",
+            "in": "query",
+            "description": "Filter by product ID",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "description": "Filter by start date",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "description": "Filter by end date",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageCalendarEventResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Calendar"
+        ],
+        "summary": "Create a new calendar event",
+        "operationId": "createEvent",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalendarEventRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarEventResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/signup": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Registro",
+        "description": "Registra uma nova empresa e usuário administrador",
+        "operationId": "signup",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Dados inválidos ou email já existe",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/JwtResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Registro realizado com sucesso",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/JwtResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Login",
+        "description": "Autentica um usuário e retorna o token JWT",
+        "operationId": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Login realizado com sucesso",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/JwtResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credenciais inválidas",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/JwtResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/drafts/{id}/status": {
+      "patch": {
+        "tags": [
+          "Draft Management"
+        ],
+        "summary": "Alterar status do rascunho",
+        "description": "Altera o status de um rascunho (apenas administradores)",
+        "operationId": "updateDraftStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID do rascunho",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Novo status",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "403": {
+            "description": "Acesso negado - apenas administradores",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Status alterado com sucesso",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Rascunho não encontrado",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/calendar/events/{id}/status": {
+      "patch": {
+        "tags": [
+          "Calendar"
+        ],
+        "summary": "Update event status",
+        "operationId": "updateEventStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "New event status",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "SCHEDULED",
+                "IN_PROGRESS",
+                "COMPLETED",
+                "CANCELLED",
+                "POSTPONED",
+                "DRAFT"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarEventResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/performance/report/top-content": {
+      "get": {
+        "tags": [
+          "Performance"
+        ],
+        "summary": "Get top performing content",
+        "operationId": "getTopPerformingContent",
+        "parameters": [
+          {
+            "name": "metric",
+            "in": "query",
+            "description": "Metric to sort by",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "views"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of results",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          },
+          {
+            "name": "productId",
+            "in": "query",
+            "description": "Filter by product ID",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "description": "Start date for analysis",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "description": "End date for analysis",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ContentMetricsResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/performance/report/summary": {
+      "get": {
+        "tags": [
+          "Performance"
+        ],
+        "summary": "Get performance summary report",
+        "operationId": "getPerformanceSummary",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "query",
+            "description": "Filter by product ID",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "description": "Start date for report",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "description": "End date for report",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceReportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/performance/metrics/{contentId}": {
+      "get": {
+        "tags": [
+          "Performance"
+        ],
+        "summary": "Get metrics for specific content",
+        "operationId": "getContentMetrics",
+        "parameters": [
+          {
+            "name": "contentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentMetricsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Performance"
+        ],
+        "summary": "Delete metrics for content (Admin only)",
+        "operationId": "deleteContentMetrics",
+        "parameters": [
+          {
+            "name": "contentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/performance/dashboard": {
+      "get": {
+        "tags": [
+          "Performance"
+        ],
+        "summary": "Get dashboard data with key metrics",
+        "operationId": "getDashboardData",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "query",
+            "description": "Filter by product ID",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/performance/analytics/trends": {
+      "get": {
+        "tags": [
+          "Performance"
+        ],
+        "summary": "Get performance trends",
+        "operationId": "getPerformanceTrends",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "query",
+            "description": "Filter by product ID",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "description": "Start date for analysis",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "description": "End date for analysis",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "metric",
+            "in": "query",
+            "description": "Metric to analyze",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "views"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/performance/analytics/engagement": {
+      "get": {
+        "tags": [
+          "Performance"
+        ],
+        "summary": "Get engagement analytics",
+        "operationId": "getEngagementAnalytics",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "query",
+            "description": "Filter by product ID",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "description": "Start date for analysis",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "description": "End date for analysis",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "period",
+            "in": "query",
+            "description": "Grouping period: daily, weekly, monthly",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "daily"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/health": {
+      "get": {
+        "tags": [
+          "health-controller"
+        ],
+        "operationId": "health",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/scheduled": {
+      "get": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Get scheduled content",
+        "operationId": "getScheduledContent",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "query",
+            "description": "Filter by product ID",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageContentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/published": {
+      "get": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Get all published content",
+        "operationId": "getPublishedContent",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "query",
+            "description": "Filter by product ID",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "channel",
+            "in": "query",
+            "description": "Filter by channel",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageContentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/my-content": {
+      "get": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Get content created by current user (Operator)",
+        "operationId": "getMyContent",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "query",
+            "description": "Filter by product ID",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "published",
+            "in": "query",
+            "description": "Filter by publication status",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "channel",
+            "in": "query",
+            "description": "Filter by channel",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageContentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/calendar/events/upcoming": {
+      "get": {
+        "tags": [
+          "Calendar"
+        ],
+        "summary": "Get upcoming events (next 7 days)",
+        "operationId": "getUpcomingEvents",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CalendarEventResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/calendar/events/today": {
+      "get": {
+        "tags": [
+          "Calendar"
+        ],
+        "summary": "Get today's events",
+        "operationId": "getTodaysEvents",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CalendarEventResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/calendar/events/range": {
+      "get": {
+        "tags": [
+          "Calendar"
+        ],
+        "summary": "Get events in a specific date range",
+        "operationId": "getEventsInDateRange",
+        "parameters": [
+          {
+            "name": "startDate",
+            "in": "query",
+            "description": "Start date",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "description": "End date",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CalendarEventResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/calendar/events/my": {
+      "get": {
+        "tags": [
+          "Calendar"
+        ],
+        "summary": "Get events created by current user",
+        "operationId": "getMyEvents",
+        "parameters": [
+          {
+            "name": "eventType",
+            "in": "query",
+            "description": "Filter by event type",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "CONTENT_PLANNING",
+                "CONTENT_CREATION",
+                "CONTENT_REVIEW",
+                "CONTENT_APPROVAL",
+                "CONTENT_PUBLICATION",
+                "CAMPAIGN_LAUNCH",
+                "MEETING",
+                "DEADLINE",
+                "REMINDER",
+                "OTHER"
+              ]
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by event status",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "SCHEDULED",
+                "IN_PROGRESS",
+                "COMPLETED",
+                "CANCELLED",
+                "POSTPONED",
+                "DRAFT"
+              ]
+            }
+          },
+          {
+            "name": "productId",
+            "in": "query",
+            "description": "Filter by product ID",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "description": "Filter by start date",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "description": "Filter by end date",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageCalendarEventResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/calendar/events/by-draft/{draftId}": {
+      "get": {
+        "tags": [
+          "Calendar"
+        ],
+        "summary": "Get events related to specific draft",
+        "operationId": "getEventsByDraft",
+        "parameters": [
+          {
+            "name": "draftId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CalendarEventResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/calendar/events/by-content/{contentId}": {
+      "get": {
+        "tags": [
+          "Calendar"
+        ],
+        "summary": "Get events related to specific content",
+        "operationId": "getEventsByContent",
+        "parameters": [
+          {
+            "name": "contentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CalendarEventResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UpdateUserRequest": {
+        "required": [
+          "adminType",
+          "email",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 100,
+            "minLength": 2,
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "maxLength": 100,
+            "minLength": 6,
+            "type": "string"
+          },
+          "adminType": {
+            "type": "string",
+            "enum": [
+              "ADMIN",
+              "OPERATOR"
+            ]
+          }
+        },
+        "description": "Novos dados do usuário"
+      },
+      "UserResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "adminType": {
+            "type": "string",
+            "enum": [
+              "ADMIN",
+              "OPERATOR"
+            ]
+          },
+          "companyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "companyName": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateProductRequest": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "description": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "category": {
+            "maxLength": 50,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "description": "Novos dados do produto"
+      },
+      "ProductResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "companyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "UpdateDraftRequest": {
+        "required": [
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "title": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "content": {
+            "maxLength": 5000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "REVIEW",
+              "APPROVED",
+              "REJECTED"
+            ]
+          }
+        },
+        "description": "Novos dados do rascunho"
+      },
+      "DraftResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "REVIEW",
+              "APPROVED",
+              "REJECTED"
+            ]
+          },
+          "productId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "productName": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userName": {
+            "type": "string"
+          },
+          "companyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ContentRequest": {
+        "required": [
+          "content",
+          "productId",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string",
+            "description": "Título do conteúdo",
+            "example": "Novo lançamento do produto X"
+          },
+          "description": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "Descrição do conteúdo",
+            "example": "Descrição detalhada do novo produto X"
+          },
+          "content": {
+            "maxLength": 10000,
+            "minLength": 1,
+            "type": "string",
+            "description": "Conteúdo completo",
+            "example": "Texto completo do conteúdo..."
+          },
+          "productId": {
+            "type": "string",
+            "description": "ID do produto relacionado",
+            "format": "uuid",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "channels": {
+            "type": "array",
+            "description": "Lista de canais onde o conteúdo será publicado",
+            "example": [
+              "instagram",
+              "facebook",
+              "twitter"
+            ],
+            "items": {
+              "type": "string",
+              "description": "Lista de canais onde o conteúdo será publicado",
+              "example": "[\"instagram\",\"facebook\",\"twitter\"]"
+            }
+          },
+          "scheduledDate": {
+            "type": "string",
+            "description": "Data agendada para publicação",
+            "format": "date-time"
+          }
+        },
+        "description": "Request DTO para criação/atualização de conteúdo"
+      },
+      "ContentResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "productId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "companyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "draftId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "channels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "published": {
+            "type": "boolean"
+          },
+          "publishedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "scheduledDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "UpdateCompanyRequest": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "industry": {
+            "maxLength": 50,
+            "minLength": 0,
+            "type": "string"
+          },
+          "size": {
+            "maxLength": 20,
+            "minLength": 0,
+            "type": "string"
+          },
+          "website": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string"
+          },
+          "description": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "description": "Novos dados da empresa"
+      },
+      "CompanyResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "industry": {
+            "type": "string"
+          },
+          "size": {
+            "type": "string"
+          },
+          "website": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "adminId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CalendarEventRequest": {
+        "required": [
+          "eventType",
+          "startDate",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string",
+            "description": "Título do evento",
+            "example": "Publicação do conteúdo X"
+          },
+          "description": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "Descrição do evento",
+            "example": "Publicar conteúdo X nas redes sociais"
+          },
+          "eventType": {
+            "type": "string",
+            "description": "Tipo do evento",
+            "example": "CONTENT_PUBLICATION",
+            "enum": [
+              "CONTENT_PLANNING",
+              "CONTENT_CREATION",
+              "CONTENT_REVIEW",
+              "CONTENT_APPROVAL",
+              "CONTENT_PUBLICATION",
+              "CAMPAIGN_LAUNCH",
+              "MEETING",
+              "DEADLINE",
+              "REMINDER",
+              "OTHER"
+            ]
+          },
+          "startDate": {
+            "type": "string",
+            "description": "Data e hora de início",
+            "format": "date-time"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "Data e hora de fim",
+            "format": "date-time"
+          },
+          "contentId": {
+            "type": "string",
+            "description": "ID do conteúdo relacionado",
+            "format": "uuid",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "draftId": {
+            "type": "string",
+            "description": "ID do draft relacionado",
+            "format": "uuid",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "productId": {
+            "type": "string",
+            "description": "ID do produto relacionado",
+            "format": "uuid",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "channels": {
+            "type": "array",
+            "description": "Lista de canais para o evento",
+            "example": [
+              "instagram",
+              "facebook"
+            ],
+            "items": {
+              "type": "string",
+              "description": "Lista de canais para o evento",
+              "example": "[\"instagram\",\"facebook\"]"
+            }
+          },
+          "status": {
+            "type": "string",
+            "description": "Status do evento",
+            "example": "SCHEDULED",
+            "enum": [
+              "SCHEDULED",
+              "IN_PROGRESS",
+              "COMPLETED",
+              "CANCELLED",
+              "POSTPONED",
+              "DRAFT"
+            ]
+          },
+          "recurring": {
+            "type": "boolean",
+            "description": "Indica se o evento é recorrente",
+            "example": false
+          },
+          "recurrencePattern": {
+            "type": "string",
+            "description": "Padrão de recorrência (se aplicável)",
+            "example": "WEEKLY"
+          },
+          "allDay": {
+            "type": "boolean",
+            "description": "Indica se o evento dura o dia todo",
+            "example": false
+          }
+        },
+        "description": "Request DTO para criação/atualização de eventos do calendário"
+      },
+      "CalendarEventResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID do evento",
+            "format": "uuid",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "title": {
+            "type": "string",
+            "description": "Título do evento",
+            "example": "Publicação do conteúdo X"
+          },
+          "description": {
+            "type": "string",
+            "description": "Descrição do evento",
+            "example": "Publicar conteúdo X nas redes sociais"
+          },
+          "eventType": {
+            "type": "string",
+            "description": "Tipo do evento",
+            "example": "CONTENT_PUBLICATION",
+            "enum": [
+              "CONTENT_PLANNING",
+              "CONTENT_CREATION",
+              "CONTENT_REVIEW",
+              "CONTENT_APPROVAL",
+              "CONTENT_PUBLICATION",
+              "CAMPAIGN_LAUNCH",
+              "MEETING",
+              "DEADLINE",
+              "REMINDER",
+              "OTHER"
+            ]
+          },
+          "startDate": {
+            "type": "string",
+            "description": "Data e hora de início",
+            "format": "date-time"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "Data e hora de fim",
+            "format": "date-time"
+          },
+          "contentId": {
+            "type": "string",
+            "description": "ID do conteúdo relacionado",
+            "format": "uuid",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "draftId": {
+            "type": "string",
+            "description": "ID do draft relacionado",
+            "format": "uuid",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "productId": {
+            "type": "string",
+            "description": "ID do produto relacionado",
+            "format": "uuid",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "companyId": {
+            "type": "string",
+            "description": "ID da empresa",
+            "format": "uuid",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "createdBy": {
+            "type": "string",
+            "description": "Email do criador do evento",
+            "example": "user@example.com"
+          },
+          "channels": {
+            "type": "array",
+            "description": "Lista de canais para o evento",
+            "example": [
+              "instagram",
+              "facebook"
+            ],
+            "items": {
+              "type": "string",
+              "description": "Lista de canais para o evento",
+              "example": "[\"instagram\",\"facebook\"]"
+            }
+          },
+          "status": {
+            "type": "string",
+            "description": "Status do evento",
+            "example": "SCHEDULED",
+            "enum": [
+              "SCHEDULED",
+              "IN_PROGRESS",
+              "COMPLETED",
+              "CANCELLED",
+              "POSTPONED",
+              "DRAFT"
+            ]
+          },
+          "recurring": {
+            "type": "boolean",
+            "description": "Indica se o evento é recorrente",
+            "example": false
+          },
+          "recurrencePattern": {
+            "type": "string",
+            "description": "Padrão de recorrência",
+            "example": "WEEKLY"
+          },
+          "allDay": {
+            "type": "boolean",
+            "description": "Indica se o evento dura o dia todo",
+            "example": false
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Data de criação do evento",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "Data da última atualização",
+            "format": "date-time"
+          }
+        },
+        "description": "Response DTO para eventos do calendário"
+      },
+      "CreateUserRequest": {
+        "required": [
+          "adminType",
+          "email",
+          "name",
+          "password"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 100,
+            "minLength": 2,
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "maxLength": 100,
+            "minLength": 6,
+            "type": "string"
+          },
+          "adminType": {
+            "type": "string",
+            "enum": [
+              "ADMIN",
+              "OPERATOR"
+            ]
+          }
+        },
+        "description": "Dados do novo usuário"
+      },
+      "CreateProductRequest": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "description": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "category": {
+            "maxLength": 50,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "description": "Dados do novo produto"
+      },
+      "ContentMetricsRequest": {
+        "required": [
+          "contentId"
+        ],
+        "type": "object",
+        "properties": {
+          "contentId": {
+            "type": "string",
+            "description": "ID do conteúdo",
+            "format": "uuid",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "views": {
+            "minimum": 0,
+            "type": "integer",
+            "description": "Número de visualizações",
+            "format": "int64",
+            "example": 1500
+          },
+          "likes": {
+            "minimum": 0,
+            "type": "integer",
+            "description": "Número de curtidas",
+            "format": "int64",
+            "example": 150
+          },
+          "shares": {
+            "minimum": 0,
+            "type": "integer",
+            "description": "Número de compartilhamentos",
+            "format": "int64",
+            "example": 25
+          },
+          "comments": {
+            "minimum": 0,
+            "type": "integer",
+            "description": "Número de comentários",
+            "format": "int64",
+            "example": 45
+          },
+          "reach": {
+            "minimum": 0,
+            "type": "integer",
+            "description": "Alcance do conteúdo",
+            "format": "int64",
+            "example": 5000
+          },
+          "impressions": {
+            "minimum": 0,
+            "type": "integer",
+            "description": "Número de impressões",
+            "format": "int64",
+            "example": 8000
+          },
+          "engagementRate": {
+            "type": "number",
+            "description": "Taxa de engajamento (0.0 a 100.0)",
+            "format": "double",
+            "example": 3.5
+          },
+          "clickThroughRate": {
+            "type": "number",
+            "description": "Taxa de cliques (0.0 a 100.0)",
+            "format": "double",
+            "example": 2.1
+          },
+          "conversionRate": {
+            "type": "number",
+            "description": "Taxa de conversão (0.0 a 100.0)",
+            "format": "double",
+            "example": 1.2
+          },
+          "metricsData": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "description": "Dados adicionais de métricas em formato JSON",
+              "example": {
+                "channel_metrics": {
+                  "instagram": {
+                    "likes": 100,
+                    "shares": 10
+                  }
+                }
+              }
+            },
+            "description": "Dados adicionais de métricas em formato JSON",
+            "example": {
+              "channel_metrics": {
+                "instagram": {
+                  "likes": 100,
+                  "shares": 10
+                }
+              }
+            }
+          }
+        },
+        "description": "Request DTO para atualização de métricas de conteúdo"
+      },
+      "ContentMetricsResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID da métrica",
+            "format": "uuid",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "contentId": {
+            "type": "string",
+            "description": "ID do conteúdo",
+            "format": "uuid",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "companyId": {
+            "type": "string",
+            "description": "ID da empresa",
+            "format": "uuid",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "views": {
+            "type": "integer",
+            "description": "Número de visualizações",
+            "format": "int64",
+            "example": 1500
+          },
+          "likes": {
+            "type": "integer",
+            "description": "Número de curtidas",
+            "format": "int64",
+            "example": 150
+          },
+          "shares": {
+            "type": "integer",
+            "description": "Número de compartilhamentos",
+            "format": "int64",
+            "example": 25
+          },
+          "comments": {
+            "type": "integer",
+            "description": "Número de comentários",
+            "format": "int64",
+            "example": 45
+          },
+          "engagementRate": {
+            "type": "number",
+            "description": "Taxa de engajamento",
+            "format": "double",
+            "example": 3.5
+          },
+          "reach": {
+            "type": "integer",
+            "description": "Alcance do conteúdo",
+            "format": "int64",
+            "example": 5000
+          },
+          "impressions": {
+            "type": "integer",
+            "description": "Número de impressões",
+            "format": "int64",
+            "example": 8000
+          },
+          "clickThroughRate": {
+            "type": "number",
+            "description": "Taxa de cliques",
+            "format": "double",
+            "example": 2.1
+          },
+          "conversionRate": {
+            "type": "number",
+            "description": "Taxa de conversão",
+            "format": "double",
+            "example": 1.2
+          },
+          "metricsData": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "description": "Dados adicionais de métricas"
+            },
+            "description": "Dados adicionais de métricas"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Data de criação",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "Data de última atualização",
+            "format": "date-time"
+          }
+        },
+        "description": "Response DTO com métricas de conteúdo"
+      },
+      "CreateDraftRequest": {
+        "required": [
+          "productId",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "title": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "content": {
+            "maxLength": 5000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "productId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "description": "Dados do novo rascunho"
+      },
+      "SignupRequest": {
+        "required": [
+          "adminName",
+          "companyName",
+          "email",
+          "password"
+        ],
+        "type": "object",
+        "properties": {
+          "companyName": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "adminName": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "maxLength": 2147483647,
+            "minLength": 6,
+            "type": "string"
+          }
+        },
+        "description": "Dados para registro"
+      },
+      "JwtResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "adminType": {
+            "type": "string",
+            "enum": [
+              "ADMIN",
+              "OPERATOR"
+            ]
+          },
+          "companyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "companyName": {
+            "type": "string"
+          }
+        }
+      },
+      "LoginRequest": {
+        "required": [
+          "email",
+          "password"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "description": "Credenciais de login"
+      },
+      "PerformanceReportResponse": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/PerformanceSummary"
+          },
+          "periodMetrics": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "description": "Métricas por período"
+            },
+            "description": "Métricas por período"
+          },
+          "comparison": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "description": "Comparação com período anterior"
+            },
+            "description": "Comparação com período anterior"
+          },
+          "topContent": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "description": "Melhores conteúdos por métrica"
+            },
+            "description": "Melhores conteúdos por métrica"
+          }
+        },
+        "description": "Response DTO com relatório de performance"
+      },
+      "PerformanceSummary": {
+        "type": "object",
+        "properties": {
+          "totalViews": {
+            "type": "integer",
+            "description": "Total de visualizações",
+            "format": "int64",
+            "example": 15000
+          },
+          "totalLikes": {
+            "type": "integer",
+            "description": "Total de curtidas",
+            "format": "int64",
+            "example": 1500
+          },
+          "totalShares": {
+            "type": "integer",
+            "description": "Total de compartilhamentos",
+            "format": "int64",
+            "example": 250
+          },
+          "totalComments": {
+            "type": "integer",
+            "description": "Total de comentários",
+            "format": "int64",
+            "example": 450
+          },
+          "totalReach": {
+            "type": "integer",
+            "description": "Alcance total",
+            "format": "int64",
+            "example": 50000
+          },
+          "totalImpressions": {
+            "type": "integer",
+            "description": "Total de impressões",
+            "format": "int64",
+            "example": 80000
+          },
+          "averageEngagementRate": {
+            "type": "number",
+            "description": "Taxa média de engajamento",
+            "format": "double",
+            "example": 3.5
+          },
+          "averageClickThroughRate": {
+            "type": "number",
+            "description": "Taxa média de cliques",
+            "format": "double",
+            "example": 2.1
+          },
+          "averageConversionRate": {
+            "type": "number",
+            "description": "Taxa média de conversão",
+            "format": "double",
+            "example": 1.2
+          },
+          "totalContent": {
+            "type": "integer",
+            "description": "Número total de conteúdos",
+            "format": "int64",
+            "example": 25
+          }
+        },
+        "description": "Resumo das métricas de performance"
+      },
+      "Pageable": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "PageContentMetricsResponse": {
+        "type": "object",
+        "properties": {
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentMetricsResponse"
+            }
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortObject"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PageableObject": {
+        "type": "object",
+        "properties": {
+          "offset": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortObject"
+          },
+          "paged": {
+            "type": "boolean"
+          },
+          "unpaged": {
+            "type": "boolean"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SortObject": {
+        "type": "object",
+        "properties": {
+          "empty": {
+            "type": "boolean"
+          },
+          "unsorted": {
+            "type": "boolean"
+          },
+          "sorted": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PageContentResponse": {
+        "type": "object",
+        "properties": {
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentResponse"
+            }
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortObject"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PageCalendarEventResponse": {
+        "type": "object",
+        "properties": {
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CalendarEventResponse"
+            }
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortObject"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "description": "JWT Token para autenticação. Formato: Bearer {token}",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}
