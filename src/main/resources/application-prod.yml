@@ -1,9 +1,9 @@
 spring:  
   # Database Configuration
   datasource:
-    url: jdbc:mysql://db_chat:3306/organix?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-    password: 'Chat@2025$'
-    username: chat
+    url: jdbc:mysql://db_organix:3306/organix?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    password: '@rg4N1x_2025!'
+    username: organix
     driver-class-name: com.mysql.cj.jdbc.Driver
 
 # JWT Configuration
@@ -16,4 +16,4 @@ application:
   uploads:
     path: /app/data
   backend:
-    url: https://chat.appteste.info
+    url: https://organix.ss-cloud.co

@@ -1,39 +1,39 @@
 name: Deploy Organix
 
 on:
-    push:
-        branches: [main]
+  push:
+    branches: [main]
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Code checkout
-              uses: actions/checkout@v3
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code checkout
+        uses: actions/checkout@v3
 
-            - name: Setup Java
-              uses: actions/setup-java@v3
-              with:
-                distribution: 'temurin'
-                java-version: '17'
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: "17"
 
-            - name: Build project
-              run: mvn clean install -DskipTests
+      - name: Build project
+        run: mvn clean install -DskipTests
 
-            - name: Login into Docker Hub
-              run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+      - name: Login into Docker Hub
+        run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
 
-            - name: Build docker image
-              run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/organix .
+      - name: Build docker image
+        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/organix .
 
-            - name: Push image to docker hub
-              run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/organix
+      - name: Push image to docker hub
+        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/organix
 
-    #deploy:
-        #runs-on: self-hosted
-        #steps:
-         # - name: Runnig image using Docker Swarm
-          #  run: |
-           #     cd /opt/chat
-            #    docker stack deploy -d -c docker-compose.yml chat
-            
+  deploy:
+    needs: build
+    runs-on: self-hosted
+    steps:
+      - name: Running image using Docker Swarm through SSH
+        run: |
+          cd /opt/organix.ss-cloud.co/
+          docker stack deploy -d -c docker-compose.yml organix
