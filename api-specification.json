@@ -3,10 +3,7 @@
   "info": {
     "title": "Organix Backend API",
     "description": "API RESTful para sistema de gestão de conteúdo multi-tenant",
-    "contact": {
-      "name": "Organix Team",
-      "email": "contact@organix.com"
-    },
+    "contact": { "name": "Organix Team", "email": "contact@organix.com" },
     "license": {
       "name": "MIT License",
       "url": "https://opensource.org/licenses/MIT"
@@ -14,41 +11,24 @@
     "version": "1.0.0"
   },
   "servers": [
-    {
-      "url": "http://localhost:8080",
-      "description": "Generated server url"
-    }
+    { "url": "http://localhost:8080", "description": "Generated server url" }
   ],
-  "security": [
-    {
-      "bearerAuth": []
-    }
-  ],
+  "security": [{ "bearerAuth": [] }],
   "tags": [
-    {
-      "name": "Draft Management",
-      "description": "Operações de gerenciamento de rascunhos"
-    },
-    {
-      "name": "Product Management",
-      "description": "Operações de gerenciamento de produtos"
-    },
-    {
-      "name": "Authentication",
-      "description": "Operações de autenticação e registro"
-    },
+    { "name": "Products", "description": "Product management endpoints" },
     {
       "name": "User Management",
       "description": "Operações de gerenciamento de usuários"
     },
     {
+      "name": "Authentication",
+      "description": "Authentication and authorization endpoints"
+    },
+    {
       "name": "Company Management",
       "description": "Operações de gerenciamento da empresa"
     },
-    {
-      "name": "Content",
-      "description": "Content management endpoints"
-    },
+    { "name": "Content", "description": "Content management endpoints" },
     {
       "name": "Performance",
       "description": "Content performance and metrics endpoints"
@@ -56,14 +36,13 @@
     {
       "name": "Calendar",
       "description": "Calendar and event management endpoints"
-    }
+    },
+    { "name": "Drafts", "description": "Draft management endpoints" }
   ],
   "paths": {
     "/api/users/{id}": {
       "get": {
-        "tags": [
-          "User Management"
-        ],
+        "tags": ["User Management"],
         "summary": "Buscar usuário por ID",
         "description": "Busca um usuário específico por ID",
         "operationId": "getUserById",
@@ -73,10 +52,7 @@
             "in": "path",
             "description": "ID do usuário",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -84,9 +60,7 @@
             "description": "Usuário não encontrado",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/UserResponse" }
               }
             }
           },
@@ -94,9 +68,7 @@
             "description": "Usuário encontrado",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/UserResponse" }
               }
             }
           },
@@ -104,23 +76,15 @@
             "description": "Acesso negado - usuários só podem ver seus próprios dados",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/UserResponse" }
               }
             }
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
+        "security": [{ "bearerAuth": [] }]
       },
       "put": {
-        "tags": [
-          "User Management"
-        ],
+        "tags": ["User Management"],
         "summary": "Atualizar usuário",
         "description": "Atualiza os dados de um usuário existente",
         "operationId": "updateUser",
@@ -130,18 +94,13 @@
             "in": "path",
             "description": "ID do usuário",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateUserRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/UpdateUserRequest" }
             }
           },
           "required": true
@@ -151,9 +110,7 @@
             "description": "Dados inválidos ou email já em uso",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/UserResponse" }
               }
             }
           },
@@ -161,9 +118,7 @@
             "description": "Usuário atualizado com sucesso",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/UserResponse" }
               }
             }
           },
@@ -171,9 +126,7 @@
             "description": "Usuário não encontrado",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/UserResponse" }
               }
             }
           },
@@ -181,23 +134,15 @@
             "description": "Acesso negado - usuários só podem atualizar seus próprios dados",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/UserResponse" }
               }
             }
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
+        "security": [{ "bearerAuth": [] }]
       },
       "delete": {
-        "tags": [
-          "User Management"
-        ],
+        "tags": ["User Management"],
         "summary": "Excluir usuário",
         "description": "Exclui um usuário da empresa",
         "operationId": "deleteUser",
@@ -207,38 +152,25 @@
             "in": "path",
             "description": "ID do usuário",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
-          "204": {
-            "description": "Usuário excluído com sucesso"
-          },
+          "204": { "description": "Usuário excluído com sucesso" },
           "403": {
             "description": "Acesso negado - apenas administradores podem excluir usuários"
           },
-          "404": {
-            "description": "Usuário não encontrado"
-          },
+          "404": { "description": "Usuário não encontrado" },
           "400": {
             "description": "Não é possível excluir o administrador da empresa"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
+        "security": [{ "bearerAuth": [] }]
       }
     },
     "/api/products/{id}": {
       "get": {
-        "tags": [
-          "Product Management"
-        ],
+        "tags": ["Products"],
         "summary": "Buscar produto por ID",
         "description": "Busca um produto específico por ID",
         "operationId": "getProductById",
@@ -248,10 +180,7 @@
             "in": "path",
             "description": "ID do produto",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -259,9 +188,7 @@
             "description": "Produto não encontrado",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProductResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/ProductResponse" }
               }
             }
           },
@@ -269,23 +196,15 @@
             "description": "Produto encontrado",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProductResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/ProductResponse" }
               }
             }
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
+        "security": [{ "bearerAuth": [] }]
       },
       "put": {
-        "tags": [
-          "Product Management"
-        ],
+        "tags": ["Products"],
         "summary": "Atualizar produto",
         "description": "Atualiza os dados de um produto existente",
         "operationId": "updateProduct",
@@ -295,18 +214,13 @@
             "in": "path",
             "description": "ID do produto",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateProductRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/UpdateProductRequest" }
             }
           },
           "required": true
@@ -316,9 +230,7 @@
             "description": "Produto atualizado com sucesso",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProductResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/ProductResponse" }
               }
             }
           },
@@ -326,9 +238,7 @@
             "description": "Produto não encontrado",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProductResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/ProductResponse" }
               }
             }
           },
@@ -336,9 +246,7 @@
             "description": "Acesso negado - apenas administradores podem atualizar produtos",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProductResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/ProductResponse" }
               }
             }
           },
@@ -346,23 +254,15 @@
             "description": "Dados inválidos",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProductResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/ProductResponse" }
               }
             }
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
+        "security": [{ "bearerAuth": [] }]
       },
       "delete": {
-        "tags": [
-          "Product Management"
-        ],
+        "tags": ["Products"],
         "summary": "Excluir produto",
         "description": "Exclui um produto da empresa",
         "operationId": "deleteProduct",
@@ -372,35 +272,22 @@
             "in": "path",
             "description": "ID do produto",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
-          "204": {
-            "description": "Produto excluído com sucesso"
-          },
-          "404": {
-            "description": "Produto não encontrado"
-          },
+          "204": { "description": "Produto excluído com sucesso" },
+          "404": { "description": "Produto não encontrado" },
           "403": {
             "description": "Acesso negado - apenas administradores podem excluir produtos"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
+        "security": [{ "bearerAuth": [] }]
       }
     },
     "/api/drafts/{id}": {
       "get": {
-        "tags": [
-          "Draft Management"
-        ],
+        "tags": ["Drafts"],
         "summary": "Buscar rascunho por ID",
         "description": "Busca um rascunho específico por ID",
         "operationId": "getDraftById",
@@ -410,10 +297,7 @@
             "in": "path",
             "description": "ID do rascunho",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -421,9 +305,7 @@
             "description": "Rascunho encontrado",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DraftResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/DraftResponse" }
               }
             }
           },
@@ -431,23 +313,15 @@
             "description": "Rascunho não encontrado",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DraftResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/DraftResponse" }
               }
             }
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
+        "security": [{ "bearerAuth": [] }]
       },
       "put": {
-        "tags": [
-          "Draft Management"
-        ],
+        "tags": ["Drafts"],
         "summary": "Atualizar rascunho",
         "description": "Atualiza os dados de um rascunho existente",
         "operationId": "updateDraft",
@@ -457,18 +331,13 @@
             "in": "path",
             "description": "ID do rascunho",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateDraftRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/UpdateDraftRequest" }
             }
           },
           "required": true
@@ -478,9 +347,7 @@
             "description": "Rascunho atualizado com sucesso",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DraftResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/DraftResponse" }
               }
             }
           },
@@ -488,9 +355,7 @@
             "description": "Dados inválidos",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DraftResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/DraftResponse" }
               }
             }
           },
@@ -498,9 +363,7 @@
             "description": "Rascunho não encontrado",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DraftResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/DraftResponse" }
               }
             }
           },
@@ -508,23 +371,15 @@
             "description": "Sem permissão para atualizar este rascunho",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DraftResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/DraftResponse" }
               }
             }
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
+        "security": [{ "bearerAuth": [] }]
       },
       "delete": {
-        "tags": [
-          "Draft Management"
-        ],
+        "tags": ["Drafts"],
         "summary": "Excluir rascunho",
         "description": "Exclui um rascunho",
         "operationId": "deleteDraft",
@@ -534,35 +389,20 @@
             "in": "path",
             "description": "ID do rascunho",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
-          "404": {
-            "description": "Rascunho não encontrado"
-          },
-          "204": {
-            "description": "Rascunho excluído com sucesso"
-          },
-          "403": {
-            "description": "Sem permissão para excluir este rascunho"
-          }
+          "404": { "description": "Rascunho não encontrado" },
+          "204": { "description": "Rascunho excluído com sucesso" },
+          "403": { "description": "Sem permissão para excluir este rascunho" }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
+        "security": [{ "bearerAuth": [] }]
       }
     },
     "/api/content/{id}": {
       "get": {
-        "tags": [
-          "Content"
-        ],
+        "tags": ["Content"],
         "summary": "Get content by ID",
         "operationId": "getContentById",
         "parameters": [
@@ -570,10 +410,7 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -581,18 +418,14 @@
             "description": "OK",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ContentResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/ContentResponse" }
               }
             }
           }
         }
       },
       "put": {
-        "tags": [
-          "Content"
-        ],
+        "tags": ["Content"],
         "summary": "Update content",
         "operationId": "updateContent",
         "parameters": [
@@ -600,18 +433,13 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ContentRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/ContentRequest" }
             }
           },
           "required": true
@@ -621,18 +449,14 @@
             "description": "OK",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ContentResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/ContentResponse" }
               }
             }
           }
         }
       },
       "delete": {
-        "tags": [
-          "Content"
-        ],
+        "tags": ["Content"],
         "summary": "Delete content",
         "operationId": "deleteContent",
         "parameters": [
@@ -640,24 +464,15 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
+        "responses": { "200": { "description": "OK" } }
       }
     },
     "/api/company": {
       "get": {
-        "tags": [
-          "Company Management"
-        ],
+        "tags": ["Company Management"],
         "summary": "Buscar informações da empresa",
         "description": "Retorna as informações da empresa do usuário autenticado",
         "operationId": "getCompanyInfo",
@@ -666,9 +481,7 @@
             "description": "Empresa não encontrada",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/CompanyResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/CompanyResponse" }
               }
             }
           },
@@ -676,32 +489,22 @@
             "description": "Informações da empresa retornadas com sucesso",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/CompanyResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/CompanyResponse" }
               }
             }
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
+        "security": [{ "bearerAuth": [] }]
       },
       "put": {
-        "tags": [
-          "Company Management"
-        ],
+        "tags": ["Company Management"],
         "summary": "Atualizar informações da empresa",
         "description": "Atualiza as informações da empresa (apenas administradores)",
         "operationId": "updateCompany",
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateCompanyRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/UpdateCompanyRequest" }
             }
           },
           "required": true
@@ -711,9 +514,7 @@
             "description": "Empresa atualizada com sucesso",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/CompanyResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/CompanyResponse" }
               }
             }
           },
@@ -721,9 +522,7 @@
             "description": "Empresa não encontrada",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/CompanyResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/CompanyResponse" }
               }
             }
           },
@@ -731,9 +530,7 @@
             "description": "Dados inválidos",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/CompanyResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/CompanyResponse" }
               }
             }
           },
@@ -741,25 +538,17 @@
             "description": "Acesso negado - apenas administradores podem atualizar a empresa",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/CompanyResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/CompanyResponse" }
               }
             }
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
+        "security": [{ "bearerAuth": [] }]
       }
     },
     "/api/calendar/events/{id}": {
       "get": {
-        "tags": [
-          "Calendar"
-        ],
+        "tags": ["Calendar"],
         "summary": "Get calendar event by ID",
         "operationId": "getEventById",
         "parameters": [
@@ -767,10 +556,7 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -787,9 +573,7 @@
         }
       },
       "put": {
-        "tags": [
-          "Calendar"
-        ],
+        "tags": ["Calendar"],
         "summary": "Update calendar event",
         "operationId": "updateEvent",
         "parameters": [
@@ -797,18 +581,13 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CalendarEventRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/CalendarEventRequest" }
             }
           },
           "required": true
@@ -827,9 +606,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Calendar"
-        ],
+        "tags": ["Calendar"],
         "summary": "Delete calendar event",
         "operationId": "deleteEvent",
         "parameters": [
@@ -837,38 +614,32 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
+        "responses": { "200": { "description": "OK" } }
       }
     },
     "/api/users": {
       "get": {
-        "tags": [
-          "User Management"
-        ],
+        "tags": ["User Management"],
         "summary": "Listar usuários",
-        "description": "Lista todos os usuários da empresa",
+        "description": "Lista todos os usuários da empresa com paginação",
         "operationId": "getAllUsers",
+        "parameters": [
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": { "$ref": "#/components/schemas/Pageable" }
+          }
+        ],
         "responses": {
           "403": {
             "description": "Acesso negado - apenas administradores podem listar usuários",
             "content": {
               "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/UserResponse"
-                  }
-                }
+                "schema": { "$ref": "#/components/schemas/PageUserResponse" }
               }
             }
           },
@@ -876,35 +647,22 @@
             "description": "Lista de usuários retornada com sucesso",
             "content": {
               "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/UserResponse"
-                  }
-                }
+                "schema": { "$ref": "#/components/schemas/PageUserResponse" }
               }
             }
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
+        "security": [{ "bearerAuth": [] }]
       },
       "post": {
-        "tags": [
-          "User Management"
-        ],
+        "tags": ["User Management"],
         "summary": "Criar usuário",
         "description": "Cria um novo usuário na empresa",
         "operationId": "createUser",
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateUserRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/CreateUserRequest" }
             }
           },
           "required": true
@@ -914,9 +672,7 @@
             "description": "Dados inválidos ou email já em uso",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/UserResponse" }
               }
             }
           },
@@ -924,9 +680,7 @@
             "description": "Usuário criado com sucesso",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/UserResponse" }
               }
             }
           },
@@ -934,25 +688,17 @@
             "description": "Acesso negado - apenas administradores podem criar usuários",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/UserResponse" }
               }
             }
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
+        "security": [{ "bearerAuth": [] }]
       }
     },
     "/api/products": {
       "get": {
-        "tags": [
-          "Product Management"
-        ],
+        "tags": ["Products"],
         "summary": "Listar produtos",
         "description": "Lista todos os produtos da empresa",
         "operationId": "getAllProducts",
@@ -963,33 +709,23 @@
               "*/*": {
                 "schema": {
                   "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ProductResponse"
-                  }
+                  "items": { "$ref": "#/components/schemas/ProductResponse" }
                 }
               }
             }
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
+        "security": [{ "bearerAuth": [] }]
       },
       "post": {
-        "tags": [
-          "Product Management"
-        ],
+        "tags": ["Products"],
         "summary": "Criar produto",
         "description": "Cria um novo produto na empresa",
         "operationId": "createProduct",
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateProductRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/CreateProductRequest" }
             }
           },
           "required": true
@@ -999,9 +735,7 @@
             "description": "Dados inválidos",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProductResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/ProductResponse" }
               }
             }
           },
@@ -1009,9 +743,7 @@
             "description": "Acesso negado - apenas administradores podem criar produtos",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProductResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/ProductResponse" }
               }
             }
           },
@@ -1019,25 +751,17 @@
             "description": "Produto criado com sucesso",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProductResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/ProductResponse" }
               }
             }
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
+        "security": [{ "bearerAuth": [] }]
       }
     },
     "/api/performance/metrics": {
       "get": {
-        "tags": [
-          "Performance"
-        ],
+        "tags": ["Performance"],
         "summary": "Get all metrics with pagination and filtering",
         "operationId": "getAllMetrics",
         "parameters": [
@@ -1046,48 +770,34 @@
             "in": "query",
             "description": "Filter by content ID",
             "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           },
           {
             "name": "productId",
             "in": "query",
             "description": "Filter by product ID",
             "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           },
           {
             "name": "startDate",
             "in": "query",
             "description": "Start date for filtering",
             "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date"
-            }
+            "schema": { "type": "string", "format": "date" }
           },
           {
             "name": "endDate",
             "in": "query",
             "description": "End date for filtering",
             "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date"
-            }
+            "schema": { "type": "string", "format": "date" }
           },
           {
             "name": "pageable",
             "in": "query",
             "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/Pageable"
-            }
+            "schema": { "$ref": "#/components/schemas/Pageable" }
           }
         ],
         "responses": {
@@ -1104,17 +814,13 @@
         }
       },
       "post": {
-        "tags": [
-          "Performance"
-        ],
+        "tags": ["Performance"],
         "summary": "Update content metrics",
         "operationId": "updateMetrics",
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ContentMetricsRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/ContentMetricsRequest" }
             }
           },
           "required": true
@@ -1135,9 +841,7 @@
     },
     "/api/performance/metrics/bulk-update": {
       "post": {
-        "tags": [
-          "Performance"
-        ],
+        "tags": ["Performance"],
         "summary": "Bulk update metrics for multiple content",
         "operationId": "bulkUpdateMetrics",
         "requestBody": {
@@ -1172,9 +876,7 @@
     },
     "/api/drafts": {
       "get": {
-        "tags": [
-          "Draft Management"
-        ],
+        "tags": ["Drafts"],
         "summary": "Listar rascunhos",
         "description": "Lista rascunhos do usuário ou todos (se ADMIN)",
         "operationId": "getAllDrafts",
@@ -1184,19 +886,14 @@
             "in": "query",
             "description": "Filtrar por status",
             "required": false,
-            "schema": {
-              "type": "string"
-            }
+            "schema": { "type": "string" }
           },
           {
             "name": "productId",
             "in": "query",
             "description": "Filtrar por produto",
             "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -1206,33 +903,23 @@
               "*/*": {
                 "schema": {
                   "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DraftResponse"
-                  }
+                  "items": { "$ref": "#/components/schemas/DraftResponse" }
                 }
               }
             }
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
+        "security": [{ "bearerAuth": [] }]
       },
       "post": {
-        "tags": [
-          "Draft Management"
-        ],
+        "tags": ["Drafts"],
         "summary": "Criar rascunho",
         "description": "Cria um novo rascunho",
         "operationId": "createDraft",
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateDraftRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/CreateDraftRequest" }
             }
           },
           "required": true
@@ -1242,9 +929,7 @@
             "description": "Dados inválidos",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DraftResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/DraftResponse" }
               }
             }
           },
@@ -1252,25 +937,61 @@
             "description": "Rascunho criado com sucesso",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DraftResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/DraftResponse" }
               }
             }
           }
         },
-        "security": [
+        "security": [{ "bearerAuth": [] }]
+      }
+    },
+    "/api/drafts/{id}/approve": {
+      "post": {
+        "tags": ["Drafts"],
+        "summary": "Aprovar rascunho",
+        "description": "Aprova um rascunho para conversão em conteúdo",
+        "operationId": "approveDraft",
+        "parameters": [
           {
-            "bearerAuth": []
+            "name": "id",
+            "in": "path",
+            "description": "ID do rascunho",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
           }
-        ]
+        ],
+        "responses": {
+          "403": {
+            "description": "Acesso negado - apenas administradores",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/DraftResponse" }
+              }
+            }
+          },
+          "200": {
+            "description": "Rascunho aprovado com sucesso",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/DraftResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Rascunho não encontrado",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/DraftResponse" }
+              }
+            }
+          }
+        },
+        "security": [{ "bearerAuth": [] }]
       }
     },
     "/api/content": {
       "get": {
-        "tags": [
-          "Content"
-        ],
+        "tags": ["Content"],
         "summary": "Get all content with pagination and filtering",
         "operationId": "getAllContent",
         "parameters": [
@@ -1279,36 +1000,27 @@
             "in": "query",
             "description": "Filter by product ID",
             "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           },
           {
             "name": "published",
             "in": "query",
             "description": "Filter by publication status",
             "required": false,
-            "schema": {
-              "type": "boolean"
-            }
+            "schema": { "type": "boolean" }
           },
           {
             "name": "channel",
             "in": "query",
             "description": "Filter by channel",
             "required": false,
-            "schema": {
-              "type": "string"
-            }
+            "schema": { "type": "string" }
           },
           {
             "name": "pageable",
             "in": "query",
             "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/Pageable"
-            }
+            "schema": { "$ref": "#/components/schemas/Pageable" }
           }
         ],
         "responses": {
@@ -1316,26 +1028,20 @@
             "description": "OK",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PageContentResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/PageContentResponse" }
               }
             }
           }
         }
       },
       "post": {
-        "tags": [
-          "Content"
-        ],
+        "tags": ["Content"],
         "summary": "Create content directly (Admin only)",
         "operationId": "createContent",
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ContentRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/ContentRequest" }
             }
           },
           "required": true
@@ -1345,9 +1051,7 @@
             "description": "OK",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ContentResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/ContentResponse" }
               }
             }
           }
@@ -1356,9 +1060,7 @@
     },
     "/api/content/{id}/unpublish": {
       "post": {
-        "tags": [
-          "Content"
-        ],
+        "tags": ["Content"],
         "summary": "Unpublish content from channels",
         "operationId": "unpublishContent",
         "parameters": [
@@ -1366,22 +1068,14 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           },
           {
             "name": "channels",
             "in": "query",
             "description": "Specific channels to unpublish from",
             "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+            "schema": { "type": "array", "items": { "type": "string" } }
           }
         ],
         "responses": {
@@ -1389,9 +1083,7 @@
             "description": "OK",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ContentResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/ContentResponse" }
               }
             }
           }
@@ -1400,9 +1092,7 @@
     },
     "/api/content/{id}/schedule": {
       "post": {
-        "tags": [
-          "Content"
-        ],
+        "tags": ["Content"],
         "summary": "Schedule content for future publication",
         "operationId": "scheduleContent",
         "parameters": [
@@ -1410,31 +1100,21 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           },
           {
             "name": "scheduledDate",
             "in": "query",
             "description": "Scheduled publication date (ISO format)",
             "required": true,
-            "schema": {
-              "type": "string"
-            }
+            "schema": { "type": "string" }
           },
           {
             "name": "channels",
             "in": "query",
             "description": "Channels to publish to",
             "required": true,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+            "schema": { "type": "array", "items": { "type": "string" } }
           }
         ],
         "responses": {
@@ -1442,9 +1122,7 @@
             "description": "OK",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ContentResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/ContentResponse" }
               }
             }
           }
@@ -1453,9 +1131,7 @@
     },
     "/api/content/{id}/publish": {
       "post": {
-        "tags": [
-          "Content"
-        ],
+        "tags": ["Content"],
         "summary": "Publish content to channels",
         "operationId": "publishContent",
         "parameters": [
@@ -1463,22 +1139,14 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           },
           {
             "name": "channels",
             "in": "query",
             "description": "Channels to publish to",
             "required": true,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+            "schema": { "type": "array", "items": { "type": "string" } }
           }
         ],
         "responses": {
@@ -1486,9 +1154,7 @@
             "description": "OK",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ContentResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/ContentResponse" }
               }
             }
           }
@@ -1497,9 +1163,7 @@
     },
     "/api/content/from-draft/{draftId}": {
       "post": {
-        "tags": [
-          "Content"
-        ],
+        "tags": ["Content"],
         "summary": "Create content from approved draft",
         "operationId": "createContentFromDraft",
         "parameters": [
@@ -1508,10 +1172,7 @@
             "in": "path",
             "description": "ID of the approved draft",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -1519,9 +1180,7 @@
             "description": "OK",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ContentResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/ContentResponse" }
               }
             }
           }
@@ -1530,9 +1189,7 @@
     },
     "/api/calendar/events": {
       "get": {
-        "tags": [
-          "Calendar"
-        ],
+        "tags": ["Calendar"],
         "summary": "Get all calendar events with pagination and filtering",
         "operationId": "getAllEvents",
         "parameters": [
@@ -1579,38 +1236,27 @@
             "in": "query",
             "description": "Filter by product ID",
             "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           },
           {
             "name": "startDate",
             "in": "query",
             "description": "Filter by start date",
             "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
+            "schema": { "type": "string", "format": "date-time" }
           },
           {
             "name": "endDate",
             "in": "query",
             "description": "Filter by end date",
             "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
+            "schema": { "type": "string", "format": "date-time" }
           },
           {
             "name": "pageable",
             "in": "query",
             "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/Pageable"
-            }
+            "schema": { "$ref": "#/components/schemas/Pageable" }
           }
         ],
         "responses": {
@@ -1627,17 +1273,13 @@
         }
       },
       "post": {
-        "tags": [
-          "Calendar"
-        ],
+        "tags": ["Calendar"],
         "summary": "Create a new calendar event",
         "operationId": "createEvent",
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CalendarEventRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/CalendarEventRequest" }
             }
           },
           "required": true
@@ -1658,18 +1300,14 @@
     },
     "/api/auth/signup": {
       "post": {
-        "tags": [
-          "Authentication"
-        ],
+        "tags": ["Authentication"],
         "summary": "Registro",
         "description": "Registra uma nova empresa e usuário administrador",
         "operationId": "signup",
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SignupRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/SignupRequest" }
             }
           },
           "required": true
@@ -1679,9 +1317,7 @@
             "description": "Dados inválidos ou email já existe",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/JwtResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/JwtResponse" }
               }
             }
           },
@@ -1689,29 +1325,60 @@
             "description": "Registro realizado com sucesso",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/JwtResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/JwtResponse" }
               }
             }
           }
         }
       }
     },
+    "/api/auth/refresh": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Refresh Token",
+        "description": "Renova o token JWT",
+        "operationId": "refresh",
+        "responses": {
+          "401": {
+            "description": "Token inválido ou expirado",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/JwtResponse" }
+              }
+            }
+          },
+          "200": {
+            "description": "Token renovado com sucesso",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/JwtResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Logout",
+        "description": "Realiza logout invalidando o token",
+        "operationId": "logout",
+        "responses": {
+          "200": { "description": "Logout realizado com sucesso" }
+        }
+      }
+    },
     "/api/auth/login": {
       "post": {
-        "tags": [
-          "Authentication"
-        ],
+        "tags": ["Authentication"],
         "summary": "Login",
         "description": "Autentica um usuário e retorna o token JWT",
         "operationId": "login",
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LoginRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/LoginRequest" }
             }
           },
           "required": true
@@ -1721,9 +1388,7 @@
             "description": "Login realizado com sucesso",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/JwtResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/JwtResponse" }
               }
             }
           },
@@ -1731,9 +1396,7 @@
             "description": "Credenciais inválidas",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/JwtResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/JwtResponse" }
               }
             }
           }
@@ -1742,9 +1405,7 @@
     },
     "/api/drafts/{id}/status": {
       "patch": {
-        "tags": [
-          "Draft Management"
-        ],
+        "tags": ["Drafts"],
         "summary": "Alterar status do rascunho",
         "description": "Altera o status de um rascunho (apenas administradores)",
         "operationId": "updateDraftStatus",
@@ -1754,19 +1415,14 @@
             "in": "path",
             "description": "ID do rascunho",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           },
           {
             "name": "status",
             "in": "query",
             "description": "Novo status",
             "required": true,
-            "schema": {
-              "type": "string"
-            }
+            "schema": { "type": "string" }
           }
         ],
         "responses": {
@@ -1774,9 +1430,7 @@
             "description": "Acesso negado - apenas administradores",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DraftResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/DraftResponse" }
               }
             }
           },
@@ -1784,9 +1438,7 @@
             "description": "Status alterado com sucesso",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DraftResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/DraftResponse" }
               }
             }
           },
@@ -1794,25 +1446,17 @@
             "description": "Rascunho não encontrado",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DraftResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/DraftResponse" }
               }
             }
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
+        "security": [{ "bearerAuth": [] }]
       }
     },
     "/api/calendar/events/{id}/status": {
       "patch": {
-        "tags": [
-          "Calendar"
-        ],
+        "tags": ["Calendar"],
         "summary": "Update event status",
         "operationId": "updateEventStatus",
         "parameters": [
@@ -1820,10 +1464,7 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           },
           {
             "name": "status",
@@ -1859,9 +1500,7 @@
     },
     "/api/performance/report/top-content": {
       "get": {
-        "tags": [
-          "Performance"
-        ],
+        "tags": ["Performance"],
         "summary": "Get top performing content",
         "operationId": "getTopPerformingContent",
         "parameters": [
@@ -1870,51 +1509,35 @@
             "in": "query",
             "description": "Metric to sort by",
             "required": false,
-            "schema": {
-              "type": "string",
-              "default": "views"
-            }
+            "schema": { "type": "string", "default": "views" }
           },
           {
             "name": "limit",
             "in": "query",
             "description": "Number of results",
             "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 10
-            }
+            "schema": { "type": "integer", "format": "int32", "default": 10 }
           },
           {
             "name": "productId",
             "in": "query",
             "description": "Filter by product ID",
             "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           },
           {
             "name": "startDate",
             "in": "query",
             "description": "Start date for analysis",
             "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date"
-            }
+            "schema": { "type": "string", "format": "date" }
           },
           {
             "name": "endDate",
             "in": "query",
             "description": "End date for analysis",
             "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date"
-            }
+            "schema": { "type": "string", "format": "date" }
           }
         ],
         "responses": {
@@ -1936,9 +1559,7 @@
     },
     "/api/performance/report/summary": {
       "get": {
-        "tags": [
-          "Performance"
-        ],
+        "tags": ["Performance"],
         "summary": "Get performance summary report",
         "operationId": "getPerformanceSummary",
         "parameters": [
@@ -1947,30 +1568,21 @@
             "in": "query",
             "description": "Filter by product ID",
             "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           },
           {
             "name": "startDate",
             "in": "query",
             "description": "Start date for report",
             "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date"
-            }
+            "schema": { "type": "string", "format": "date" }
           },
           {
             "name": "endDate",
             "in": "query",
             "description": "End date for report",
             "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date"
-            }
+            "schema": { "type": "string", "format": "date" }
           }
         ],
         "responses": {
@@ -1989,9 +1601,7 @@
     },
     "/api/performance/metrics/{contentId}": {
       "get": {
-        "tags": [
-          "Performance"
-        ],
+        "tags": ["Performance"],
         "summary": "Get metrics for specific content",
         "operationId": "getContentMetrics",
         "parameters": [
@@ -1999,10 +1609,7 @@
             "name": "contentId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -2019,9 +1626,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Performance"
-        ],
+        "tags": ["Performance"],
         "summary": "Delete metrics for content (Admin only)",
         "operationId": "deleteContentMetrics",
         "parameters": [
@@ -2029,24 +1634,15 @@
             "name": "contentId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
+        "responses": { "200": { "description": "OK" } }
       }
     },
     "/api/performance/dashboard": {
       "get": {
-        "tags": [
-          "Performance"
-        ],
+        "tags": ["Performance"],
         "summary": "Get dashboard data with key metrics",
         "operationId": "getDashboardData",
         "parameters": [
@@ -2055,10 +1651,7 @@
             "in": "query",
             "description": "Filter by product ID",
             "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -2068,9 +1661,7 @@
               "*/*": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": {
-                    "type": "object"
-                  }
+                  "additionalProperties": { "type": "object" }
                 }
               }
             }
@@ -2080,9 +1671,7 @@
     },
     "/api/performance/analytics/trends": {
       "get": {
-        "tags": [
-          "Performance"
-        ],
+        "tags": ["Performance"],
         "summary": "Get performance trends",
         "operationId": "getPerformanceTrends",
         "parameters": [
@@ -2091,40 +1680,28 @@
             "in": "query",
             "description": "Filter by product ID",
             "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           },
           {
             "name": "startDate",
             "in": "query",
             "description": "Start date for analysis",
             "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date"
-            }
+            "schema": { "type": "string", "format": "date" }
           },
           {
             "name": "endDate",
             "in": "query",
             "description": "End date for analysis",
             "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date"
-            }
+            "schema": { "type": "string", "format": "date" }
           },
           {
             "name": "metric",
             "in": "query",
             "description": "Metric to analyze",
             "required": false,
-            "schema": {
-              "type": "string",
-              "default": "views"
-            }
+            "schema": { "type": "string", "default": "views" }
           }
         ],
         "responses": {
@@ -2134,9 +1711,7 @@
               "*/*": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": {
-                    "type": "object"
-                  }
+                  "additionalProperties": { "type": "object" }
                 }
               }
             }
@@ -2146,9 +1721,7 @@
     },
     "/api/performance/analytics/engagement": {
       "get": {
-        "tags": [
-          "Performance"
-        ],
+        "tags": ["Performance"],
         "summary": "Get engagement analytics",
         "operationId": "getEngagementAnalytics",
         "parameters": [
@@ -2157,40 +1730,28 @@
             "in": "query",
             "description": "Filter by product ID",
             "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           },
           {
             "name": "startDate",
             "in": "query",
             "description": "Start date for analysis",
             "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date"
-            }
+            "schema": { "type": "string", "format": "date" }
           },
           {
             "name": "endDate",
             "in": "query",
             "description": "End date for analysis",
             "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date"
-            }
+            "schema": { "type": "string", "format": "date" }
           },
           {
             "name": "period",
             "in": "query",
             "description": "Grouping period: daily, weekly, monthly",
             "required": false,
-            "schema": {
-              "type": "string",
-              "default": "daily"
-            }
+            "schema": { "type": "string", "default": "daily" }
           }
         ],
         "responses": {
@@ -2200,9 +1761,7 @@
               "*/*": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": {
-                    "type": "object"
-                  }
+                  "additionalProperties": { "type": "object" }
                 }
               }
             }
@@ -2212,9 +1771,7 @@
     },
     "/api/health": {
       "get": {
-        "tags": [
-          "health-controller"
-        ],
+        "tags": ["health-controller"],
         "operationId": "health",
         "responses": {
           "200": {
@@ -2223,9 +1780,7 @@
               "*/*": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": {
-                    "type": "object"
-                  }
+                  "additionalProperties": { "type": "object" }
                 }
               }
             }
@@ -2235,9 +1790,7 @@
     },
     "/api/content/scheduled": {
       "get": {
-        "tags": [
-          "Content"
-        ],
+        "tags": ["Content"],
         "summary": "Get scheduled content",
         "operationId": "getScheduledContent",
         "parameters": [
@@ -2246,18 +1799,13 @@
             "in": "query",
             "description": "Filter by product ID",
             "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           },
           {
             "name": "pageable",
             "in": "query",
             "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/Pageable"
-            }
+            "schema": { "$ref": "#/components/schemas/Pageable" }
           }
         ],
         "responses": {
@@ -2265,9 +1813,7 @@
             "description": "OK",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PageContentResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/PageContentResponse" }
               }
             }
           }
@@ -2276,9 +1822,7 @@
     },
     "/api/content/published": {
       "get": {
-        "tags": [
-          "Content"
-        ],
+        "tags": ["Content"],
         "summary": "Get all published content",
         "operationId": "getPublishedContent",
         "parameters": [
@@ -2287,27 +1831,20 @@
             "in": "query",
             "description": "Filter by product ID",
             "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           },
           {
             "name": "channel",
             "in": "query",
             "description": "Filter by channel",
             "required": false,
-            "schema": {
-              "type": "string"
-            }
+            "schema": { "type": "string" }
           },
           {
             "name": "pageable",
             "in": "query",
             "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/Pageable"
-            }
+            "schema": { "$ref": "#/components/schemas/Pageable" }
           }
         ],
         "responses": {
@@ -2315,9 +1852,7 @@
             "description": "OK",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PageContentResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/PageContentResponse" }
               }
             }
           }
@@ -2326,9 +1861,7 @@
     },
     "/api/content/my-content": {
       "get": {
-        "tags": [
-          "Content"
-        ],
+        "tags": ["Content"],
         "summary": "Get content created by current user (Operator)",
         "operationId": "getMyContent",
         "parameters": [
@@ -2337,36 +1870,27 @@
             "in": "query",
             "description": "Filter by product ID",
             "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           },
           {
             "name": "published",
             "in": "query",
             "description": "Filter by publication status",
             "required": false,
-            "schema": {
-              "type": "boolean"
-            }
+            "schema": { "type": "boolean" }
           },
           {
             "name": "channel",
             "in": "query",
             "description": "Filter by channel",
             "required": false,
-            "schema": {
-              "type": "string"
-            }
+            "schema": { "type": "string" }
           },
           {
             "name": "pageable",
             "in": "query",
             "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/Pageable"
-            }
+            "schema": { "$ref": "#/components/schemas/Pageable" }
           }
         ],
         "responses": {
@@ -2374,20 +1898,37 @@
             "description": "OK",
             "content": {
               "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PageContentResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/PageContentResponse" }
               }
             }
           }
         }
       }
     },
+    "/api/company/stats": {
+      "get": {
+        "tags": ["Company Management"],
+        "summary": "Estatísticas da empresa",
+        "description": "Retorna estatísticas gerais da empresa",
+        "operationId": "getCompanyStats",
+        "responses": {
+          "200": {
+            "description": "Estatísticas retornadas com sucesso",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyStatsResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [{ "bearerAuth": [] }]
+      }
+    },
     "/api/calendar/events/upcoming": {
       "get": {
-        "tags": [
-          "Calendar"
-        ],
+        "tags": ["Calendar"],
         "summary": "Get upcoming events (next 7 days)",
         "operationId": "getUpcomingEvents",
         "responses": {
@@ -2409,9 +1950,7 @@
     },
     "/api/calendar/events/today": {
       "get": {
-        "tags": [
-          "Calendar"
-        ],
+        "tags": ["Calendar"],
         "summary": "Get today's events",
         "operationId": "getTodaysEvents",
         "responses": {
@@ -2433,9 +1972,7 @@
     },
     "/api/calendar/events/range": {
       "get": {
-        "tags": [
-          "Calendar"
-        ],
+        "tags": ["Calendar"],
         "summary": "Get events in a specific date range",
         "operationId": "getEventsInDateRange",
         "parameters": [
@@ -2444,20 +1981,14 @@
             "in": "query",
             "description": "Start date",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
+            "schema": { "type": "string", "format": "date-time" }
           },
           {
             "name": "endDate",
             "in": "query",
             "description": "End date",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
+            "schema": { "type": "string", "format": "date-time" }
           }
         ],
         "responses": {
@@ -2479,9 +2010,7 @@
     },
     "/api/calendar/events/my": {
       "get": {
-        "tags": [
-          "Calendar"
-        ],
+        "tags": ["Calendar"],
         "summary": "Get events created by current user",
         "operationId": "getMyEvents",
         "parameters": [
@@ -2528,38 +2057,27 @@
             "in": "query",
             "description": "Filter by product ID",
             "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           },
           {
             "name": "startDate",
             "in": "query",
             "description": "Filter by start date",
             "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
+            "schema": { "type": "string", "format": "date-time" }
           },
           {
             "name": "endDate",
             "in": "query",
             "description": "Filter by end date",
             "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
+            "schema": { "type": "string", "format": "date-time" }
           },
           {
             "name": "pageable",
             "in": "query",
             "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/Pageable"
-            }
+            "schema": { "$ref": "#/components/schemas/Pageable" }
           }
         ],
         "responses": {
@@ -2578,9 +2096,7 @@
     },
     "/api/calendar/events/by-draft/{draftId}": {
       "get": {
-        "tags": [
-          "Calendar"
-        ],
+        "tags": ["Calendar"],
         "summary": "Get events related to specific draft",
         "operationId": "getEventsByDraft",
         "parameters": [
@@ -2588,10 +2104,7 @@
             "name": "draftId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -2613,9 +2126,7 @@
     },
     "/api/calendar/events/by-content/{contentId}": {
       "get": {
-        "tags": [
-          "Calendar"
-        ],
+        "tags": ["Calendar"],
         "summary": "Get events related to specific content",
         "operationId": "getEventsByContent",
         "parameters": [
@@ -2623,10 +2134,7 @@
             "name": "contentId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "schema": { "type": "string", "format": "uuid" }
           }
         ],
         "responses": {
@@ -2650,143 +2158,58 @@
   "components": {
     "schemas": {
       "UpdateUserRequest": {
-        "required": [
-          "adminType",
-          "email",
-          "name"
-        ],
+        "required": ["adminType", "email", "name"],
         "type": "object",
         "properties": {
-          "name": {
-            "maxLength": 100,
-            "minLength": 2,
-            "type": "string"
-          },
-          "email": {
-            "type": "string"
-          },
-          "password": {
-            "maxLength": 100,
-            "minLength": 6,
-            "type": "string"
-          },
-          "adminType": {
-            "type": "string",
-            "enum": [
-              "ADMIN",
-              "OPERATOR"
-            ]
-          }
+          "name": { "maxLength": 100, "minLength": 2, "type": "string" },
+          "email": { "type": "string" },
+          "password": { "maxLength": 100, "minLength": 6, "type": "string" },
+          "adminType": { "type": "string", "enum": ["ADMIN", "OPERATOR"] }
         },
         "description": "Novos dados do usuário"
       },
       "UserResponse": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "name": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string"
-          },
-          "adminType": {
-            "type": "string",
-            "enum": [
-              "ADMIN",
-              "OPERATOR"
-            ]
-          },
-          "companyId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "companyName": {
-            "type": "string"
-          }
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "email": { "type": "string" },
+          "adminType": { "type": "string", "enum": ["ADMIN", "OPERATOR"] },
+          "companyId": { "type": "string", "format": "uuid" },
+          "companyName": { "type": "string" }
         }
       },
       "UpdateProductRequest": {
-        "required": [
-          "name"
-        ],
+        "required": ["name"],
         "type": "object",
         "properties": {
-          "name": {
-            "maxLength": 100,
-            "minLength": 0,
-            "type": "string"
-          },
-          "description": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string"
-          },
-          "category": {
-            "maxLength": 50,
-            "minLength": 0,
-            "type": "string"
-          }
+          "name": { "maxLength": 100, "minLength": 0, "type": "string" },
+          "description": { "maxLength": 500, "minLength": 0, "type": "string" },
+          "category": { "maxLength": 50, "minLength": 0, "type": "string" }
         },
         "description": "Novos dados do produto"
       },
       "ProductResponse": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "name": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "category": {
-            "type": "string"
-          },
-          "companyId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "category": { "type": "string" },
+          "companyId": { "type": "string", "format": "uuid" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
         }
       },
       "UpdateDraftRequest": {
-        "required": [
-          "title"
-        ],
+        "required": ["title"],
         "type": "object",
         "properties": {
-          "title": {
-            "maxLength": 200,
-            "minLength": 0,
-            "type": "string"
-          },
-          "content": {
-            "maxLength": 5000,
-            "minLength": 0,
-            "type": "string"
-          },
+          "title": { "maxLength": 200, "minLength": 0, "type": "string" },
+          "content": { "maxLength": 5000, "minLength": 0, "type": "string" },
           "status": {
             "type": "string",
-            "enum": [
-              "DRAFT",
-              "REVIEW",
-              "APPROVED",
-              "REJECTED"
-            ]
+            "enum": ["DRAFT", "REVIEW", "APPROVED", "REJECTED"]
           }
         },
         "description": "Novos dados do rascunho"
@@ -2794,59 +2217,24 @@
       "DraftResponse": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "title": {
-            "type": "string"
-          },
-          "content": {
-            "type": "string"
-          },
+          "id": { "type": "string", "format": "uuid" },
+          "title": { "type": "string" },
+          "content": { "type": "string" },
           "status": {
             "type": "string",
-            "enum": [
-              "DRAFT",
-              "REVIEW",
-              "APPROVED",
-              "REJECTED"
-            ]
+            "enum": ["DRAFT", "REVIEW", "APPROVED", "REJECTED"]
           },
-          "productId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "productName": {
-            "type": "string"
-          },
-          "userId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "userName": {
-            "type": "string"
-          },
-          "companyId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
+          "productId": { "type": "string", "format": "uuid" },
+          "productName": { "type": "string" },
+          "userId": { "type": "string", "format": "uuid" },
+          "userName": { "type": "string" },
+          "companyId": { "type": "string", "format": "uuid" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
         }
       },
       "ContentRequest": {
-        "required": [
-          "content",
-          "productId",
-          "title"
-        ],
+        "required": ["content", "productId", "title"],
         "type": "object",
         "properties": {
           "title": {
@@ -2879,11 +2267,7 @@
           "channels": {
             "type": "array",
             "description": "Lista de canais onde o conteúdo será publicado",
-            "example": [
-              "instagram",
-              "facebook",
-              "twitter"
-            ],
+            "example": ["instagram", "facebook", "twitter"],
             "items": {
               "type": "string",
               "description": "Lista de canais onde o conteúdo será publicado",
@@ -2901,137 +2285,50 @@
       "ContentResponse": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "title": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "content": {
-            "type": "string"
-          },
-          "productId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "companyId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "createdBy": {
-            "type": "string"
-          },
-          "draftId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "channels": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "published": {
-            "type": "boolean"
-          },
-          "publishedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "scheduledDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
+          "id": { "type": "string", "format": "uuid" },
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "content": { "type": "string" },
+          "productId": { "type": "string", "format": "uuid" },
+          "companyId": { "type": "string", "format": "uuid" },
+          "createdBy": { "type": "string" },
+          "draftId": { "type": "string", "format": "uuid" },
+          "channels": { "type": "array", "items": { "type": "string" } },
+          "published": { "type": "boolean" },
+          "publishedAt": { "type": "string", "format": "date-time" },
+          "scheduledDate": { "type": "string", "format": "date-time" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
         }
       },
       "UpdateCompanyRequest": {
-        "required": [
-          "name"
-        ],
+        "required": ["name"],
         "type": "object",
         "properties": {
-          "name": {
-            "maxLength": 100,
-            "minLength": 0,
-            "type": "string"
-          },
-          "industry": {
-            "maxLength": 50,
-            "minLength": 0,
-            "type": "string"
-          },
-          "size": {
-            "maxLength": 20,
-            "minLength": 0,
-            "type": "string"
-          },
-          "website": {
-            "maxLength": 255,
-            "minLength": 0,
-            "type": "string"
-          },
-          "description": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string"
-          }
+          "name": { "maxLength": 100, "minLength": 0, "type": "string" },
+          "industry": { "maxLength": 50, "minLength": 0, "type": "string" },
+          "size": { "maxLength": 20, "minLength": 0, "type": "string" },
+          "website": { "maxLength": 255, "minLength": 0, "type": "string" },
+          "description": { "maxLength": 500, "minLength": 0, "type": "string" }
         },
         "description": "Novos dados da empresa"
       },
       "CompanyResponse": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "name": {
-            "type": "string"
-          },
-          "industry": {
-            "type": "string"
-          },
-          "size": {
-            "type": "string"
-          },
-          "website": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "adminId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "industry": { "type": "string" },
+          "size": { "type": "string" },
+          "website": { "type": "string" },
+          "description": { "type": "string" },
+          "adminId": { "type": "string", "format": "uuid" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
         }
       },
       "CalendarEventRequest": {
-        "required": [
-          "eventType",
-          "startDate",
-          "title"
-        ],
+        "required": ["eventType", "startDate", "title"],
         "type": "object",
         "properties": {
           "title": {
@@ -3096,10 +2393,7 @@
           "channels": {
             "type": "array",
             "description": "Lista de canais para o evento",
-            "example": [
-              "instagram",
-              "facebook"
-            ],
+            "example": ["instagram", "facebook"],
             "items": {
               "type": "string",
               "description": "Lista de canais para o evento",
@@ -3215,10 +2509,7 @@
           "channels": {
             "type": "array",
             "description": "Lista de canais para o evento",
-            "example": [
-              "instagram",
-              "facebook"
-            ],
+            "example": ["instagram", "facebook"],
             "items": {
               "type": "string",
               "description": "Lista de canais para o evento",
@@ -3267,65 +2558,28 @@
         "description": "Response DTO para eventos do calendário"
       },
       "CreateUserRequest": {
-        "required": [
-          "adminType",
-          "email",
-          "name",
-          "password"
-        ],
+        "required": ["adminType", "email", "name", "password"],
         "type": "object",
         "properties": {
-          "name": {
-            "maxLength": 100,
-            "minLength": 2,
-            "type": "string"
-          },
-          "email": {
-            "type": "string"
-          },
-          "password": {
-            "maxLength": 100,
-            "minLength": 6,
-            "type": "string"
-          },
-          "adminType": {
-            "type": "string",
-            "enum": [
-              "ADMIN",
-              "OPERATOR"
-            ]
-          }
+          "name": { "maxLength": 100, "minLength": 2, "type": "string" },
+          "email": { "type": "string" },
+          "password": { "maxLength": 100, "minLength": 6, "type": "string" },
+          "adminType": { "type": "string", "enum": ["ADMIN", "OPERATOR"] }
         },
         "description": "Dados do novo usuário"
       },
       "CreateProductRequest": {
-        "required": [
-          "name"
-        ],
+        "required": ["name"],
         "type": "object",
         "properties": {
-          "name": {
-            "maxLength": 100,
-            "minLength": 0,
-            "type": "string"
-          },
-          "description": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string"
-          },
-          "category": {
-            "maxLength": 50,
-            "minLength": 0,
-            "type": "string"
-          }
+          "name": { "maxLength": 100, "minLength": 0, "type": "string" },
+          "description": { "maxLength": 500, "minLength": 0, "type": "string" },
+          "category": { "maxLength": 50, "minLength": 0, "type": "string" }
         },
         "description": "Dados do novo produto"
       },
       "ContentMetricsRequest": {
-        "required": [
-          "contentId"
-        ],
+        "required": ["contentId"],
         "type": "object",
         "properties": {
           "contentId": {
@@ -3401,21 +2655,13 @@
               "description": "Dados adicionais de métricas em formato JSON",
               "example": {
                 "channel_metrics": {
-                  "instagram": {
-                    "likes": 100,
-                    "shares": 10
-                  }
+                  "instagram": { "likes": 100, "shares": 10 }
                 }
               }
             },
             "description": "Dados adicionais de métricas em formato JSON",
             "example": {
-              "channel_metrics": {
-                "instagram": {
-                  "likes": 100,
-                  "shares": 10
-                }
-              }
+              "channel_metrics": { "instagram": { "likes": 100, "shares": 10 } }
             }
           }
         },
@@ -3518,51 +2764,22 @@
         "description": "Response DTO com métricas de conteúdo"
       },
       "CreateDraftRequest": {
-        "required": [
-          "productId",
-          "title"
-        ],
+        "required": ["productId", "title"],
         "type": "object",
         "properties": {
-          "title": {
-            "maxLength": 200,
-            "minLength": 0,
-            "type": "string"
-          },
-          "content": {
-            "maxLength": 5000,
-            "minLength": 0,
-            "type": "string"
-          },
-          "productId": {
-            "type": "string",
-            "format": "uuid"
-          }
+          "title": { "maxLength": 200, "minLength": 0, "type": "string" },
+          "content": { "maxLength": 5000, "minLength": 0, "type": "string" },
+          "productId": { "type": "string", "format": "uuid" }
         },
         "description": "Dados do novo rascunho"
       },
       "SignupRequest": {
-        "required": [
-          "adminName",
-          "companyName",
-          "email",
-          "password"
-        ],
+        "required": ["adminName", "companyName", "email", "password"],
         "type": "object",
         "properties": {
-          "companyName": {
-            "maxLength": 100,
-            "minLength": 0,
-            "type": "string"
-          },
-          "adminName": {
-            "maxLength": 100,
-            "minLength": 0,
-            "type": "string"
-          },
-          "email": {
-            "type": "string"
-          },
+          "companyName": { "maxLength": 100, "minLength": 0, "type": "string" },
+          "adminName": { "maxLength": 100, "minLength": 0, "type": "string" },
+          "email": { "type": "string" },
           "password": {
             "maxLength": 2147483647,
             "minLength": 6,
@@ -3571,63 +2788,93 @@
         },
         "description": "Dados para registro"
       },
+      "CompanyInfoDto": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "adminId": { "type": "string", "format": "uuid" }
+        }
+      },
       "JwtResponse": {
         "type": "object",
         "properties": {
-          "token": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string"
-          },
-          "userId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "email": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "adminType": {
-            "type": "string",
-            "enum": [
-              "ADMIN",
-              "OPERATOR"
-            ]
-          },
-          "companyId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "companyName": {
-            "type": "string"
-          }
+          "user": { "$ref": "#/components/schemas/UserInfoDto" },
+          "company": { "$ref": "#/components/schemas/CompanyInfoDto" },
+          "token": { "type": "string" },
+          "refreshToken": { "type": "string" }
+        }
+      },
+      "UserInfoDto": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "email": { "type": "string" },
+          "adminType": { "type": "string", "enum": ["ADMIN", "OPERATOR"] },
+          "companyId": { "type": "string", "format": "uuid" }
         }
       },
       "LoginRequest": {
-        "required": [
-          "email",
-          "password"
-        ],
+        "required": ["email", "password"],
         "type": "object",
         "properties": {
-          "email": {
-            "type": "string"
-          },
-          "password": {
-            "type": "string"
-          }
+          "email": { "type": "string" },
+          "password": { "type": "string" }
         },
         "description": "Credenciais de login"
+      },
+      "Pageable": {
+        "type": "object",
+        "properties": {
+          "page": { "minimum": 0, "type": "integer", "format": "int32" },
+          "size": { "minimum": 1, "type": "integer", "format": "int32" },
+          "sort": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "PageUserResponse": {
+        "type": "object",
+        "properties": {
+          "totalElements": { "type": "integer", "format": "int64" },
+          "totalPages": { "type": "integer", "format": "int32" },
+          "size": { "type": "integer", "format": "int32" },
+          "content": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/UserResponse" }
+          },
+          "number": { "type": "integer", "format": "int32" },
+          "sort": { "$ref": "#/components/schemas/SortObject" },
+          "pageable": { "$ref": "#/components/schemas/PageableObject" },
+          "numberOfElements": { "type": "integer", "format": "int32" },
+          "first": { "type": "boolean" },
+          "last": { "type": "boolean" },
+          "empty": { "type": "boolean" }
+        }
+      },
+      "PageableObject": {
+        "type": "object",
+        "properties": {
+          "offset": { "type": "integer", "format": "int64" },
+          "sort": { "$ref": "#/components/schemas/SortObject" },
+          "pageNumber": { "type": "integer", "format": "int32" },
+          "pageSize": { "type": "integer", "format": "int32" },
+          "unpaged": { "type": "boolean" },
+          "paged": { "type": "boolean" }
+        }
+      },
+      "SortObject": {
+        "type": "object",
+        "properties": {
+          "empty": { "type": "boolean" },
+          "sorted": { "type": "boolean" },
+          "unsorted": { "type": "boolean" }
+        }
       },
       "PerformanceReportResponse": {
         "type": "object",
         "properties": {
-          "summary": {
-            "$ref": "#/components/schemas/PerformanceSummary"
-          },
+          "summary": { "$ref": "#/components/schemas/PerformanceSummary" },
           "periodMetrics": {
             "type": "object",
             "additionalProperties": {
@@ -3721,203 +2968,76 @@
         },
         "description": "Resumo das métricas de performance"
       },
-      "Pageable": {
-        "type": "object",
-        "properties": {
-          "page": {
-            "minimum": 0,
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "minimum": 1,
-            "type": "integer",
-            "format": "int32"
-          },
-          "sort": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
       "PageContentMetricsResponse": {
         "type": "object",
         "properties": {
-          "totalPages": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalElements": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
+          "totalElements": { "type": "integer", "format": "int64" },
+          "totalPages": { "type": "integer", "format": "int32" },
+          "size": { "type": "integer", "format": "int32" },
           "content": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ContentMetricsResponse"
-            }
+            "items": { "$ref": "#/components/schemas/ContentMetricsResponse" }
           },
-          "number": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "sort": {
-            "$ref": "#/components/schemas/SortObject"
-          },
-          "numberOfElements": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "pageable": {
-            "$ref": "#/components/schemas/PageableObject"
-          },
-          "first": {
-            "type": "boolean"
-          },
-          "last": {
-            "type": "boolean"
-          },
-          "empty": {
-            "type": "boolean"
-          }
-        }
-      },
-      "PageableObject": {
-        "type": "object",
-        "properties": {
-          "offset": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "sort": {
-            "$ref": "#/components/schemas/SortObject"
-          },
-          "paged": {
-            "type": "boolean"
-          },
-          "unpaged": {
-            "type": "boolean"
-          },
-          "pageSize": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "pageNumber": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "SortObject": {
-        "type": "object",
-        "properties": {
-          "empty": {
-            "type": "boolean"
-          },
-          "unsorted": {
-            "type": "boolean"
-          },
-          "sorted": {
-            "type": "boolean"
-          }
+          "number": { "type": "integer", "format": "int32" },
+          "sort": { "$ref": "#/components/schemas/SortObject" },
+          "pageable": { "$ref": "#/components/schemas/PageableObject" },
+          "numberOfElements": { "type": "integer", "format": "int32" },
+          "first": { "type": "boolean" },
+          "last": { "type": "boolean" },
+          "empty": { "type": "boolean" }
         }
       },
       "PageContentResponse": {
         "type": "object",
         "properties": {
-          "totalPages": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalElements": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
+          "totalElements": { "type": "integer", "format": "int64" },
+          "totalPages": { "type": "integer", "format": "int32" },
+          "size": { "type": "integer", "format": "int32" },
           "content": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ContentResponse"
-            }
+            "items": { "$ref": "#/components/schemas/ContentResponse" }
           },
-          "number": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "sort": {
-            "$ref": "#/components/schemas/SortObject"
-          },
-          "numberOfElements": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "pageable": {
-            "$ref": "#/components/schemas/PageableObject"
-          },
-          "first": {
-            "type": "boolean"
-          },
-          "last": {
-            "type": "boolean"
-          },
-          "empty": {
-            "type": "boolean"
-          }
+          "number": { "type": "integer", "format": "int32" },
+          "sort": { "$ref": "#/components/schemas/SortObject" },
+          "pageable": { "$ref": "#/components/schemas/PageableObject" },
+          "numberOfElements": { "type": "integer", "format": "int32" },
+          "first": { "type": "boolean" },
+          "last": { "type": "boolean" },
+          "empty": { "type": "boolean" }
+        }
+      },
+      "CompanyStatsResponse": {
+        "type": "object",
+        "properties": {
+          "companyId": { "type": "string", "format": "uuid" },
+          "companyName": { "type": "string" },
+          "totalUsers": { "type": "integer", "format": "int64" },
+          "totalProducts": { "type": "integer", "format": "int64" },
+          "totalDrafts": { "type": "integer", "format": "int64" },
+          "pendingDrafts": { "type": "integer", "format": "int64" },
+          "approvedDrafts": { "type": "integer", "format": "int64" },
+          "totalContent": { "type": "integer", "format": "int64" },
+          "publishedContent": { "type": "integer", "format": "int64" },
+          "scheduledContent": { "type": "integer", "format": "int64" }
         }
       },
       "PageCalendarEventResponse": {
         "type": "object",
         "properties": {
-          "totalPages": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalElements": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
+          "totalElements": { "type": "integer", "format": "int64" },
+          "totalPages": { "type": "integer", "format": "int32" },
+          "size": { "type": "integer", "format": "int32" },
           "content": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CalendarEventResponse"
-            }
+            "items": { "$ref": "#/components/schemas/CalendarEventResponse" }
           },
-          "number": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "sort": {
-            "$ref": "#/components/schemas/SortObject"
-          },
-          "numberOfElements": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "pageable": {
-            "$ref": "#/components/schemas/PageableObject"
-          },
-          "first": {
-            "type": "boolean"
-          },
-          "last": {
-            "type": "boolean"
-          },
-          "empty": {
-            "type": "boolean"
-          }
+          "number": { "type": "integer", "format": "int32" },
+          "sort": { "$ref": "#/components/schemas/SortObject" },
+          "pageable": { "$ref": "#/components/schemas/PageableObject" },
+          "numberOfElements": { "type": "integer", "format": "int32" },
+          "first": { "type": "boolean" },
+          "last": { "type": "boolean" },
+          "empty": { "type": "boolean" }
         }
       }
     },

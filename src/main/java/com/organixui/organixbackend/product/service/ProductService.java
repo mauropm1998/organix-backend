@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -58,10 +60,14 @@ public class ProductService {
         Product product = new Product();
         product.setName(request.getName());
         product.setDescription(request.getDescription());
-        product.setCategory(request.getCategory());
         product.setCompanyId(companyId);
         
-        product = productRepository.save(product);
+        // Garantir que o createdAt seja definido se não foi automaticamente
+        if (product.getCreatedAt() == null) {
+            product.setCreatedAt(LocalDateTime.now());
+        }
+        
+        product = productRepository.saveAndFlush(product);
         return convertToResponse(product);
     }
     
@@ -76,7 +82,6 @@ public class ProductService {
         
         product.setName(request.getName());
         product.setDescription(request.getDescription());
-        product.setCategory(request.getCategory());
         
         product = productRepository.save(product);
         return convertToResponse(product);
@@ -98,14 +103,19 @@ public class ProductService {
      * Converte uma entidade Product para DTO de resposta.
      */
     private ProductResponse convertToResponse(Product product) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        String createdAtFormatted = product.getCreatedAt() != null 
+            ? product.getCreatedAt().format(formatter) 
+            : "";
+        
         return new ProductResponse(
                 product.getId(),
                 product.getName(),
                 product.getDescription(),
-                product.getCategory(),
                 product.getCompanyId(),
                 product.getCreatedAt(),
-                product.getUpdatedAt()
+                product.getUpdatedAt(),
+                createdAtFormatted
         );
     }
 }

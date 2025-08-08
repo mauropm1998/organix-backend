@@ -228,8 +228,33 @@ public class DraftService {
                 .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
     }
     
+        /**
+     * Aprova um rascunho (apenas ADMIN).
+     */
+    @Transactional
+    public DraftResponse approveDraft(UUID id) {
+        UUID companyId = SecurityUtils.getCurrentUserCompanyId();
+        User currentUser = getCurrentUser();
+        
+        if (currentUser.getAdminType() != AdminType.ADMIN) {
+            throw new BusinessException("Apenas administradores podem aprovar rascunhos");
+        }
+        
+        Draft draft = draftRepository.findByIdAndCompanyId(id, companyId)
+                .orElseThrow(() -> ResourceNotFoundException.draft(id.toString()));
+        
+        if (draft.getStatus() == DraftStatus.APPROVED) {
+            throw new BusinessException("Este rascunho já foi aprovado");
+        }
+        
+        draft.setStatus(DraftStatus.APPROVED);
+        draft = draftRepository.save(draft);
+        
+        return convertToResponse(draft);
+    }
+    
     /**
-     * Converte uma entidade Draft para DTO de resposta.
+     * Converte entidade Draft para DTO de resposta.
      */
     private DraftResponse convertToResponse(Draft draft) {
         Product product = productRepository.findById(draft.getProductId()).orElse(null);

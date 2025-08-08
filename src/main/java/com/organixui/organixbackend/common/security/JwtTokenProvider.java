@@ -58,6 +58,35 @@ public class JwtTokenProvider {
     }
     
     /**
+     * Gera um refresh token a partir de uma autenticação válida.
+     */
+    public String generateRefreshToken(Authentication authentication) {
+        UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
+        Date expiryDate = new Date(System.currentTimeMillis() + (jwtExpirationMs * 7)); // 7 dias
+        
+        return Jwts.builder()
+                .subject(userPrincipal.getUsername())
+                .issuedAt(new Date())
+                .expiration(expiryDate)
+                .signWith(secretKey)
+                .compact();
+    }
+    
+    /**
+     * Gera um refresh token a partir de um username.
+     */
+    public String generateRefreshTokenFromUsername(String username) {
+        Date expiryDate = new Date(System.currentTimeMillis() + (jwtExpirationMs * 7)); // 7 dias
+        
+        return Jwts.builder()
+                .subject(username)
+                .issuedAt(new Date())
+                .expiration(expiryDate)
+                .signWith(secretKey)
+                .compact();
+    }
+    
+    /**
      * Extrai o username (email) de um token JWT.
      */
     public String getUsernameFromToken(String token) {

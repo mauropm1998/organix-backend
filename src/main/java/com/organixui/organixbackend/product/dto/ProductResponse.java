@@ -17,8 +17,8 @@ public class ProductResponse {
     private UUID id;
     private String name;
     private String description;
-    private String category;
     private UUID companyId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String createdAtFormatted; // Data de criação no formato dd/MM/yyyy
 }

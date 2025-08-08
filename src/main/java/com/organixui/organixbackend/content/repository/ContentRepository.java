@@ -53,6 +53,19 @@ public interface ContentRepository extends JpaRepository<Content, UUID> {
     long countByCompanyId(UUID companyId);
     
     /**
+     * Conta conteúdo publicado por empresa.
+     */
+    long countByCompanyIdAndPublished(UUID companyId, Boolean published);
+    
+    /**
+     * Conta conteúdo agendado por empresa.
+     */
+    @Query("SELECT COUNT(c) FROM Content c WHERE c.companyId = :companyId " +
+           "AND c.scheduledDate IS NOT NULL AND c.scheduledDate > :now")
+    long countByCompanyIdAndScheduledDateAfter(@Param("companyId") UUID companyId, 
+                                              @Param("now") LocalDateTime now);
+    
+    /**
      * Busca conteúdo com filtros complexos - para Admin.
      */
     @Query(value = "SELECT * FROM content c WHERE c.company_id = :companyId " +

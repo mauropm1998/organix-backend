@@ -1,6 +1,8 @@
 package com.organixui.organixbackend.company.controller;
 
+import com.organixui.organixbackend.common.security.SecurityUtils;
 import com.organixui.organixbackend.company.dto.CompanyResponse;
+import com.organixui.organixbackend.company.dto.CompanyStatsResponse;
 import com.organixui.organixbackend.company.dto.UpdateCompanyRequest;
 import com.organixui.organixbackend.company.service.CompanyService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 /**
  * Controller REST para gerenciamento de empresa.
@@ -52,5 +56,16 @@ public class CompanyController {
             @Parameter(description = "Novos dados da empresa") @Valid @RequestBody UpdateCompanyRequest request) {
         CompanyResponse company = companyService.updateCompany(request);
         return ResponseEntity.ok(company);
+    }
+    
+    @GetMapping("/stats")
+    @Operation(summary = "Estatísticas da empresa", description = "Retorna estatísticas gerais da empresa")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Estatísticas retornadas com sucesso")
+    })
+    public ResponseEntity<CompanyStatsResponse> getCompanyStats() {
+        UUID companyId = SecurityUtils.getCurrentUserCompanyId();
+        CompanyStatsResponse stats = companyService.getCompanyStats(companyId);
+        return ResponseEntity.ok(stats);
     }
 }

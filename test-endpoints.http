@@ -27,7 +27,17 @@ Content-Type: application/json
 GET http://localhost:8080/api/products
 Authorization: Bearer {{token}}
 
-## 5. Swagger Documentation
+## 5. Criar produto (requer token)
+POST http://localhost:8080/api/products
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Produto Teste",
+  "description": "Descrição do produto teste"
+}
+
+## 6. Swagger Documentation
 GET http://localhost:8080/swagger-ui.html
 
 ## 6. API Docs JSON

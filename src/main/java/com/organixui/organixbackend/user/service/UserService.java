@@ -11,6 +11,8 @@ import com.organixui.organixbackend.user.dto.UserResponse;
 import com.organixui.organixbackend.user.model.User;
 import com.organixui.organixbackend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +44,16 @@ public class UserService {
         return users.stream()
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
+    }
+    
+    /**
+     * Lista todos os usuários da empresa do usuário autenticado com paginação.
+     */
+    public Page<UserResponse> getAllUsers(Pageable pageable) {
+        UUID companyId = SecurityUtils.getCurrentUserCompanyId();
+        Page<User> users = userRepository.findByCompanyId(companyId, pageable);
+        
+        return users.map(this::convertToResponse);
     }
     
     /**

@@ -1,5 +1,6 @@
 package com.organixui.organixbackend.common.auth.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -17,17 +18,21 @@ public class SignupRequest {
     
     @NotBlank(message = "Nome da empresa é obrigatório")
     @Size(max = 100, message = "Nome da empresa deve ter no máximo 100 caracteres")
+    @JsonProperty("companyName")
     private String companyName;
     
     @NotBlank(message = "Nome do administrador é obrigatório")
     @Size(max = 100, message = "Nome do administrador deve ter no máximo 100 caracteres")
+    @JsonProperty("adminName")
     private String adminName;
     
     @NotBlank(message = "Email é obrigatório")
     @Email(message = "Email deve ter um formato válido")
+    @JsonProperty("email")
     private String email;
     
     @NotBlank(message = "Senha é obrigatória")
     @Size(min = 6, message = "Senha deve ter pelo menos 6 caracteres")
+    @JsonProperty("password")
     private String password;
 }

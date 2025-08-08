@@ -31,9 +31,6 @@ public class Product {
     @Column(length = 500)
     private String description;
     
-    @Column(length = 50)
-    private String category;
-    
     @Column(name = "company_id", nullable = false)
     private UUID companyId;
     

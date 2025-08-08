@@ -27,7 +27,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/drafts")
 @RequiredArgsConstructor
-@Tag(name = "Draft Management", description = "Operações de gerenciamento de rascunhos")
+@Tag(name = "Drafts", description = "Draft management endpoints")
 @SecurityRequirement(name = "bearerAuth")
 public class DraftController {
     
@@ -109,6 +109,20 @@ public class DraftController {
             @Parameter(description = "ID do rascunho") @PathVariable UUID id,
             @Parameter(description = "Novo status") @RequestParam String status) {
         DraftResponse draft = draftService.updateDraftStatus(id, status);
+        return ResponseEntity.ok(draft);
+    }
+    
+    @PostMapping("/{id}/approve")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Aprovar rascunho", description = "Aprova um rascunho para conversão em conteúdo")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Rascunho aprovado com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Rascunho não encontrado"),
+        @ApiResponse(responseCode = "403", description = "Acesso negado - apenas administradores")
+    })
+    public ResponseEntity<DraftResponse> approveDraft(
+            @Parameter(description = "ID do rascunho") @PathVariable UUID id) {
+        DraftResponse draft = draftService.approveDraft(id);
         return ResponseEntity.ok(draft);
     }
 }

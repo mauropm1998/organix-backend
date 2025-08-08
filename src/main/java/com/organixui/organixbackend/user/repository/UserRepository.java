@@ -1,6 +1,8 @@
 package com.organixui.organixbackend.user.repository;
 
 import com.organixui.organixbackend.user.model.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -31,8 +33,18 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     List<User> findByCompanyId(UUID companyId);
     
     /**
+     * Lista todos os usuários de uma empresa específica com paginação.
+     */
+    Page<User> findByCompanyId(UUID companyId, Pageable pageable);
+    
+    /**
      * Busca usuário por ID dentro de uma empresa específica.
      * Garante isolamento de dados entre empresas.
      */
     Optional<User> findByIdAndCompanyId(UUID id, UUID companyId);
+    
+    /**
+     * Conta o número de usuários em uma empresa.
+     */
+    long countByCompanyId(UUID companyId);
 }

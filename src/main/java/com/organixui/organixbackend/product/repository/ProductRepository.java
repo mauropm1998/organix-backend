@@ -24,4 +24,9 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
      * Busca produto por ID dentro de uma empresa específica.
      */
     Optional<Product> findByIdAndCompanyId(UUID id, UUID companyId);
+    
+    /**
+     * Conta o número de produtos em uma empresa.
+     */
+    long countByCompanyId(UUID companyId);
 }

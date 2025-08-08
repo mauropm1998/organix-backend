@@ -3,8 +3,6 @@ package com.organixui.organixbackend.draft.repository;
 import com.organixui.organixbackend.draft.model.Draft;
 import com.organixui.organixbackend.draft.model.DraftStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -63,8 +61,12 @@ public interface DraftRepository extends JpaRepository<Draft, UUID> {
     List<Draft> findByStatusAndProductIdAndCreatedByAndCompanyId(DraftStatus status, UUID productId, String createdBy, UUID companyId);
     
     /**
+     * Conta total de rascunhos por empresa.
+     */
+    long countByCompanyId(UUID companyId);
+    
+    /**
      * Conta rascunhos por status e empresa.
      */
-    @Query("SELECT COUNT(d) FROM Draft d WHERE d.status = :status AND d.companyId = :companyId")
-    long countByStatusAndCompanyId(@Param("status") DraftStatus status, @Param("companyId") UUID companyId);
+    long countByCompanyIdAndStatus(UUID companyId, DraftStatus status);
 }

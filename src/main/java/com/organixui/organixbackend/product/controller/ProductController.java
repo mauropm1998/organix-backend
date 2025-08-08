@@ -27,7 +27,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/products")
 @RequiredArgsConstructor
-@Tag(name = "Product Management", description = "Operações de gerenciamento de produtos")
+@Tag(name = "Products", description = "Product management endpoints")
 @SecurityRequirement(name = "bearerAuth")
 public class ProductController {
     
@@ -56,7 +56,7 @@ public class ProductController {
     }
     
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @Operation(summary = "Criar produto", description = "Cria um novo produto na empresa")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = "Produto criado com sucesso"),
@@ -70,7 +70,7 @@ public class ProductController {
     }
     
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @Operation(summary = "Atualizar produto", description = "Atualiza os dados de um produto existente")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Produto atualizado com sucesso"),
@@ -86,7 +86,7 @@ public class ProductController {
     }
     
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @Operation(summary = "Excluir produto", description = "Exclui um produto da empresa")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "204", description = "Produto excluído com sucesso"),

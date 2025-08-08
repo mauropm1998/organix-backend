@@ -20,7 +20,4 @@ public class CreateProductRequest {
     
     @Size(max = 500, message = "Descrição deve ter no máximo 500 caracteres")
     private String description;
-    
-    @Size(max = 50, message = "Categoria deve ter no máximo 50 caracteres")
-    private String category;
 }

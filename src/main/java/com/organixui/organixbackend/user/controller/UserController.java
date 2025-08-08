@@ -12,6 +12,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,13 +38,14 @@ public class UserController {
     
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Listar usuários", description = "Lista todos os usuários da empresa")
+    @Operation(summary = "Listar usuários", description = "Lista todos os usuários da empresa com paginação")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Lista de usuários retornada com sucesso"),
         @ApiResponse(responseCode = "403", description = "Acesso negado - apenas administradores podem listar usuários")
     })
-    public ResponseEntity<List<UserResponse>> getAllUsers() {
-        List<UserResponse> users = userService.getAllUsers();
+    public ResponseEntity<Page<UserResponse>> getAllUsers(
+            @PageableDefault(size = 20) Pageable pageable) {
+        Page<UserResponse> users = userService.getAllUsers(pageable);
         return ResponseEntity.ok(users);
     }
     
