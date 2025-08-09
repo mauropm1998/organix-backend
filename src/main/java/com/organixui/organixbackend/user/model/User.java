@@ -65,7 +65,7 @@ public class User implements UserDetails {
     // Implementação do UserDetails para Spring Security
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(adminType.name()));
+        return List.of(new SimpleGrantedAuthority("ROLE_" + adminType.name()));
     }
     
     @Override

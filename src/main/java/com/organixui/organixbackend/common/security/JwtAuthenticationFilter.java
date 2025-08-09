@@ -16,6 +16,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.organixui.organixbackend.common.auth.service.CustomUserDetailsService;
+
 import java.io.IOException;
 
 /**
@@ -28,7 +30,7 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     
     private final JwtTokenProvider tokenProvider;
-    private final UserDetailsService userDetailsService;
+    private final CustomUserDetailsService userDetailsService;
     
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, 

@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,6 +30,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Tag(name = "Products", description = "Product management endpoints")
 @SecurityRequirement(name = "bearerAuth")
+@Slf4j
 public class ProductController {
     
     private final ProductService productService;
@@ -56,7 +58,7 @@ public class ProductController {
     }
     
     @PostMapping
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Criar produto", description = "Cria um novo produto na empresa")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = "Produto criado com sucesso"),
@@ -69,8 +71,8 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body(product);
     }
     
-    @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+        @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Atualizar produto", description = "Atualiza os dados de um produto existente")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Produto atualizado com sucesso"),
@@ -86,7 +88,7 @@ public class ProductController {
     }
     
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Excluir produto", description = "Exclui um produto da empresa")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "204", description = "Produto excluído com sucesso"),

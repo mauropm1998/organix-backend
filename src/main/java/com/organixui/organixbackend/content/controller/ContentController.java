@@ -36,7 +36,7 @@ public class ContentController {
 
     @PostMapping
     @Operation(summary = "Create content directly (Admin only)")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<ContentResponse> createContent(@Valid @RequestBody ContentRequest request) {
         ContentResponse content = contentService.createContent(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(content);
