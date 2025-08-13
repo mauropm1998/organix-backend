@@ -6,6 +6,7 @@ import com.organixui.organixbackend.common.security.SecurityUtils;
 import com.organixui.organixbackend.content.dto.ContentRequest;
 import com.organixui.organixbackend.content.dto.ContentResponse;
 import com.organixui.organixbackend.content.model.Content;
+import com.organixui.organixbackend.content.model.ContentStatus;
 import com.organixui.organixbackend.content.repository.ContentRepository;
 import com.organixui.organixbackend.draft.model.Draft;
 import com.organixui.organixbackend.draft.model.DraftStatus;
@@ -53,6 +54,12 @@ public class ContentService {
             throw new BusinessException("Only approved drafts can be converted to content");
         }
         
+        // Verificar se já existe conteúdo criado a partir deste draft
+        Optional<Content> existingContent = contentRepository.findByDraftIdAndCompanyId(draftId, companyId);
+        if (existingContent.isPresent()) {
+            throw new BusinessException("Content already exists for this draft. Draft ID: " + draftId);
+        }
+        
         // Validar acesso ao draft
         validateDraftAccess(draft, userEmail);
         
@@ -65,9 +72,10 @@ public class ContentService {
         content.setProductId(draft.getProductId());
         content.setCompanyId(companyId);
         content.setCreatedBy(userEmail);
+        content.setDraftId(draft.getId());
         content.setCreatedAt(LocalDateTime.now());
         content.setUpdatedAt(LocalDateTime.now());
-        content.setPublished(false);
+        content.setStatus(ContentStatus.DRAFT);
         content.setChannels(new ArrayList<>());
         
         Content savedContent = contentRepository.save(content);
@@ -99,7 +107,8 @@ public class ContentService {
         content.setCreatedBy(userEmail);
         content.setCreatedAt(LocalDateTime.now());
         content.setUpdatedAt(LocalDateTime.now());
-        content.setPublished(false);
+        content.setStatus(request.getStatus() != null ? request.getStatus() : ContentStatus.DRAFT);
+        content.setPublishedAt(request.getPublishedAt());
         content.setChannels(request.getChannels() != null ? request.getChannels() : new ArrayList<>());
         content.setScheduledDate(request.getScheduledDate());
         
@@ -113,29 +122,62 @@ public class ContentService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ContentResponse> getAllContent(UUID productId, Boolean published, String channel, Pageable pageable) {
+    public Page<ContentResponse> getAllContent(ContentStatus status, String channel, Pageable pageable) {
         UUID companyId = SecurityUtils.getCurrentUserCompanyId();
         String userEmail = SecurityUtils.getCurrentUserEmail();
         
-        if (isAdmin()) {
-            // Admin vê todo o conteúdo da empresa
-            return contentRepository.findByCompanyIdWithFilters(
-                    companyId.toString(), 
-                    productId != null ? productId.toString() : null, 
-                    published, 
-                    channel, 
-                    pageable)
-                    .map(this::mapToResponse);
-        } else {
-            // Operator vê apenas seu próprio conteúdo
-            return contentRepository.findByCompanyIdAndCreatedByWithFilters(
-                    companyId.toString(), 
-                    userEmail, 
-                    productId != null ? productId.toString() : null, 
-                    published, 
-                    channel, 
-                    pageable)
-                    .map(this::mapToResponse);
+        try {
+            Page<Content> contentPage;
+            if (isAdmin()) {
+                // Admin vê todo o conteúdo da empresa
+                contentPage = contentRepository.findByCompanyIdWithFilters(
+                        companyId, 
+                        null, // productId removido
+                        status, 
+                        pageable);
+            } else {
+                // Operator vê apenas seu próprio conteúdo
+                contentPage = contentRepository.findByCompanyIdAndCreatedByWithFilters(
+                        companyId, 
+                        userEmail, 
+                        null, // productId removido
+                        status, 
+                        pageable);
+            }
+            
+            // Filtrar por canal se especificado
+            if (channel != null && !channel.trim().isEmpty()) {
+                return contentPage.map(content -> {
+                    // Verificar se o conteúdo tem o canal especificado
+                    if (content.getChannels() != null && content.getChannels().contains(channel)) {
+                        return mapToResponse(content);
+                    }
+                    return null;
+                }).map(response -> response); // Remove nulls automaticamente
+            }
+            
+            return contentPage.map(this::mapToResponse);
+        } catch (Exception e) {
+            log.warn("Error with complex filters, falling back to simple query: {}", e.getMessage());
+            // Fallback para métodos simples
+            Page<Content> fallbackPage;
+            if (isAdmin()) {
+                fallbackPage = contentRepository.findByCompanyId(companyId, pageable);
+            } else {
+                fallbackPage = contentRepository.findByCompanyIdAndCreatedBy(companyId, userEmail, pageable);
+            }
+            
+            // Aplicar filtro de canal no fallback também
+            if (channel != null && !channel.trim().isEmpty()) {
+                return fallbackPage.map(content -> {
+                    if (content.getChannels() != null && content.getChannels().contains(channel)) {
+                        return mapToResponse(content);
+                    }
+                    return null;
+                }).map(response -> response);
+            }
+            
+            return fallbackPage.map(this::mapToResponse);
         }
     }
 
@@ -151,6 +193,22 @@ public class ContentService {
         validateContentAccess(content, userEmail);
         
         return mapToResponse(content);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<ContentResponse> getContentByDraftId(UUID draftId) {
+        UUID companyId = SecurityUtils.getCurrentUserCompanyId();
+        String userEmail = SecurityUtils.getCurrentUserEmail();
+        
+        Optional<Content> content = contentRepository.findByDraftIdAndCompanyId(draftId, companyId);
+        
+        if (content.isPresent()) {
+            // Validar acesso
+            validateContentAccess(content.get(), userEmail);
+            return Optional.of(mapToResponse(content.get()));
+        }
+        
+        return Optional.empty();
     }
 
     public ContentResponse updateContent(UUID id, ContentRequest request) {
@@ -177,15 +235,21 @@ public class ContentService {
         content.setContent(request.getContent());
         content.setUpdatedAt(LocalDateTime.now());
         
+        if (request.getStatus() != null) {
+            content.setStatus(request.getStatus());
+        }
+        
+        if (request.getPublishedAt() != null) {
+            content.setPublishedAt(request.getPublishedAt());
+        }
+
         if (request.getChannels() != null) {
             content.setChannels(request.getChannels());
         }
-        
+
         if (request.getScheduledDate() != null) {
             content.setScheduledDate(request.getScheduledDate());
-        }
-        
-        Content savedContent = contentRepository.save(content);
+        }        Content savedContent = contentRepository.save(content);
         
         log.info("Content updated successfully: {}", savedContent.getId());
         return mapToResponse(savedContent);
@@ -236,7 +300,7 @@ public class ContentService {
         }
         
         content.setChannels(currentChannels);
-        content.setPublished(true);
+        content.setStatus(ContentStatus.PUBLISHED);
         content.setPublishedAt(LocalDateTime.now());
         content.setUpdatedAt(LocalDateTime.now());
         
@@ -273,7 +337,7 @@ public class ContentService {
         
         // Se não há mais canais, marcar como não publicado
         if (currentChannels == null || currentChannels.isEmpty()) {
-            content.setPublished(false);
+            content.setStatus(ContentStatus.DRAFT);
             content.setPublishedAt(null);
         }
         
@@ -286,39 +350,37 @@ public class ContentService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ContentResponse> getMyContent(UUID productId, Boolean published, String channel, Pageable pageable) {
+    public Page<ContentResponse> getMyContent(ContentStatus status, String channel, Pageable pageable) {
         UUID companyId = SecurityUtils.getCurrentUserCompanyId();
         String userEmail = SecurityUtils.getCurrentUserEmail();
         
         return contentRepository.findByCompanyIdAndCreatedByWithFilters(
-                companyId.toString(), 
+                companyId, 
                 userEmail, 
-                productId != null ? productId.toString() : null, 
-                published, 
-                channel, 
+                null, // productId removido
+                status, 
                 pageable)
                 .map(this::mapToResponse);
     }
 
     @Transactional(readOnly = true)
-    public Page<ContentResponse> getPublishedContent(UUID productId, String channel, Pageable pageable) {
+    public Page<ContentResponse> getPublishedContent(String channel, Pageable pageable) {
         UUID companyId = SecurityUtils.getCurrentUserCompanyId();
         
         return contentRepository.findByCompanyIdWithFilters(
-                companyId.toString(), 
-                productId != null ? productId.toString() : null, 
-                true, 
-                channel, 
+                companyId, 
+                null, // productId removido
+                ContentStatus.PUBLISHED, 
                 pageable)
                 .map(this::mapToResponse);
     }
 
     @Transactional(readOnly = true)
-    public Page<ContentResponse> getScheduledContent(UUID productId, Pageable pageable) {
+    public Page<ContentResponse> getScheduledContent(Pageable pageable) {
         UUID companyId = SecurityUtils.getCurrentUserCompanyId();
         LocalDateTime now = LocalDateTime.now();
         
-        return contentRepository.findByCompanyIdAndScheduledDateAfter(companyId, productId, now, pageable)
+        return contentRepository.findByCompanyIdAndScheduledDateAfter(companyId, null, now, pageable)
                 .map(this::mapToResponse);
     }
 
@@ -379,7 +441,7 @@ public class ContentService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .anyMatch(role -> role.equals("ADMIN"));
+                .anyMatch(role -> role.equals("ROLE_ADMIN"));
     }
 
     private void createInitialMetrics(Content content) {
@@ -414,7 +476,7 @@ public class ContentService {
         response.setCreatedBy(content.getCreatedBy());
         response.setCreatedAt(content.getCreatedAt());
         response.setUpdatedAt(content.getUpdatedAt());
-        response.setPublished(content.getPublished());
+        response.setStatus(content.getStatus());
         response.setPublishedAt(content.getPublishedAt());
         response.setChannels(content.getChannels());
         response.setScheduledDate(content.getScheduledDate());

@@ -7,6 +7,7 @@ import com.organixui.organixbackend.company.dto.CompanyStatsResponse;
 import com.organixui.organixbackend.company.dto.UpdateCompanyRequest;
 import com.organixui.organixbackend.company.model.Company;
 import com.organixui.organixbackend.company.repository.CompanyRepository;
+import com.organixui.organixbackend.content.model.ContentStatus;
 import com.organixui.organixbackend.content.repository.ContentRepository;
 import com.organixui.organixbackend.draft.model.DraftStatus;
 import com.organixui.organixbackend.draft.repository.DraftRepository;
@@ -78,7 +79,7 @@ public class CompanyService {
         long pendingDrafts = draftRepository.countByCompanyIdAndStatus(companyId, DraftStatus.REVIEW);
         long approvedDrafts = draftRepository.countByCompanyIdAndStatus(companyId, DraftStatus.APPROVED);
         long totalContent = contentRepository.countByCompanyId(companyId);
-        long publishedContent = contentRepository.countByCompanyIdAndPublished(companyId, true);
+        long publishedContent = contentRepository.countByCompanyIdAndStatus(companyId, ContentStatus.PUBLISHED);
         long scheduledContent = contentRepository.countByCompanyIdAndScheduledDateAfter(companyId, LocalDateTime.now());
         
         return CompanyStatsResponse.builder()

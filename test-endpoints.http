@@ -40,5 +40,63 @@ Authorization: Bearer {{token}}
 ## 6. Swagger Documentation
 GET http://localhost:8080/swagger-ui.html
 
-## 6. API Docs JSON
+## 7. API Docs JSON
 GET http://localhost:8080/v3/api-docs
+
+## 8. Criar conteúdo como RASCUNHO
+POST http://localhost:8080/api/content
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Meu Primeiro Post",
+  "description": "Descrição do post",
+  "content": "Conteúdo completo do post",
+  "productId": "{{productId}}",
+  "status": "DRAFT",
+  "channels": ["Instagram", "Facebook"],
+  "scheduledDate": "2025-08-15T10:00:00"
+}
+
+## 9. Criar conteúdo PUBLICADO com data de publicação
+POST http://localhost:8080/api/content
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Post Publicado",
+  "description": "Post já publicado",
+  "content": "Conteúdo já disponível",
+  "productId": "{{productId}}",
+  "status": "PUBLISHED",
+  "publishedAt": "2025-08-15T07:01",
+  "channels": ["LinkedIn", "Twitter"],
+  "scheduledDate": "2025-08-15T12:00:00"
+}
+
+## 10. Listar conteúdos por status
+GET http://localhost:8080/api/content?status=DRAFT&size=10&page=0
+Authorization: Bearer {{token}}
+
+## 11. Listar conteúdos publicados
+GET http://localhost:8080/api/content?status=PUBLISHED&size=10&page=0
+Authorization: Bearer {{token}}
+
+## 12. Filtrar por canal específico
+GET http://localhost:8080/api/content?channel=Instagram&size=10&page=0
+Authorization: Bearer {{token}}
+
+## 13. Atualizar conteúdo incluindo status
+PUT http://localhost:8080/api/content/{{contentId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Título Atualizado",
+  "description": "Descrição atualizada",
+  "content": "Conteúdo atualizado",
+  "productId": "{{productId}}",
+  "status": "PUBLISHED",
+  "publishedAt": "2025-08-15T08:30",
+  "channels": ["Instagram", "Facebook", "LinkedIn"]
+}

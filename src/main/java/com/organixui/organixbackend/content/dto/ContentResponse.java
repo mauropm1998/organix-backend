@@ -1,5 +1,6 @@
 package com.organixui.organixbackend.content.dto;
 
+import com.organixui.organixbackend.content.model.ContentStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,7 +25,7 @@ public class ContentResponse {
     private String createdBy;
     private UUID draftId;
     private List<String> channels;
-    private Boolean published;
+    private ContentStatus status;
     private LocalDateTime publishedAt;
     private LocalDateTime scheduledDate;
     private LocalDateTime createdAt;

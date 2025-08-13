@@ -214,7 +214,7 @@ public class DraftService {
         }
         
         // Não pode editar rascunhos que já foram aprovados ou rejeitados
-        if (draft.getStatus() == DraftStatus.APPROVED || draft.getStatus() == DraftStatus.REJECTED) {
+        if (draft.getStatus() == DraftStatus.APPROVED) {
             throw new BusinessException("Não é possível editar rascunhos com status " + draft.getStatus());
         }
     }

@@ -32,7 +32,7 @@ public class CalendarController {
 
     @PostMapping("/events")
     @Operation(summary = "Create a new calendar event")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERATOR')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
     public ResponseEntity<CalendarEventResponse> createEvent(@Valid @RequestBody CalendarEventRequest request) {
         CalendarEventResponse event = calendarService.createEvent(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(event);
@@ -40,7 +40,7 @@ public class CalendarController {
 
     @GetMapping("/events")
     @Operation(summary = "Get all calendar events with pagination and filtering")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERATOR')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
     public ResponseEntity<Page<CalendarEventResponse>> getAllEvents(
             @RequestParam(required = false) @Parameter(description = "Filter by event type") EventType eventType,
             @RequestParam(required = false) @Parameter(description = "Filter by event status") EventStatus status,
@@ -56,7 +56,7 @@ public class CalendarController {
 
     @GetMapping("/events/{id}")
     @Operation(summary = "Get calendar event by ID")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERATOR')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
     public ResponseEntity<CalendarEventResponse> getEventById(@PathVariable UUID id) {
         CalendarEventResponse event = calendarService.getEventById(id);
         return ResponseEntity.ok(event);
@@ -64,7 +64,7 @@ public class CalendarController {
 
     @PutMapping("/events/{id}")
     @Operation(summary = "Update calendar event")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERATOR')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
     public ResponseEntity<CalendarEventResponse> updateEvent(
             @PathVariable UUID id,
             @Valid @RequestBody CalendarEventRequest request) {
@@ -74,7 +74,7 @@ public class CalendarController {
 
     @DeleteMapping("/events/{id}")
     @Operation(summary = "Delete calendar event")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERATOR')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
     public ResponseEntity<Void> deleteEvent(@PathVariable UUID id) {
         calendarService.deleteEvent(id);
         return ResponseEntity.noContent().build();
@@ -82,7 +82,7 @@ public class CalendarController {
 
     @GetMapping("/events/range")
     @Operation(summary = "Get events in a specific date range")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERATOR')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
     public ResponseEntity<List<CalendarEventResponse>> getEventsInDateRange(
             @RequestParam @Parameter(description = "Start date", required = true) 
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
@@ -94,7 +94,7 @@ public class CalendarController {
 
     @GetMapping("/events/today")
     @Operation(summary = "Get today's events")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERATOR')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
     public ResponseEntity<List<CalendarEventResponse>> getTodaysEvents() {
         List<CalendarEventResponse> events = calendarService.getTodaysEvents();
         return ResponseEntity.ok(events);
@@ -102,7 +102,7 @@ public class CalendarController {
 
     @GetMapping("/events/upcoming")
     @Operation(summary = "Get upcoming events (next 7 days)")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERATOR')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
     public ResponseEntity<List<CalendarEventResponse>> getUpcomingEvents() {
         List<CalendarEventResponse> events = calendarService.getUpcomingEvents();
         return ResponseEntity.ok(events);
@@ -110,7 +110,7 @@ public class CalendarController {
 
     @GetMapping("/events/my")
     @Operation(summary = "Get events created by current user")
-    @PreAuthorize("hasAuthority('OPERATOR')")
+    @PreAuthorize("hasRole('OPERATOR')")
     public ResponseEntity<Page<CalendarEventResponse>> getMyEvents(
             @RequestParam(required = false) @Parameter(description = "Filter by event type") EventType eventType,
             @RequestParam(required = false) @Parameter(description = "Filter by event status") EventStatus status,
@@ -126,7 +126,7 @@ public class CalendarController {
 
     @PatchMapping("/events/{id}/status")
     @Operation(summary = "Update event status")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERATOR')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
     public ResponseEntity<CalendarEventResponse> updateEventStatus(
             @PathVariable UUID id,
             @RequestParam @Parameter(description = "New event status") EventStatus status) {
@@ -136,7 +136,7 @@ public class CalendarController {
 
     @GetMapping("/events/by-content/{contentId}")
     @Operation(summary = "Get events related to specific content")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERATOR')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
     public ResponseEntity<List<CalendarEventResponse>> getEventsByContent(@PathVariable UUID contentId) {
         List<CalendarEventResponse> events = calendarService.getEventsByContent(contentId);
         return ResponseEntity.ok(events);
@@ -144,7 +144,7 @@ public class CalendarController {
 
     @GetMapping("/events/by-draft/{draftId}")
     @Operation(summary = "Get events related to specific draft")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERATOR')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
     public ResponseEntity<List<CalendarEventResponse>> getEventsByDraft(@PathVariable UUID draftId) {
         List<CalendarEventResponse> events = calendarService.getEventsByDraft(draftId);
         return ResponseEntity.ok(events);

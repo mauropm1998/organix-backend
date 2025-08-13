@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: dev
+    active: prod
   application:
     name: organix-backend
   
@@ -14,6 +14,9 @@ spring:
     serialization:
       write-dates-as-timestamps: false
     default-property-inclusion: NON_NULL
+    deserialization:
+      adjust-dates-to-context-time-zone: false
+    date-format: "yyyy-MM-dd'T'HH:mm:ss"
 
 # Swagger Configuration
 springdoc:

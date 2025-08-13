@@ -52,8 +52,9 @@ public class Content {
     @Column(name = "channels", columnDefinition = "JSON")
     private List<String> channels;
     
-    @Column(name = "published", nullable = false)
-    private Boolean published = false;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private ContentStatus status = ContentStatus.DRAFT;
     
     @Column(name = "published_at")
     private LocalDateTime publishedAt;

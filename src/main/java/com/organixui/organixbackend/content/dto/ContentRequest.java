@@ -1,15 +1,15 @@
 package com.organixui.organixbackend.content.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.organixui.organixbackend.content.model.ContentStatus;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
 
 @Data
 @Schema(description = "Request DTO para criação/atualização de conteúdo")
@@ -36,7 +36,12 @@ public class ContentRequest {
     @Schema(description = "Lista de canais onde o conteúdo será publicado", example = "[\"instagram\", \"facebook\", \"twitter\"]")
     private List<String> channels;
 
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @Schema(description = "Status do conteúdo", example = "DRAFT")
+    private ContentStatus status;
+
+    @Schema(description = "Data de publicação (apenas se status for PUBLISHED)", example = "2024-01-15T10:30:00")
+    private LocalDateTime publishedAt;
+
     @Schema(description = "Data agendada para publicação", example = "2024-01-15T10:30:00")
     private LocalDateTime scheduledDate;
 }

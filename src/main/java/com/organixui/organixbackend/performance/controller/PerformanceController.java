@@ -31,7 +31,7 @@ public class PerformanceController {
 
     @PostMapping("/metrics")
     @Operation(summary = "Update content metrics")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERATOR')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
     public ResponseEntity<ContentMetricsResponse> updateMetrics(@Valid @RequestBody ContentMetricsRequest request) {
         ContentMetricsResponse metrics = performanceService.updateMetrics(request);
         return ResponseEntity.ok(metrics);
@@ -39,7 +39,7 @@ public class PerformanceController {
 
     @GetMapping("/metrics/{contentId}")
     @Operation(summary = "Get metrics for specific content")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERATOR')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
     public ResponseEntity<ContentMetricsResponse> getContentMetrics(@PathVariable UUID contentId) {
         ContentMetricsResponse metrics = performanceService.getContentMetrics(contentId);
         return ResponseEntity.ok(metrics);
@@ -47,7 +47,7 @@ public class PerformanceController {
 
     @GetMapping("/metrics")
     @Operation(summary = "Get all metrics with pagination and filtering")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERATOR')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
     public ResponseEntity<Page<ContentMetricsResponse>> getAllMetrics(
             @RequestParam(required = false) @Parameter(description = "Filter by content ID") UUID contentId,
             @RequestParam(required = false) @Parameter(description = "Filter by product ID") UUID productId,
@@ -62,7 +62,7 @@ public class PerformanceController {
 
     @GetMapping("/report/summary")
     @Operation(summary = "Get performance summary report")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERATOR')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
     public ResponseEntity<PerformanceReportResponse> getPerformanceSummary(
             @RequestParam(required = false) @Parameter(description = "Filter by product ID") UUID productId,
             @RequestParam(required = false) @Parameter(description = "Start date for report") 
@@ -75,7 +75,7 @@ public class PerformanceController {
 
     @GetMapping("/report/top-content")
     @Operation(summary = "Get top performing content")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERATOR')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
     public ResponseEntity<List<ContentMetricsResponse>> getTopPerformingContent(
             @RequestParam(defaultValue = "views") @Parameter(description = "Metric to sort by") String metric,
             @RequestParam(defaultValue = "10") @Parameter(description = "Number of results") int limit,
@@ -90,7 +90,7 @@ public class PerformanceController {
 
     @GetMapping("/analytics/engagement")
     @Operation(summary = "Get engagement analytics")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERATOR')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
     public ResponseEntity<Map<String, Object>> getEngagementAnalytics(
             @RequestParam(required = false) @Parameter(description = "Filter by product ID") UUID productId,
             @RequestParam(required = false) @Parameter(description = "Start date for analysis") 
@@ -104,7 +104,7 @@ public class PerformanceController {
 
     @GetMapping("/analytics/trends")
     @Operation(summary = "Get performance trends")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERATOR')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
     public ResponseEntity<Map<String, Object>> getPerformanceTrends(
             @RequestParam(required = false) @Parameter(description = "Filter by product ID") UUID productId,
             @RequestParam(required = false) @Parameter(description = "Start date for analysis") 
@@ -118,7 +118,7 @@ public class PerformanceController {
 
     @GetMapping("/dashboard")
     @Operation(summary = "Get dashboard data with key metrics")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OPERATOR')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
     public ResponseEntity<Map<String, Object>> getDashboardData(
             @RequestParam(required = false) @Parameter(description = "Filter by product ID") UUID productId) {
         Map<String, Object> dashboard = performanceService.getDashboardData(productId);
@@ -127,7 +127,7 @@ public class PerformanceController {
 
     @DeleteMapping("/metrics/{contentId}")
     @Operation(summary = "Delete metrics for content (Admin only)")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteContentMetrics(@PathVariable UUID contentId) {
         performanceService.deleteContentMetrics(contentId);
         return ResponseEntity.noContent().build();
@@ -135,7 +135,7 @@ public class PerformanceController {
 
     @PostMapping("/metrics/bulk-update")
     @Operation(summary = "Bulk update metrics for multiple content")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<ContentMetricsResponse>> bulkUpdateMetrics(
             @Valid @RequestBody List<ContentMetricsRequest> requests) {
         List<ContentMetricsResponse> metrics = performanceService.bulkUpdateMetrics(requests);

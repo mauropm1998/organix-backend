@@ -1,6 +1,7 @@
 package com.organixui.organixbackend.content.repository;
 
 import com.organixui.organixbackend.content.model.Content;
+import com.organixui.organixbackend.content.model.ContentStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -30,6 +31,11 @@ public interface ContentRepository extends JpaRepository<Content, UUID> {
     Optional<Content> findByIdAndCompanyId(UUID id, UUID companyId);
     
     /**
+     * Busca conteúdo por draft ID e empresa.
+     */
+    Optional<Content> findByDraftIdAndCompanyId(UUID draftId, UUID companyId);
+    
+    /**
      * Busca conteúdo por criador e empresa.
      */
     List<Content> findByCreatedByAndCompanyId(String createdBy, UUID companyId);
@@ -55,7 +61,7 @@ public interface ContentRepository extends JpaRepository<Content, UUID> {
     /**
      * Conta conteúdo publicado por empresa.
      */
-    long countByCompanyIdAndPublished(UUID companyId, Boolean published);
+    long countByCompanyIdAndStatus(UUID companyId, ContentStatus status);
     
     /**
      * Conta conteúdo agendado por empresa.
@@ -66,33 +72,37 @@ public interface ContentRepository extends JpaRepository<Content, UUID> {
                                               @Param("now") LocalDateTime now);
     
     /**
+     * Busca conteúdo por empresa - método simples.
+     */
+    Page<Content> findByCompanyId(UUID companyId, Pageable pageable);
+    
+    /**
+     * Busca conteúdo por criador e empresa - método simples.
+     */
+    Page<Content> findByCompanyIdAndCreatedBy(UUID companyId, String createdBy, Pageable pageable);
+    
+    /**
      * Busca conteúdo com filtros complexos - para Admin.
      */
-    @Query(value = "SELECT * FROM content c WHERE c.company_id = :companyId " +
-           "AND (:productId IS NULL OR c.product_id = :productId) " +
-           "AND (:published IS NULL OR c.published = :published) " +
-           "AND (:channel IS NULL OR JSON_CONTAINS(c.channels, JSON_QUOTE(:channel)))",
-           nativeQuery = true)
-    Page<Content> findByCompanyIdWithFilters(@Param("companyId") String companyId,
-                                            @Param("productId") String productId,
-                                            @Param("published") Boolean published,
-                                            @Param("channel") String channel,
+    @Query("SELECT c FROM Content c WHERE c.companyId = :companyId " +
+           "AND (:productId IS NULL OR c.productId = :productId) " +
+           "AND (:status IS NULL OR c.status = :status)")
+    Page<Content> findByCompanyIdWithFilters(@Param("companyId") UUID companyId,
+                                            @Param("productId") UUID productId,
+                                            @Param("status") ContentStatus status,
                                             Pageable pageable);
     
     /**
      * Busca conteúdo com filtros complexos - para Operator (apenas próprio conteúdo).
      */
-    @Query(value = "SELECT * FROM content c WHERE c.company_id = :companyId " +
-           "AND c.created_by = :createdBy " +
-           "AND (:productId IS NULL OR c.product_id = :productId) " +
-           "AND (:published IS NULL OR c.published = :published) " +
-           "AND (:channel IS NULL OR JSON_CONTAINS(c.channels, JSON_QUOTE(:channel)))",
-           nativeQuery = true)
-    Page<Content> findByCompanyIdAndCreatedByWithFilters(@Param("companyId") String companyId,
+    @Query("SELECT c FROM Content c WHERE c.companyId = :companyId " +
+           "AND c.createdBy = :createdBy " +
+           "AND (:productId IS NULL OR c.productId = :productId) " +
+           "AND (:status IS NULL OR c.status = :status)")
+    Page<Content> findByCompanyIdAndCreatedByWithFilters(@Param("companyId") UUID companyId,
                                                         @Param("createdBy") String createdBy,
-                                                        @Param("productId") String productId,
-                                                        @Param("published") Boolean published,
-                                                        @Param("channel") String channel,
+                                                        @Param("productId") UUID productId,
+                                                        @Param("status") ContentStatus status,
                                                         Pageable pageable);
     
     /**
