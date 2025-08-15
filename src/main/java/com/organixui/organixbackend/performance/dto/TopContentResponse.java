@@ -31,20 +31,23 @@ public class TopContentResponse {
     @Schema(description = "Canal onde foi publicado", example = "Instagram")
     private String channel;
 
-    @Schema(description = "Total de visualizações", example = "5000")
-    private Long totalViews;
+    @Schema(description = "Curtidas no canal específico", example = "450")
+    private Long channelLikes;
 
-    @Schema(description = "Total de curtidas", example = "450")
-    private Long totalLikes;
+    @Schema(description = "Comentários no canal específico", example = "75")
+    private Long channelComments;
 
-    @Schema(description = "Total de comentários", example = "75")
-    private Long totalComments;
+    @Schema(description = "Compartilhamentos no canal específico", example = "30")
+    private Long channelShares;
 
-    @Schema(description = "Total de compartilhamentos", example = "30")
-    private Long totalShares;
+    @Schema(description = "Visitas ao site através do canal", example = "120")
+    private Long channelSiteVisits;
 
-    @Schema(description = "Taxa de engajamento", example = "9.2")
-    private Double engagementRate;
+    @Schema(description = "Novas contas criadas através do canal", example = "15")
+    private Long channelNewAccounts;
+
+    @Schema(description = "Cliques no post do canal", example = "200")
+    private Long channelPostClicks;
 
     @Schema(description = "Data de publicação")
     private String publishDate;

@@ -211,13 +211,14 @@ public class PerformanceService {
             String contentProductId = result[3] != null ? result[3].toString() : null;
             String productName = (String) result[4];
             String channelName = (String) result[5];
-            Long totalViews = result[6] != null ? ((Number) result[6]).longValue() : 0L;
-            Long totalLikes = result[7] != null ? ((Number) result[7]).longValue() : 0L;
-            Long totalComments = result[8] != null ? ((Number) result[8]).longValue() : 0L;
-            Long totalShares = result[9] != null ? ((Number) result[9]).longValue() : 0L;
-            Double engagementRate = result[10] != null ? ((Number) result[10]).doubleValue() : 0.0;
-            String publishDate = result[11] != null ? result[11].toString() : "";
-            Double performanceScore = result[12] != null ? ((Number) result[12]).doubleValue() : 0.0;
+            Long channelLikes = result[6] != null ? ((Number) result[6]).longValue() : 0L;
+            Long channelComments = result[7] != null ? ((Number) result[7]).longValue() : 0L;
+            Long channelShares = result[8] != null ? ((Number) result[8]).longValue() : 0L;
+            Long channelSiteVisits = result[9] != null ? ((Number) result[9]).longValue() : 0L;
+            Long channelNewAccounts = result[10] != null ? ((Number) result[10]).longValue() : 0L;
+            Long channelPostClicks = result[11] != null ? ((Number) result[11]).longValue() : 0L;
+            String publishDate = result[12] != null ? result[12].toString() : "";
+            Double performanceScore = result[13] != null ? ((Number) result[13]).doubleValue() : 0.0;
             
             return TopContentResponse.builder()
                     .contentId(contentId)
@@ -226,11 +227,12 @@ public class PerformanceService {
                     .productId(contentProductId)
                     .productName(productName)
                     .channel(channelName)
-                    .totalViews(totalViews)
-                    .totalLikes(totalLikes)
-                    .totalComments(totalComments)
-                    .totalShares(totalShares)
-                    .engagementRate(engagementRate)
+                    .channelLikes(channelLikes)
+                    .channelComments(channelComments)
+                    .channelShares(channelShares)
+                    .channelSiteVisits(channelSiteVisits)
+                    .channelNewAccounts(channelNewAccounts)
+                    .channelPostClicks(channelPostClicks)
                     .publishDate(publishDate)
                     .performanceScore(performanceScore)
                     .build();
@@ -269,13 +271,14 @@ public class PerformanceService {
             String contentProductId = result[3] != null ? result[3].toString() : null;
             String productName = (String) result[4];
             String channelName = (String) result[5];
-            Long totalViews = result[6] != null ? ((Number) result[6]).longValue() : 0L;
-            Long totalLikes = result[7] != null ? ((Number) result[7]).longValue() : 0L;
-            Long totalComments = result[8] != null ? ((Number) result[8]).longValue() : 0L;
-            Long totalShares = result[9] != null ? ((Number) result[9]).longValue() : 0L;
-            Double engagementRate = result[10] != null ? ((Number) result[10]).doubleValue() : 0.0;
-            String publishDate = result[11] != null ? result[11].toString() : "";
-            Double performanceScore = result[12] != null ? ((Number) result[12]).doubleValue() : 0.0;
+            Long channelLikes = result[6] != null ? ((Number) result[6]).longValue() : 0L;
+            Long channelComments = result[7] != null ? ((Number) result[7]).longValue() : 0L;
+            Long channelShares = result[8] != null ? ((Number) result[8]).longValue() : 0L;
+            Long channelSiteVisits = result[9] != null ? ((Number) result[9]).longValue() : 0L;
+            Long channelNewAccounts = result[10] != null ? ((Number) result[10]).longValue() : 0L;
+            Long channelPostClicks = result[11] != null ? ((Number) result[11]).longValue() : 0L;
+            String publishDate = result[12] != null ? result[12].toString() : "";
+            Double performanceScore = result[13] != null ? ((Number) result[13]).doubleValue() : 0.0;
             
             return TopContentResponse.builder()
                     .contentId(contentId)
@@ -284,11 +287,12 @@ public class PerformanceService {
                     .productId(contentProductId)
                     .productName(productName)
                     .channel(channelName)
-                    .totalViews(totalViews)
-                    .totalLikes(totalLikes)
-                    .totalComments(totalComments)
-                    .totalShares(totalShares)
-                    .engagementRate(engagementRate)
+                    .channelLikes(channelLikes)
+                    .channelComments(channelComments)
+                    .channelShares(channelShares)
+                    .channelSiteVisits(channelSiteVisits)
+                    .channelNewAccounts(channelNewAccounts)
+                    .channelPostClicks(channelPostClicks)
                     .publishDate(publishDate)
                     .performanceScore(performanceScore)
                     .build();
