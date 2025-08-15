@@ -1,9 +1,12 @@
 package com.organixui.organixbackend.content.model;
 
 /**
- * Enum that represents the possible content statuses.
+ * Enum que representa os possíveis status de conteúdo.
  */
 public enum ContentStatus {
-    DRAFT,      // Content in draft (not published)
-    PUBLISHED   // Published content
+    PENDING,        // Pendente
+    CANCELED,       // Cancelado
+    POSTED,         // Postado
+    IN_PRODUCTION,  // Em produção
+    FINISHED        // Finalizado
 }

@@ -1,44 +1,34 @@
 package com.organixui.organixbackend.product.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-/**
- * Entidade que representa um produto de uma empresa.
- * Produtos são utilizados para categorizar o conteúdo criado.
- */
 @Entity
 @Table(name = "products")
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Product {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(updatable = false, nullable = false)
     private UUID id;
     
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false)
     private String name;
-    
-    @Column(length = 500)
-    private String description;
     
     @Column(name = "company_id", nullable = false)
     private UUID companyId;
     
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
     
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 }

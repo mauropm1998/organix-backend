@@ -16,14 +16,12 @@ import java.util.UUID;
 @AllArgsConstructor
 public class DraftResponse {
     private UUID id;
-    private String title;
+    private String name;
+    private String type;
+    private UUID creatorId;
+    private String creatorName;
     private String content;
     private DraftStatus status;
-    private UUID productId;
-    private String productName;
-    private UUID userId;
-    private String userName;
-    private UUID companyId;
     private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private UUID companyId;
 }

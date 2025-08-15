@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MainController {
 
-    @RequestMapping(value = { "/", "/chat/**" })
+    @RequestMapping(value = { "/", "/login", "/signup", "/drafts", "/content", "/performance", "/users", "/products" })
     public String redirect() {
         return "forward:/index.html";
     }

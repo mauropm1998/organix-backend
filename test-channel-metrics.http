@@ -1,0 +1,83 @@
+### Endpoint para atualizar métricas de todos os canais de um conteúdo
+PUT http://localhost:8080/api/content/{{contentId}}/channels/metrics
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "channelMetrics": [
+    {
+      "channelId": "{{channelId1}}",
+      "likes": 150,
+      "comments": 25,
+      "shares": 40,
+      "siteVisits": 300,
+      "newAccounts": 15,
+      "postClicks": 200
+    },
+    {
+      "channelId": "{{channelId2}}",
+      "likes": 89,
+      "comments": 12,
+      "shares": 18,
+      "siteVisits": 150,
+      "newAccounts": 8,
+      "postClicks": 95
+    },
+    {
+      "channelId": "{{channelId3}}",
+      "likes": 234,
+      "comments": 45,
+      "shares": 67,
+      "siteVisits": 450,
+      "newAccounts": 22,
+      "postClicks": 350
+    }
+  ]
+}
+
+### Response esperado:
+### {
+###   "id": "uuid-das-metricas",
+###   "contentId": "uuid-do-conteudo",
+###   "views": 0,
+###   "likes": 473,
+###   "reach": 0,
+###   "engagement": 0,
+###   "comments": 82,
+###   "shares": 125,
+###   "channelMetrics": [
+###     {
+###       "id": "uuid-do-canal-1",
+###       "channelId": "uuid-do-canal-1",
+###       "channelName": "Instagram",
+###       "likes": 150,
+###       "comments": 25,
+###       "shares": 40,
+###       "siteVisits": 300,
+###       "newAccounts": 15,
+###       "postClicks": 200
+###     },
+###     {
+###       "id": "uuid-do-canal-2",
+###       "channelId": "uuid-do-canal-2", 
+###       "channelName": "Facebook",
+###       "likes": 89,
+###       "comments": 12,
+###       "shares": 18,
+###       "siteVisits": 150,
+###       "newAccounts": 8,
+###       "postClicks": 95
+###     },
+###     {
+###       "id": "uuid-do-canal-3",
+###       "channelId": "uuid-do-canal-3",
+###       "channelName": "LinkedIn", 
+###       "likes": 234,
+###       "comments": 45,
+###       "shares": 67,
+###       "siteVisits": 450,
+###       "newAccounts": 22,
+###       "postClicks": 350
+###     }
+###   ]
+### }

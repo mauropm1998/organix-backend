@@ -1,0 +1,82 @@
+### Testes Completos dos Endpoints de Performance
+
+## 1. Métricas Resumidas (Summary)
+GET http://localhost:8080/api/performance/summary
+Authorization: Bearer {{token}}
+
+## 2. Métricas Resumidas com filtros
+GET http://localhost:8080/api/performance/summary?startDate=2025-08-01&endDate=2025-08-31&channel=Instagram&productId=550e8400-e29b-41d4-a716-446655440000
+Authorization: Bearer {{token}}
+
+## 3. Performance por Canal
+GET http://localhost:8080/api/performance/channel-performance
+Authorization: Bearer {{token}}
+
+## 4. Top Content - Todos
+GET http://localhost:8080/api/performance/top-content
+Authorization: Bearer {{token}}
+
+## 5. Top Content com Filtros
+GET http://localhost:8080/api/performance/top-content?startDate=2025-08-01&endDate=2025-08-31&channel=Instagram&productId=550e8400-e29b-41d4-a716-446655440000
+Authorization: Bearer {{token}}
+
+## 6. Métricas de Conteúdo Específico
+GET http://localhost:8080/api/performance/content/550e8400-e29b-41d4-a716-446655440001/metrics
+Authorization: Bearer {{token}}
+
+### Responses esperados:
+
+### 1. Summary Response:
+### {
+###   "totalViews": 15000,
+###   "totalLikes": 1200,
+###   "totalComments": 300,
+###   "totalShares": 150,
+###   "averageEngagementRate": 8.5,
+###   "totalReach": 50000
+### }
+
+### 2. Channel Performance Response:
+### [
+###   {
+###     "channelName": "Instagram",
+###     "totalPosts": 25,
+###     "totalViews": 8000,
+###     "totalLikes": 700,
+###     "totalComments": 180,
+###     "totalShares": 90,
+###     "engagementRate": 9.2,
+###     "averageReach": 25000.0
+###   }
+### ]
+
+### 3. Top Content Response (AGORA COM PRODUTO):
+### [
+###   {
+###     "contentId": "550e8400-e29b-41d4-a716-446655440001",
+###     "contentName": "Post sobre Produto X",
+###     "contentType": "Post",
+###     "productId": "550e8400-e29b-41d4-a716-446655440000",
+###     "productName": "Produto X",
+###     "channel": "Instagram",
+###     "totalViews": 5000,
+###     "totalLikes": 450,
+###     "totalComments": 75,
+###     "totalShares": 30,
+###     "engagementRate": 9.2,
+###     "publishDate": "2025-08-15T10:00:00",
+###     "performanceScore": 8.5
+###   }
+### ]
+
+### 4. Content Metrics Response:
+### {
+###   "id": "550e8400-e29b-41d4-a716-446655440002",
+###   "contentId": "550e8400-e29b-41d4-a716-446655440001",
+###   "views": 5000,
+###   "likes": 450,
+###   "reach": 15000,
+###   "engagement": 600,
+###   "comments": 75,
+###   "shares": 30
+### }

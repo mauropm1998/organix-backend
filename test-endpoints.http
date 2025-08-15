@@ -43,19 +43,71 @@ GET http://localhost:8080/swagger-ui.html
 ## 7. API Docs JSON
 GET http://localhost:8080/v3/api-docs
 
-## 8. Criar conteúdo como RASCUNHO
+## 8. Criar conteúdo com status padrão (PENDING)
 POST http://localhost:8080/api/content
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "title": "Meu Primeiro Post",
-  "description": "Descrição do post",
-  "content": "Conteúdo completo do post",
+  "name": "Conteúdo com Status Padrão",
+  "type": "Post",
   "productId": "{{productId}}",
-  "status": "DRAFT",
-  "channels": ["Instagram", "Facebook"],
-  "scheduledDate": "2025-08-15T10:00:00"
+  "producerId": "{{producerId}}",
+  "postDate": "2025-08-20T10:00:00",
+  "channelIds": ["{{channelId1}}", "{{channelId2}}"]
+}
+
+## 9. Criar conteúdo com status específico - EM PRODUÇÃO
+POST http://localhost:8080/api/content
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Conteúdo Em Produção",
+  "type": "Video",
+  "productId": "{{productId}}",
+  "producerId": "{{producerId}}",
+  "status": "IN_PRODUCTION",
+  "postDate": "2025-08-25T15:30:00",
+  "channelIds": ["{{channelId1}}"]
+}
+
+## 10. Criar conteúdo com status específico - POSTADO
+POST http://localhost:8080/api/content
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Conteúdo Já Postado",
+  "type": "Story",
+  "productId": "{{productId}}",
+  "status": "POSTED",
+  "postDate": "2025-08-15T09:00:00",
+  "channelIds": ["{{channelId2}}"]
+}
+
+## 11. Criar conteúdo com status específico - FINALIZADO
+POST http://localhost:8080/api/content
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Conteúdo Finalizado",
+  "type": "Campanha",
+  "productId": "{{productId}}",
+  "producerId": "{{producerId}}",
+  "status": "FINISHED",
+  "postDate": "2025-08-10T12:00:00",
+  "channelIds": ["{{channelId1}}", "{{channelId2}}"]
+}
+
+{
+  "name": "Meu Primeiro Post",
+  "type": "Post Instagram",
+  "productId": "{{productId}}",
+  "producerId": "{{producerId}}",
+  "postDate": "2025-08-15T10:00:00",
+  "channelIds": ["{{channelId1}}", "{{channelId2}}"]
 }
 
 ## 9. Criar conteúdo PUBLICADO com data de publicação
@@ -64,10 +116,13 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "title": "Post Publicado",
-  "description": "Post já publicado",
-  "content": "Conteúdo já disponível",
+  "name": "Post com Produtor",
+  "type": "Campanha",
   "productId": "{{productId}}",
+  "producerId": "{{producerId}}",
+  "postDate": "2025-08-15T14:30:00",
+  "channelIds": ["{{channelId1}}"]
+}
   "status": "PUBLISHED",
   "publishedAt": "2025-08-15T07:01",
   "channels": ["LinkedIn", "Twitter"],
@@ -92,11 +147,91 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "title": "Título Atualizado",
-  "description": "Descrição atualizada",
-  "content": "Conteúdo atualizado",
+  "name": "Conteúdo Atualizado",
+  "type": "Post Atualizado",
   "productId": "{{productId}}",
-  "status": "PUBLISHED",
-  "publishedAt": "2025-08-15T08:30",
-  "channels": ["Instagram", "Facebook", "LinkedIn"]
+  "producerId": "{{newProducerId}}",
+  "status": "POSTED",
+  "postDate": "2025-08-15T16:00:00",
+  "channelIds": ["{{channelId1}}", "{{channelId2}}"]
+}
+
+## 14. Atualizar apenas o status do conteúdo
+PATCH http://localhost:8080/api/content/{{contentId}}/status
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "status": "POSTED"
+}
+
+## 15. Atualizar rascunho para aprovar
+PUT http://localhost:8080/api/drafts/{{draftId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Nome do rascunho",
+  "type": "Tipo do rascunho",
+  "content": "Conteúdo do rascunho",
+  "status": "APPROVED"
+}
+
+## 16. Atualizar rascunho para rejeitar
+PUT http://localhost:8080/api/drafts/{{draftId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Nome do rascunho",
+  "type": "Tipo do rascunho",
+  "content": "Conteúdo do rascunho",
+  "status": "NOT_APPROVED"
+}
+
+## 17. Criar rascunho com status padrão (PENDING)
+POST http://localhost:8080/api/drafts
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Novo Rascunho",
+  "type": "Post",
+  "creatorId": "{{userId}}",
+  "content": "Conteúdo do rascunho"
+}
+
+## 18. Criar rascunho já aprovado
+POST http://localhost:8080/api/drafts
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Rascunho Pré-aprovado",
+  "type": "Campanha",
+  "creatorId": "{{userId}}",
+  "content": "Conteúdo já aprovado",
+  "status": "APPROVED"
+}
+
+## 19. Criar conteúdo sem produtor (criador assume papel)
+POST http://localhost:8080/api/content
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Conteúdo Solo",
+  "type": "Post Pessoal",
+  "productId": "{{productId}}",
+  "postDate": "2025-08-15T18:00:00",
+  "channelIds": ["{{channelId1}}"]
+}
+
+## 20. Atualizar apenas o status via PUT (alternativa ao PATCH)
+PUT http://localhost:8080/api/content/{{contentId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "status": "IN_PRODUCTION"
 }

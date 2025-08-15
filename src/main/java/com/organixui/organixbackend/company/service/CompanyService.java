@@ -17,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
@@ -55,10 +54,6 @@ public class CompanyService {
                 .orElseThrow(() -> ResourceNotFoundException.company(companyId.toString()));
         
         company.setName(request.getName());
-        company.setIndustry(request.getIndustry());
-        company.setSize(request.getSize());
-        company.setWebsite(request.getWebsite());
-        company.setDescription(request.getDescription());
         
         company = companyRepository.save(company);
         return convertToResponse(company);
@@ -76,11 +71,10 @@ public class CompanyService {
         long totalUsers = userRepository.countByCompanyId(companyId);
         long totalProducts = productRepository.countByCompanyId(companyId);
         long totalDrafts = draftRepository.countByCompanyId(companyId);
-        long pendingDrafts = draftRepository.countByCompanyIdAndStatus(companyId, DraftStatus.REVIEW);
-        long approvedDrafts = draftRepository.countByCompanyIdAndStatus(companyId, DraftStatus.APPROVED);
+        long pendingDrafts = draftRepository.countByCompanyIdAndStatus(companyId, DraftStatus.PENDING);
+        long publishedDrafts = draftRepository.countByCompanyIdAndStatus(companyId, DraftStatus.APPROVED);
         long totalContent = contentRepository.countByCompanyId(companyId);
-        long publishedContent = contentRepository.countByCompanyIdAndStatus(companyId, ContentStatus.PUBLISHED);
-        long scheduledContent = contentRepository.countByCompanyIdAndScheduledDateAfter(companyId, LocalDateTime.now());
+        long postedContent = contentRepository.countByCompanyIdAndStatus(companyId, ContentStatus.POSTED);
         
         return CompanyStatsResponse.builder()
                 .companyId(companyId)
@@ -89,10 +83,9 @@ public class CompanyService {
                 .totalProducts(totalProducts)
                 .totalDrafts(totalDrafts)
                 .pendingDrafts(pendingDrafts)
-                .approvedDrafts(approvedDrafts)
+                .approvedDrafts(publishedDrafts)
                 .totalContent(totalContent)
-                .publishedContent(publishedContent)
-                .scheduledContent(scheduledContent)
+                .postedContent(postedContent)
                 .build();
     }    /**
      * Converte uma entidade Company para DTO de resposta.
@@ -101,13 +94,8 @@ public class CompanyService {
         return new CompanyResponse(
                 company.getId(),
                 company.getName(),
-                company.getIndustry(),
-                company.getSize(),
-                company.getWebsite(),
-                company.getDescription(),
                 company.getAdminId(),
-                company.getCreatedAt(),
-                company.getUpdatedAt()
+                company.getCreatedAt()
         );
     }
 }

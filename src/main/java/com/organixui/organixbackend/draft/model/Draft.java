@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -25,33 +24,26 @@ public class Draft {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     
-    @Column(nullable = false, length = 200)
-    private String title;
+    @Column(nullable = false)
+    private String name;
     
-    @Column(length = 500)
-    private String description;
+    @Column(nullable = false)
+    private String type;
+    
+    @Column(name = "creator_id", nullable = false)
+    private UUID creatorId;
     
     @Column(columnDefinition = "TEXT")
     private String content;
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private DraftStatus status = DraftStatus.DRAFT;
-    
-    @Column(name = "product_id", nullable = false)
-    private UUID productId;
-    
-    @Column(name = "company_id", nullable = false)
-    private UUID companyId;
-    
-    @Column(name = "created_by", nullable = false, length = 100)
-    private String createdBy;
+    private DraftStatus status = DraftStatus.PENDING;
     
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
     
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @Column(name = "company_id", nullable = false)
+    private UUID companyId;
 }

@@ -1,494 +1,307 @@
 package com.organixui.organixbackend.performance.service;
 
-import com.organixui.organixbackend.common.exception.BusinessException;
 import com.organixui.organixbackend.common.exception.ResourceNotFoundException;
 import com.organixui.organixbackend.common.security.SecurityUtils;
-import com.organixui.organixbackend.content.model.Content;
 import com.organixui.organixbackend.content.repository.ContentRepository;
-import com.organixui.organixbackend.performance.dto.ContentMetricsRequest;
-import com.organixui.organixbackend.performance.dto.ContentMetricsResponse;
-import com.organixui.organixbackend.performance.dto.PerformanceReportResponse;
+import com.organixui.organixbackend.performance.dto.*;
 import com.organixui.organixbackend.performance.model.ContentMetrics;
 import com.organixui.organixbackend.performance.repository.ContentMetricsRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.UUID;
 
+/**
+ * Service para operações relacionadas a performance e métricas.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@Transactional
 public class PerformanceService {
 
     private final ContentMetricsRepository contentMetricsRepository;
     private final ContentRepository contentRepository;
 
-    public ContentMetricsResponse updateMetrics(ContentMetricsRequest request) {
-        log.info("Updating metrics for content: {}", request.getContentId());
-        
+    /**
+     * Atualiza métricas de um conteúdo.
+     */
+    public ContentMetricsResponse updateContentMetrics(UUID contentId, ContentMetricsRequest request) {
         UUID companyId = SecurityUtils.getCurrentUserCompanyId();
-        String userEmail = SecurityUtils.getCurrentUserEmail();
         
-        // Verificar se o conteúdo existe e pertence à empresa
-        Content content = contentRepository.findByIdAndCompanyId(request.getContentId(), companyId)
-                .orElseThrow(() -> ResourceNotFoundException.content());
-        
-        // Validar acesso ao conteúdo
-        validateContentAccess(content, userEmail);
-        
-        // Buscar métricas existentes ou criar novas
-        ContentMetrics metrics = contentMetricsRepository.findByContentId(request.getContentId())
-                .orElseGet(() -> {
-                    ContentMetrics newMetrics = new ContentMetrics();
-                    newMetrics.setId(UUID.randomUUID());
-                    newMetrics.setContentId(request.getContentId());
-                    newMetrics.setCompanyId(companyId);
-                    newMetrics.setCreatedAt(LocalDateTime.now());
-                    return newMetrics;
-                });
-        
-        // Atualizar métricas
-        if (request.getViews() != null) {
-            metrics.setViews(request.getViews());
-        }
-        if (request.getLikes() != null) {
-            metrics.setLikes(request.getLikes());
-        }
-        if (request.getShares() != null) {
-            metrics.setShares(request.getShares());
-        }
-        if (request.getComments() != null) {
-            metrics.setComments(request.getComments());
-        }
-        if (request.getReach() != null) {
-            metrics.setReach(request.getReach());
-        }
-        if (request.getImpressions() != null) {
-            metrics.setImpressions(request.getImpressions());
-        }
-        if (request.getEngagementRate() != null) {
-            metrics.setEngagementRate(request.getEngagementRate());
-        }
-        if (request.getClickThroughRate() != null) {
-            metrics.setClickThroughRate(request.getClickThroughRate());
-        }
-        if (request.getConversionRate() != null) {
-            metrics.setConversionRate(request.getConversionRate());
-        }
-        if (request.getMetricsData() != null) {
-            metrics.setMetricsData(request.getMetricsData());
-        }
-        
-        metrics.setUpdatedAt(LocalDateTime.now());
-        
+        // Verifica se o conteúdo existe e pertence à empresa
+        contentRepository.findByIdAndCompanyId(contentId, companyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Content not found"));
+
+        // Busca ou cria métricas para o conteúdo
+        ContentMetrics metrics = contentMetricsRepository.findByContentId(contentId)
+                .orElse(new ContentMetrics());
+
+        // Atualiza as métricas
+        metrics.setContentId(contentId);
+        metrics.setViews(request.getViews());
+        metrics.setLikes(request.getLikes());
+        metrics.setReach(request.getReach());
+        metrics.setEngagement(request.getEngagement());
+        metrics.setComments(request.getComments());
+        metrics.setShares(request.getShares());
+
         ContentMetrics savedMetrics = contentMetricsRepository.save(metrics);
-        
-        log.info("Metrics updated successfully for content: {}", request.getContentId());
-        return mapToResponse(savedMetrics);
+
+        return ContentMetricsResponse.builder()
+                .id(savedMetrics.getId())
+                .contentId(savedMetrics.getContentId())
+                .views(savedMetrics.getViews())
+                .likes(savedMetrics.getLikes())
+                .reach(savedMetrics.getReach())
+                .engagement(savedMetrics.getEngagement())
+                .comments(savedMetrics.getComments())
+                .shares(savedMetrics.getShares())
+                .build();
     }
 
-    @Transactional(readOnly = true)
+    /**
+     * Obtém métricas de um conteúdo específico.
+     */
     public ContentMetricsResponse getContentMetrics(UUID contentId) {
         UUID companyId = SecurityUtils.getCurrentUserCompanyId();
-        String userEmail = SecurityUtils.getCurrentUserEmail();
         
-        // Verificar se o conteúdo existe e pertence à empresa
-        Content content = contentRepository.findByIdAndCompanyId(contentId, companyId)
-                .orElseThrow(() -> ResourceNotFoundException.content());
-        
-        // Validar acesso ao conteúdo
-        validateContentAccess(content, userEmail);
-        
+        // Verifica se o conteúdo existe e pertence à empresa
+        contentRepository.findByIdAndCompanyId(contentId, companyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Content not found"));
+
         ContentMetrics metrics = contentMetricsRepository.findByContentId(contentId)
-                .orElseThrow(() -> new BusinessException("Metrics not found for content: " + contentId));
-        
-        return mapToResponse(metrics);
+                .orElseThrow(() -> new ResourceNotFoundException("Content metrics not found"));
+
+        return ContentMetricsResponse.builder()
+                .id(metrics.getId())
+                .contentId(metrics.getContentId())
+                .views(metrics.getViews())
+                .likes(metrics.getLikes())
+                .reach(metrics.getReach())
+                .engagement(metrics.getEngagement())
+                .comments(metrics.getComments())
+                .shares(metrics.getShares())
+                .build();
     }
 
-    @Transactional(readOnly = true)
-    public Page<ContentMetricsResponse> getAllMetrics(UUID contentId, UUID productId, LocalDate startDate, LocalDate endDate, Pageable pageable) {
+    /**
+     * Obtém resumo geral de performance da empresa com filtros opcionais.
+     */
+    public PerformanceSummaryResponse getPerformanceSummary(LocalDate startDate, LocalDate endDate, String channel, String productId) {
         UUID companyId = SecurityUtils.getCurrentUserCompanyId();
-        String userEmail = SecurityUtils.getCurrentUserEmail();
+        log.debug("Fetching performance summary for company: {}", companyId);
         
-        LocalDateTime startDateTime = startDate != null ? startDate.atStartOfDay() : null;
-        LocalDateTime endDateTime = endDate != null ? endDate.atTime(LocalTime.MAX) : null;
+        // Converte LocalDate para LocalDateTime para a consulta
+        java.time.LocalDateTime startDateTime = startDate != null ? startDate.atStartOfDay() : null;
+        java.time.LocalDateTime endDateTime = endDate != null ? endDate.atTime(23, 59, 59) : null;
         
-        if (isAdmin()) {
-            // Admin vê todas as métricas da empresa
-            return contentMetricsRepository.findByCompanyIdWithFilters(companyId, contentId, productId, startDateTime, endDateTime, pageable)
-                    .map(this::mapToResponse);
-        } else {
-            // Operator vê apenas métricas dos próprios conteúdos
-            return contentMetricsRepository.findByCompanyIdAndCreatedByWithFilters(companyId, userEmail, contentId, productId, startDateTime, endDateTime, pageable)
-                    .map(this::mapToResponse);
-        }
-    }
-
-    @Transactional(readOnly = true)
-    public PerformanceReportResponse getPerformanceSummary(UUID productId, LocalDate startDate, LocalDate endDate) {
-        UUID companyId = SecurityUtils.getCurrentUserCompanyId();
-        String userEmail = SecurityUtils.getCurrentUserEmail();
-        
-        LocalDateTime startDateTime = startDate != null ? startDate.atStartOfDay() : null;
-        LocalDateTime endDateTime = endDate != null ? endDate.atTime(LocalTime.MAX) : null;
-        
-        // Buscar métricas baseado no nível de acesso
-        List<ContentMetrics> metrics;
-        if (isAdmin()) {
-            metrics = contentMetricsRepository.findMetricsForReport(companyId, productId, startDateTime, endDateTime);
-        } else {
-            metrics = contentMetricsRepository.findMetricsForReportByUser(companyId, userEmail, productId, startDateTime, endDateTime);
-        }
-        
-        PerformanceReportResponse report = new PerformanceReportResponse();
-        
-        // Calcular resumo
-        PerformanceReportResponse.PerformanceSummary summary = calculateSummary(metrics);
-        report.setSummary(summary);
-        
-        // Métricas por período
-        Map<String, Object> periodMetrics = calculatePeriodMetrics(metrics, startDate, endDate);
-        report.setPeriodMetrics(periodMetrics);
-        
-        // Comparação com período anterior
-        Map<String, Object> comparison = calculateComparison(companyId, userEmail, productId, startDate, endDate);
-        report.setComparison(comparison);
-        
-        // Top conteúdos
-        Map<String, Object> topContent = calculateTopContent(metrics);
-        report.setTopContent(topContent);
-        
-        return report;
-    }
-
-    @Transactional(readOnly = true)
-    public List<ContentMetricsResponse> getTopPerformingContent(String metric, int limit, UUID productId, LocalDate startDate, LocalDate endDate) {
-        UUID companyId = SecurityUtils.getCurrentUserCompanyId();
-        String userEmail = SecurityUtils.getCurrentUserEmail();
-        
-        LocalDateTime startDateTime = startDate != null ? startDate.atStartOfDay() : null;
-        LocalDateTime endDateTime = endDate != null ? endDate.atTime(LocalTime.MAX) : null;
-        
-        Pageable pageable = PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, metric));
-        
-        Page<ContentMetrics> metricsPage;
-        if (isAdmin()) {
-            metricsPage = contentMetricsRepository.findByCompanyIdWithFilters(companyId, null, productId, startDateTime, endDateTime, pageable);
-        } else {
-            metricsPage = contentMetricsRepository.findByCompanyIdAndCreatedByWithFilters(companyId, userEmail, null, productId, startDateTime, endDateTime, pageable);
-        }
-        
-        return metricsPage.getContent().stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
-    }
-
-    @Transactional(readOnly = true)
-    public Map<String, Object> getEngagementAnalytics(UUID productId, LocalDate startDate, LocalDate endDate, String period) {
-        UUID companyId = SecurityUtils.getCurrentUserCompanyId();
-        String userEmail = SecurityUtils.getCurrentUserEmail();
-        
-        LocalDateTime startDateTime = startDate != null ? startDate.atStartOfDay() : LocalDateTime.now().minusDays(30);
-        LocalDateTime endDateTime = endDate != null ? endDate.atTime(LocalTime.MAX) : LocalDateTime.now();
-        
-        List<ContentMetrics> metrics;
-        if (isAdmin()) {
-            metrics = contentMetricsRepository.findMetricsForReport(companyId, productId, startDateTime, endDateTime);
-        } else {
-            metrics = contentMetricsRepository.findMetricsForReportByUser(companyId, userEmail, productId, startDateTime, endDateTime);
-        }
-        
-        Map<String, Object> analytics = new HashMap<>();
-        
-        // Agrupar por período
-        Map<String, List<ContentMetrics>> groupedMetrics = groupMetricsByPeriod(metrics, period);
-        
-        // Calcular médias de engajamento por período
-        Map<String, Double> engagementByPeriod = groupedMetrics.entrySet().stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        entry -> entry.getValue().stream()
-                                .mapToDouble(m -> m.getEngagementRate() != null ? m.getEngagementRate() : 0.0)
-                                .average()
-                                .orElse(0.0)
-                ));
-        
-        analytics.put("engagementByPeriod", engagementByPeriod);
-        analytics.put("totalMetrics", metrics.size());
-        analytics.put("averageEngagement", metrics.stream()
-                .mapToDouble(m -> m.getEngagementRate() != null ? m.getEngagementRate() : 0.0)
-                .average()
-                .orElse(0.0));
-        
-        return analytics;
-    }
-
-    @Transactional(readOnly = true)
-    public Map<String, Object> getPerformanceTrends(UUID productId, LocalDate startDate, LocalDate endDate, String metric) {
-        UUID companyId = SecurityUtils.getCurrentUserCompanyId();
-        String userEmail = SecurityUtils.getCurrentUserEmail();
-        
-        LocalDateTime startDateTime = startDate != null ? startDate.atStartOfDay() : LocalDateTime.now().minusDays(30);
-        LocalDateTime endDateTime = endDate != null ? endDate.atTime(LocalTime.MAX) : LocalDateTime.now();
-        
-        List<ContentMetrics> metrics;
-        if (isAdmin()) {
-            metrics = contentMetricsRepository.findMetricsForReport(companyId, productId, startDateTime, endDateTime);
-        } else {
-            metrics = contentMetricsRepository.findMetricsForReportByUser(companyId, userEmail, productId, startDateTime, endDateTime);
-        }
-        
-        Map<String, Object> trends = new HashMap<>();
-        
-        // Agrupar por dia e calcular trend
-        Map<LocalDate, Double> dailyValues = metrics.stream()
-                .collect(Collectors.groupingBy(
-                        m -> m.getUpdatedAt().toLocalDate(),
-                        Collectors.averagingDouble(m -> getMetricValue(m, metric))
-                ));
-        
-        trends.put("dailyTrends", dailyValues);
-        trends.put("metric", metric);
-        trends.put("period", Map.of("start", startDate, "end", endDate));
-        
-        return trends;
-    }
-
-    @Transactional(readOnly = true)
-    public Map<String, Object> getDashboardData(UUID productId) {
-        UUID companyId = SecurityUtils.getCurrentUserCompanyId();
-        String userEmail = SecurityUtils.getCurrentUserEmail();
-        
-        LocalDateTime last30Days = LocalDateTime.now().minusDays(30);
-        
-        List<ContentMetrics> metrics;
-        if (isAdmin()) {
-            metrics = contentMetricsRepository.findMetricsForReport(companyId, productId, last30Days, LocalDateTime.now());
-        } else {
-            metrics = contentMetricsRepository.findMetricsForReportByUser(companyId, userEmail, productId, last30Days, LocalDateTime.now());
-        }
-        
-        Map<String, Object> dashboard = new HashMap<>();
-        
-        // KPIs principais
-        dashboard.put("totalViews", metrics.stream().mapToLong(m -> m.getViews() != null ? m.getViews() : 0).sum());
-        dashboard.put("totalLikes", metrics.stream().mapToLong(m -> m.getLikes() != null ? m.getLikes() : 0).sum());
-        dashboard.put("totalShares", metrics.stream().mapToLong(m -> m.getShares() != null ? m.getShares() : 0).sum());
-        dashboard.put("totalComments", metrics.stream().mapToLong(m -> m.getComments() != null ? m.getComments() : 0).sum());
-        dashboard.put("averageEngagement", metrics.stream()
-                .mapToDouble(m -> m.getEngagementRate() != null ? m.getEngagementRate() : 0.0)
-                .average()
-                .orElse(0.0));
-        
-        // Conteúdo mais popular
-        dashboard.put("topContent", metrics.stream()
-                .sorted((a, b) -> Long.compare(
-                        b.getViews() != null ? b.getViews() : 0,
-                        a.getViews() != null ? a.getViews() : 0))
-                .limit(5)
-                .map(this::mapToResponse)
-                .collect(Collectors.toList()));
-        
-        return dashboard;
-    }
-
-    public void deleteContentMetrics(UUID contentId) {
-        log.info("Deleting metrics for content: {}", contentId);
-        
-        UUID companyId = SecurityUtils.getCurrentUserCompanyId();
-        
-        // Verificar se o conteúdo existe e pertence à empresa
-        Content content = contentRepository.findByIdAndCompanyId(contentId, companyId)
-                .orElseThrow(() -> ResourceNotFoundException.content());
-        
-        contentMetricsRepository.deleteByContentId(contentId);
-        
-        log.info("Metrics deleted successfully for content: {}", contentId);
-    }
-
-    public List<ContentMetricsResponse> bulkUpdateMetrics(List<ContentMetricsRequest> requests) {
-        log.info("Bulk updating metrics for {} contents", requests.size());
-        
-        List<ContentMetricsResponse> responses = new ArrayList<>();
-        
-        for (ContentMetricsRequest request : requests) {
+        // Converte productId string para UUID se fornecido
+        UUID productUuid = null;
+        if (productId != null && !productId.trim().isEmpty()) {
             try {
-                ContentMetricsResponse response = updateMetrics(request);
-                responses.add(response);
-            } catch (Exception e) {
-                log.error("Error updating metrics for content: {}", request.getContentId(), e);
-                // Continuar com os próximos mesmo se houver erro
+                productUuid = UUID.fromString(productId);
+            } catch (IllegalArgumentException e) {
+                log.warn("Invalid productId format: {}", productId);
+                // Continua com productUuid = null, que fará a query ignorar o filtro
             }
         }
         
-        log.info("Bulk update completed. {} out of {} successful", responses.size(), requests.size());
-        return responses;
-    }
-
-    private void validateContentAccess(Content content, String userEmail) {
-        if (!isAdmin() && !content.getCreatedBy().equals(userEmail)) {
-            throw new BusinessException("Access denied to this content");
+        // Busca métricas agregadas do banco de dados
+        Object[] result = contentMetricsRepository.findAggregatedMetrics(
+            companyId, startDateTime, endDateTime, channel, productUuid);
+        
+        if (result == null || result.length < 6) {
+            // Retorna valores zerados se não houver dados
+            return PerformanceSummaryResponse.builder()
+                    .totalViews(0L)
+                    .totalLikes(0L)
+                    .totalComments(0L)
+                    .totalShares(0L)
+                    .averageEngagementRate(0.0)
+                    .totalReach(0L)
+                    .build();
         }
+        
+        // Extrai os resultados da consulta
+        Long totalViews = result[0] != null ? ((Number) result[0]).longValue() : 0L;
+        Long totalLikes = result[1] != null ? ((Number) result[1]).longValue() : 0L;
+        Long totalComments = result[2] != null ? ((Number) result[2]).longValue() : 0L;
+        Long totalShares = result[3] != null ? ((Number) result[3]).longValue() : 0L;
+        Long totalReach = result[4] != null ? ((Number) result[4]).longValue() : 0L;
+        Double averageEngagementRate = result[5] != null ? ((Number) result[5]).doubleValue() : 0.0;
+        
+        return PerformanceSummaryResponse.builder()
+                .totalViews(totalViews)
+                .totalLikes(totalLikes)
+                .totalComments(totalComments)
+                .totalShares(totalShares)
+                .averageEngagementRate(averageEngagementRate)
+                .totalReach(totalReach)
+                .build();
     }
 
-    private boolean isAdmin() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .anyMatch(role -> role.equals("ADMIN"));
+    /**
+     * Obtém performance por canal.
+     */
+    public List<ChannelPerformanceResponse> getChannelPerformance() {
+        UUID companyId = SecurityUtils.getCurrentUserCompanyId();
+        log.debug("Fetching channel performance for company: {}", companyId);
+        
+        // Busca performance por canal do banco de dados
+        List<Object[]> results = contentMetricsRepository.findChannelPerformance(companyId);
+        
+        return results.stream().map(result -> {
+            String channelName = (String) result[0];
+            Long totalPosts = result[1] != null ? ((Number) result[1]).longValue() : 0L;
+            Long totalViews = result[2] != null ? ((Number) result[2]).longValue() : 0L;
+            Long totalLikes = result[3] != null ? ((Number) result[3]).longValue() : 0L;
+            Long totalComments = result[4] != null ? ((Number) result[4]).longValue() : 0L;
+            Long totalShares = result[5] != null ? ((Number) result[5]).longValue() : 0L;
+            Double engagementRate = result[6] != null ? ((Number) result[6]).doubleValue() : 0.0;
+            Double averageReach = result[7] != null ? ((Number) result[7]).doubleValue() : 0.0;
+            
+            return ChannelPerformanceResponse.builder()
+                    .channelName(channelName)
+                    .totalPosts(totalPosts)
+                    .totalViews(totalViews)
+                    .totalLikes(totalLikes)
+                    .totalComments(totalComments)
+                    .totalShares(totalShares)
+                    .engagementRate(engagementRate)
+                    .averageReach(averageReach)
+                    .build();
+        }).collect(java.util.stream.Collectors.toList());
     }
 
-    private PerformanceReportResponse.PerformanceSummary calculateSummary(List<ContentMetrics> metrics) {
-        PerformanceReportResponse.PerformanceSummary summary = new PerformanceReportResponse.PerformanceSummary();
+    /**
+     * Obtém top conteúdos por performance com filtros opcionais (sem paginação).
+     */
+    public List<TopContentResponse> getTopContent(LocalDate startDate, LocalDate endDate, String channel, String productId) {
+        UUID companyId = SecurityUtils.getCurrentUserCompanyId();
+        log.debug("Fetching top content for company: {}", companyId);
         
-        summary.setTotalViews(metrics.stream().mapToLong(m -> m.getViews() != null ? m.getViews() : 0).sum());
-        summary.setTotalLikes(metrics.stream().mapToLong(m -> m.getLikes() != null ? m.getLikes() : 0).sum());
-        summary.setTotalShares(metrics.stream().mapToLong(m -> m.getShares() != null ? m.getShares() : 0).sum());
-        summary.setTotalComments(metrics.stream().mapToLong(m -> m.getComments() != null ? m.getComments() : 0).sum());
-        summary.setTotalReach(metrics.stream().mapToLong(m -> m.getReach() != null ? m.getReach() : 0).sum());
-        summary.setTotalImpressions(metrics.stream().mapToLong(m -> m.getImpressions() != null ? m.getImpressions() : 0).sum());
+        // Converte LocalDate para LocalDateTime para a consulta
+        java.time.LocalDateTime startDateTime = startDate != null ? startDate.atStartOfDay() : null;
+        java.time.LocalDateTime endDateTime = endDate != null ? endDate.atTime(23, 59, 59) : null;
         
-        summary.setAverageEngagementRate(metrics.stream()
-                .mapToDouble(m -> m.getEngagementRate() != null ? m.getEngagementRate() : 0.0)
-                .average()
-                .orElse(0.0));
-        
-        summary.setAverageClickThroughRate(metrics.stream()
-                .mapToDouble(m -> m.getClickThroughRate() != null ? m.getClickThroughRate() : 0.0)
-                .average()
-                .orElse(0.0));
-        
-        summary.setAverageConversionRate(metrics.stream()
-                .mapToDouble(m -> m.getConversionRate() != null ? m.getConversionRate() : 0.0)
-                .average()
-                .orElse(0.0));
-        
-        summary.setTotalContent((long) metrics.size());
-        
-        return summary;
-    }
-
-    private Map<String, Object> calculatePeriodMetrics(List<ContentMetrics> metrics, LocalDate startDate, LocalDate endDate) {
-        Map<String, Object> periodMetrics = new HashMap<>();
-        
-        // Agrupar por dia
-        Map<LocalDate, List<ContentMetrics>> dailyMetrics = metrics.stream()
-                .collect(Collectors.groupingBy(m -> m.getUpdatedAt().toLocalDate()));
-        
-        periodMetrics.put("daily", dailyMetrics.entrySet().stream()
-                .collect(Collectors.toMap(
-                        entry -> entry.getKey().toString(),
-                        entry -> calculateSummary(entry.getValue())
-                )));
-        
-        return periodMetrics;
-    }
-
-    private Map<String, Object> calculateComparison(UUID companyId, String userEmail, UUID productId, LocalDate startDate, LocalDate endDate) {
-        // Implementação simplificada - pode ser expandida
-        Map<String, Object> comparison = new HashMap<>();
-        comparison.put("previousPeriod", "Not implemented yet");
-        return comparison;
-    }
-
-    private Map<String, Object> calculateTopContent(List<ContentMetrics> metrics) {
-        Map<String, Object> topContent = new HashMap<>();
-        
-        // Top por visualizações
-        topContent.put("byViews", metrics.stream()
-                .sorted((a, b) -> Long.compare(
-                        b.getViews() != null ? b.getViews() : 0,
-                        a.getViews() != null ? a.getViews() : 0))
-                .limit(5)
-                .map(this::mapToResponse)
-                .collect(Collectors.toList()));
-        
-        // Top por engajamento
-        topContent.put("byEngagement", metrics.stream()
-                .sorted((a, b) -> Double.compare(
-                        b.getEngagementRate() != null ? b.getEngagementRate() : 0.0,
-                        a.getEngagementRate() != null ? a.getEngagementRate() : 0.0))
-                .limit(5)
-                .map(this::mapToResponse)
-                .collect(Collectors.toList()));
-        
-        return topContent;
-    }
-
-    private Map<String, List<ContentMetrics>> groupMetricsByPeriod(List<ContentMetrics> metrics, String period) {
-        switch (period.toLowerCase()) {
-            case "daily":
-                return metrics.stream()
-                        .collect(Collectors.groupingBy(m -> m.getUpdatedAt().toLocalDate().toString()));
-            case "weekly":
-                return metrics.stream()
-                        .collect(Collectors.groupingBy(m -> getWeekOfYear(m.getUpdatedAt())));
-            case "monthly":
-                return metrics.stream()
-                        .collect(Collectors.groupingBy(m -> m.getUpdatedAt().getYear() + "-" + m.getUpdatedAt().getMonthValue()));
-            default:
-                return metrics.stream()
-                        .collect(Collectors.groupingBy(m -> m.getUpdatedAt().toLocalDate().toString()));
+        // Converte productId string para UUID se fornecido
+        UUID productUuid = null;
+        if (productId != null && !productId.trim().isEmpty()) {
+            try {
+                productUuid = UUID.fromString(productId);
+            } catch (IllegalArgumentException e) {
+                log.warn("Invalid productId format: {}", productId);
+            }
         }
+        
+        // Busca top conteúdos do banco de dados
+        List<Object[]> results = contentMetricsRepository.findTopContent(
+            companyId, startDateTime, endDateTime, channel, productUuid);
+        
+        return results.stream().map(result -> {
+            String contentId = result[0] != null ? result[0].toString() : "";
+            String contentName = (String) result[1];
+            String contentType = (String) result[2];
+            String contentProductId = result[3] != null ? result[3].toString() : null;
+            String productName = (String) result[4];
+            String channelName = (String) result[5];
+            Long totalViews = result[6] != null ? ((Number) result[6]).longValue() : 0L;
+            Long totalLikes = result[7] != null ? ((Number) result[7]).longValue() : 0L;
+            Long totalComments = result[8] != null ? ((Number) result[8]).longValue() : 0L;
+            Long totalShares = result[9] != null ? ((Number) result[9]).longValue() : 0L;
+            Double engagementRate = result[10] != null ? ((Number) result[10]).doubleValue() : 0.0;
+            String publishDate = result[11] != null ? result[11].toString() : "";
+            Double performanceScore = result[12] != null ? ((Number) result[12]).doubleValue() : 0.0;
+            
+            return TopContentResponse.builder()
+                    .contentId(contentId)
+                    .contentName(contentName)
+                    .contentType(contentType)
+                    .productId(contentProductId)
+                    .productName(productName)
+                    .channel(channelName)
+                    .totalViews(totalViews)
+                    .totalLikes(totalLikes)
+                    .totalComments(totalComments)
+                    .totalShares(totalShares)
+                    .engagementRate(engagementRate)
+                    .publishDate(publishDate)
+                    .performanceScore(performanceScore)
+                    .build();
+        }).collect(java.util.stream.Collectors.toList());
     }
 
-    private String getWeekOfYear(LocalDateTime dateTime) {
-        // Implementação simplificada
-        return dateTime.getYear() + "-W" + ((dateTime.getDayOfYear() / 7) + 1);
-    }
-
-    private double getMetricValue(ContentMetrics metrics, String metric) {
-        switch (metric.toLowerCase()) {
-            case "views":
-                return metrics.getViews() != null ? metrics.getViews().doubleValue() : 0.0;
-            case "likes":
-                return metrics.getLikes() != null ? metrics.getLikes().doubleValue() : 0.0;
-            case "shares":
-                return metrics.getShares() != null ? metrics.getShares().doubleValue() : 0.0;
-            case "comments":
-                return metrics.getComments() != null ? metrics.getComments().doubleValue() : 0.0;
-            case "engagementrate":
-                return metrics.getEngagementRate() != null ? metrics.getEngagementRate() : 0.0;
-            case "reach":
-                return metrics.getReach() != null ? metrics.getReach().doubleValue() : 0.0;
-            case "impressions":
-                return metrics.getImpressions() != null ? metrics.getImpressions().doubleValue() : 0.0;
-            default:
-                return 0.0;
+    /**
+     * Obtém top conteúdos por performance com filtros opcionais.
+     */
+    public Page<TopContentResponse> getTopContent(Pageable pageable, LocalDate startDate, LocalDate endDate, String channel, String productId) {
+        UUID companyId = SecurityUtils.getCurrentUserCompanyId();
+        log.debug("Fetching top content for company: {}", companyId);
+        
+        // Converte LocalDate para LocalDateTime para a consulta
+        java.time.LocalDateTime startDateTime = startDate != null ? startDate.atStartOfDay() : null;
+        java.time.LocalDateTime endDateTime = endDate != null ? endDate.atTime(23, 59, 59) : null;
+        
+        // Converte productId string para UUID se fornecido
+        UUID productUuid = null;
+        if (productId != null && !productId.trim().isEmpty()) {
+            try {
+                productUuid = UUID.fromString(productId);
+            } catch (IllegalArgumentException e) {
+                log.warn("Invalid productId format: {}", productId);
+            }
         }
-    }
-
-    private ContentMetricsResponse mapToResponse(ContentMetrics metrics) {
-        ContentMetricsResponse response = new ContentMetricsResponse();
-        response.setId(metrics.getId());
-        response.setContentId(metrics.getContentId());
-        response.setCompanyId(metrics.getCompanyId());
-        response.setViews(metrics.getViews());
-        response.setLikes(metrics.getLikes());
-        response.setShares(metrics.getShares());
-        response.setComments(metrics.getComments());
-        response.setEngagementRate(metrics.getEngagementRate());
-        response.setReach(metrics.getReach());
-        response.setImpressions(metrics.getImpressions());
-        response.setClickThroughRate(metrics.getClickThroughRate());
-        response.setConversionRate(metrics.getConversionRate());
-        response.setMetricsData(metrics.getMetricsData());
-        response.setCreatedAt(metrics.getCreatedAt());
-        response.setUpdatedAt(metrics.getUpdatedAt());
-        return response;
+        
+        // Busca top conteúdos do banco de dados
+        List<Object[]> results = contentMetricsRepository.findTopContent(
+            companyId, startDateTime, endDateTime, channel, productUuid);
+        
+        List<TopContentResponse> content = results.stream().map(result -> {
+            String contentId = result[0] != null ? result[0].toString() : "";
+            String contentName = (String) result[1];
+            String contentType = (String) result[2];
+            String contentProductId = result[3] != null ? result[3].toString() : null;
+            String productName = (String) result[4];
+            String channelName = (String) result[5];
+            Long totalViews = result[6] != null ? ((Number) result[6]).longValue() : 0L;
+            Long totalLikes = result[7] != null ? ((Number) result[7]).longValue() : 0L;
+            Long totalComments = result[8] != null ? ((Number) result[8]).longValue() : 0L;
+            Long totalShares = result[9] != null ? ((Number) result[9]).longValue() : 0L;
+            Double engagementRate = result[10] != null ? ((Number) result[10]).doubleValue() : 0.0;
+            String publishDate = result[11] != null ? result[11].toString() : "";
+            Double performanceScore = result[12] != null ? ((Number) result[12]).doubleValue() : 0.0;
+            
+            return TopContentResponse.builder()
+                    .contentId(contentId)
+                    .contentName(contentName)
+                    .contentType(contentType)
+                    .productId(contentProductId)
+                    .productName(productName)
+                    .channel(channelName)
+                    .totalViews(totalViews)
+                    .totalLikes(totalLikes)
+                    .totalComments(totalComments)
+                    .totalShares(totalShares)
+                    .engagementRate(engagementRate)
+                    .publishDate(publishDate)
+                    .performanceScore(performanceScore)
+                    .build();
+        }).collect(java.util.stream.Collectors.toList());
+        
+        // Aplica paginação manual já que a query não suporta Pageable diretamente
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), content.size());
+        
+        List<TopContentResponse> paginatedContent = start >= content.size() ? 
+            java.util.Collections.emptyList() : 
+            content.subList(start, end);
+        
+        return new PageImpl<>(paginatedContent, pageable, content.size());
     }
 }

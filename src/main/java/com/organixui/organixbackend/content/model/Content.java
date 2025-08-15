@@ -4,18 +4,12 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Entidade que representa conteúdo publicado.
- * Conteúdo é criado a partir de rascunhos aprovados.
- */
 @Entity
 @Table(name = "content")
 @Data
@@ -24,48 +18,49 @@ import java.util.UUID;
 public class Content {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(updatable = false, nullable = false)
     private UUID id;
     
-    @Column(nullable = false, length = 200)
-    private String title;
+    @Column(nullable = false)
+    private String name;
     
-    @Column(length = 500)
-    private String description;
+    @Column(nullable = false)
+    private String type;
     
-    @Column(columnDefinition = "TEXT")
-    private String content;
-    
-    @Column(name = "product_id", nullable = false)
+    @Column(name = "product_id")
     private UUID productId;
+    
+    @Column(name = "creator_id", nullable = false)
+    private UUID creatorId;
+    
+    @Column(name = "producer_id")
+    private UUID producerId;
     
     @Column(name = "company_id", nullable = false)
     private UUID companyId;
     
-    @Column(name = "created_by", nullable = false, length = 100)
-    private String createdBy;
-    
-    @Column(name = "draft_id")
-    private UUID draftId;
-    
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "channels", columnDefinition = "JSON")
-    private List<String> channels;
-    
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private ContentStatus status = ContentStatus.DRAFT;
+    @Column(nullable = false)
+    private ContentStatus status;
     
-    @Column(name = "published_at")
-    private LocalDateTime publishedAt;
+    @Column(name = "creation_date", nullable = false)
+    private LocalDateTime creationDate;
     
-    @Column(name = "scheduled_date")
-    private LocalDateTime scheduledDate;
+    @Column(name = "post_date")
+    private LocalDateTime postDate;
     
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "content_channels",
+        joinColumns = @JoinColumn(name = "content_id"),
+        inverseJoinColumns = @JoinColumn(name = "channel_id")
+    )
+    private List<Channel> channels;
     
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @PrePersist
+    protected void onCreate() {
+        creationDate = LocalDateTime.now();
+    }
 }

@@ -9,8 +9,6 @@ import com.organixui.organixbackend.draft.dto.UpdateDraftRequest;
 import com.organixui.organixbackend.draft.model.Draft;
 import com.organixui.organixbackend.draft.model.DraftStatus;
 import com.organixui.organixbackend.draft.repository.DraftRepository;
-import com.organixui.organixbackend.product.model.Product;
-import com.organixui.organixbackend.product.repository.ProductRepository;
 import com.organixui.organixbackend.user.model.AdminType;
 import com.organixui.organixbackend.user.model.User;
 import com.organixui.organixbackend.user.repository.UserRepository;
@@ -31,42 +29,33 @@ import java.util.stream.Collectors;
 public class DraftService {
     
     private final DraftRepository draftRepository;
-    private final ProductRepository productRepository;
     private final UserRepository userRepository;
-    
+
     /**
      * Lista rascunhos baseado no role do usuário.
      * ADMIN: vê todos os rascunhos da empresa
      * OPERATOR: vê apenas seus próprios rascunhos
      */
-    public List<DraftResponse> getAllDrafts(String status, UUID productId) {
+    public List<DraftResponse> getAllDrafts(String status) {
         UUID companyId = SecurityUtils.getCurrentUserCompanyId();
+        UUID currentUserId = SecurityUtils.getCurrentUserId();
         User currentUser = getCurrentUser();
         
         List<Draft> drafts;
         
         if (currentUser.getAdminType() == AdminType.ADMIN) {
             // Admin vê todos os rascunhos da empresa
-            if (status != null && productId != null) {
-                drafts = draftRepository.findByStatusAndProductIdAndCompanyId(DraftStatus.valueOf(status.toUpperCase()), productId, companyId);
-            } else if (status != null) {
+            if (status != null) {
                 drafts = draftRepository.findByStatusAndCompanyId(DraftStatus.valueOf(status.toUpperCase()), companyId);
-            } else if (productId != null) {
-                drafts = draftRepository.findByProductIdAndCompanyId(productId, companyId);
             } else {
                 drafts = draftRepository.findByCompanyId(companyId);
             }
         } else {
             // Operator vê apenas seus próprios rascunhos
-            String currentUsername = SecurityUtils.getCurrentUsername();
-            if (status != null && productId != null) {
-                drafts = draftRepository.findByStatusAndProductIdAndCreatedByAndCompanyId(DraftStatus.valueOf(status.toUpperCase()), productId, currentUsername, companyId);
-            } else if (status != null) {
-                drafts = draftRepository.findByStatusAndCreatedByAndCompanyId(DraftStatus.valueOf(status.toUpperCase()), currentUsername, companyId);
-            } else if (productId != null) {
-                drafts = draftRepository.findByProductIdAndCreatedByAndCompanyId(productId, currentUsername, companyId);
+            if (status != null) {
+                drafts = draftRepository.findByStatusAndCreatorId(DraftStatus.valueOf(status.toUpperCase()), currentUserId);
             } else {
-                drafts = draftRepository.findByCreatedByAndCompanyId(currentUsername, companyId);
+                drafts = draftRepository.findByCreatorId(currentUserId);
             }
         }
         
@@ -74,204 +63,146 @@ public class DraftService {
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
     }
-    
+
     /**
-     * Busca rascunho por ID com verificação de permissão.
+     * Obtém um rascunho específico pelo ID.
+     * Valida se o usuário tem permissão para ver o rascunho.
      */
     public DraftResponse getDraftById(UUID id) {
         UUID companyId = SecurityUtils.getCurrentUserCompanyId();
         Draft draft = draftRepository.findByIdAndCompanyId(id, companyId)
-                .orElseThrow(() -> ResourceNotFoundException.draft(id.toString()));
+                .orElseThrow(() -> new ResourceNotFoundException("Rascunho não encontrado"));
         
-        // Verifica se o usuário tem permissão para ver este rascunho
-        validateDraftAccess(draft);
+        validateUserCanAccessDraft(draft);
         
         return convertToResponse(draft);
     }
-    
+
     /**
      * Cria um novo rascunho.
      */
     @Transactional
     public DraftResponse createDraft(CreateDraftRequest request) {
+        UUID currentUserId = SecurityUtils.getCurrentUserId();
         UUID companyId = SecurityUtils.getCurrentUserCompanyId();
-        User currentUser = SecurityUtils.getCurrentUser();
-        
-        // Verificar se o produto existe e pertence à empresa
-        productRepository.findByIdAndCompanyId(request.getProductId(), companyId)
-                .orElseThrow(() -> ResourceNotFoundException.product());
         
         Draft draft = new Draft();
-        draft.setTitle(request.getTitle());
+        draft.setName(request.getName());
+        draft.setType(request.getType());
         draft.setContent(request.getContent());
-        draft.setProductId(request.getProductId());
-        draft.setCreatedBy(currentUser.getEmail());
+        draft.setCreatorId(currentUserId);
         draft.setCompanyId(companyId);
-        draft.setStatus(DraftStatus.DRAFT);
+        draft.setStatus(request.getStatus() != null ? request.getStatus() : DraftStatus.PENDING);
         
-        draft = draftRepository.save(draft);
-        return convertToResponse(draft);
+        Draft savedDraft = draftRepository.save(draft);
+        return convertToResponse(savedDraft);
     }
-    
+
     /**
      * Atualiza um rascunho existente.
+     * Apenas o criador ou admin pode atualizar.
      */
     @Transactional
     public DraftResponse updateDraft(UUID id, UpdateDraftRequest request) {
         UUID companyId = SecurityUtils.getCurrentUserCompanyId();
         Draft draft = draftRepository.findByIdAndCompanyId(id, companyId)
-                .orElseThrow(() -> ResourceNotFoundException.draft(id.toString()));
+                .orElseThrow(() -> new ResourceNotFoundException("Rascunho não encontrado"));
         
-        // Verifica se o usuário tem permissão para editar este rascunho
-        validateDraftEditAccess(draft);
+        validateUserCanModifyDraft(draft);
         
-        draft.setTitle(request.getTitle());
-        draft.setContent(request.getContent());
-        
-        // Apenas ADMIN pode alterar status via update
+        if (request.getName() != null) {
+            draft.setName(request.getName());
+        }
+        if (request.getType() != null) {
+            draft.setType(request.getType());
+        }
+        if (request.getContent() != null) {
+            draft.setContent(request.getContent());
+        }
         if (request.getStatus() != null) {
-            User currentUser = getCurrentUser();
-            if (currentUser.getAdminType() == AdminType.ADMIN) {
-                draft.setStatus(request.getStatus());
-            }
+            draft.setStatus(request.getStatus());
         }
         
-        draft = draftRepository.save(draft);
-        return convertToResponse(draft);
+        Draft savedDraft = draftRepository.save(draft);
+        return convertToResponse(savedDraft);
     }
-    
+
     /**
      * Exclui um rascunho.
+     * Apenas o criador ou admin pode excluir.
      */
     @Transactional
     public void deleteDraft(UUID id) {
         UUID companyId = SecurityUtils.getCurrentUserCompanyId();
         Draft draft = draftRepository.findByIdAndCompanyId(id, companyId)
-                .orElseThrow(() -> ResourceNotFoundException.draft(id.toString()));
+                .orElseThrow(() -> new ResourceNotFoundException("Rascunho não encontrado"));
         
-        // Verifica se o usuário tem permissão para excluir este rascunho
-        validateDraftEditAccess(draft);
+        validateUserCanModifyDraft(draft);
         
         draftRepository.delete(draft);
     }
-    
+
     /**
-     * Altera o status de um rascunho (apenas ADMIN).
+     * Valida se o usuário atual pode acessar o rascunho.
      */
-    @Transactional
-    public DraftResponse updateDraftStatus(UUID id, String status) {
-        UUID companyId = SecurityUtils.getCurrentUserCompanyId();
+    private void validateUserCanAccessDraft(Draft draft) {
+        UUID currentUserId = SecurityUtils.getCurrentUserId();
         User currentUser = getCurrentUser();
         
-        if (currentUser.getAdminType() != AdminType.ADMIN) {
-            throw new BusinessException("Apenas administradores podem alterar o status de rascunhos");
-        }
-        
-        Draft draft = draftRepository.findByIdAndCompanyId(id, companyId)
-                .orElseThrow(() -> ResourceNotFoundException.draft(id.toString()));
-        
-        try {
-            draft.setStatus(DraftStatus.valueOf(status.toUpperCase()));
-        } catch (IllegalArgumentException e) {
-            throw new BusinessException("Status inválido: " + status);
-        }
-        
-        draft = draftRepository.save(draft);
-        return convertToResponse(draft);
-    }
-    
-    /**
-     * Valida se o usuário tem acesso para visualizar o rascunho.
-     */
-    private void validateDraftAccess(Draft draft) {
-        User currentUser = getCurrentUser();
-        
-        // ADMIN pode ver todos os rascunhos da empresa
+        // Admin pode acessar qualquer rascunho da empresa
         if (currentUser.getAdminType() == AdminType.ADMIN) {
             return;
         }
         
-        // OPERATOR só pode ver seus próprios rascunhos
-        if (!draft.getCreatedBy().equals(currentUser.getEmail())) {
+        // Operator só pode acessar seus próprios rascunhos
+        if (!draft.getCreatorId().equals(currentUserId)) {
             throw new BusinessException("Você não tem permissão para acessar este rascunho");
         }
     }
-    
+
     /**
-     * Valida se o usuário tem acesso para editar/excluir o rascunho.
+     * Valida se o usuário atual pode modificar o rascunho.
      */
-    private void validateDraftEditAccess(Draft draft) {
+    private void validateUserCanModifyDraft(Draft draft) {
+        UUID currentUserId = SecurityUtils.getCurrentUserId();
         User currentUser = getCurrentUser();
         
-        // ADMIN pode editar todos os rascunhos da empresa
+        // Admin pode modificar qualquer rascunho da empresa
         if (currentUser.getAdminType() == AdminType.ADMIN) {
             return;
         }
         
-        // OPERATOR só pode editar seus próprios rascunhos
-        if (!draft.getCreatedBy().equals(currentUser.getEmail())) {
-            throw new BusinessException("Você não tem permissão para editar este rascunho");
-        }
-        
-        // Não pode editar rascunhos que já foram aprovados ou rejeitados
-        if (draft.getStatus() == DraftStatus.APPROVED) {
-            throw new BusinessException("Não é possível editar rascunhos com status " + draft.getStatus());
+        // Operator só pode modificar seus próprios rascunhos
+        if (!draft.getCreatorId().equals(currentUserId)) {
+            throw new BusinessException("Você não tem permissão para modificar este rascunho");
         }
     }
-    
+
     /**
-     * Obtém o usuário atual autenticado.
+     * Obtém o usuário atual.
      */
     private User getCurrentUser() {
-        String email = SecurityUtils.getCurrentUserEmail();
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
+        UUID currentUserId = SecurityUtils.getCurrentUserId();
+        return userRepository.findById(currentUserId)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
     }
-    
-        /**
-     * Aprova um rascunho (apenas ADMIN).
-     */
-    @Transactional
-    public DraftResponse approveDraft(UUID id) {
-        UUID companyId = SecurityUtils.getCurrentUserCompanyId();
-        User currentUser = getCurrentUser();
-        
-        if (currentUser.getAdminType() != AdminType.ADMIN) {
-            throw new BusinessException("Apenas administradores podem aprovar rascunhos");
-        }
-        
-        Draft draft = draftRepository.findByIdAndCompanyId(id, companyId)
-                .orElseThrow(() -> ResourceNotFoundException.draft(id.toString()));
-        
-        if (draft.getStatus() == DraftStatus.APPROVED) {
-            throw new BusinessException("Este rascunho já foi aprovado");
-        }
-        
-        draft.setStatus(DraftStatus.APPROVED);
-        draft = draftRepository.save(draft);
-        
-        return convertToResponse(draft);
-    }
-    
+
     /**
-     * Converte entidade Draft para DTO de resposta.
+     * Converte Draft entity para DraftResponse DTO.
      */
     private DraftResponse convertToResponse(Draft draft) {
-        Product product = productRepository.findById(draft.getProductId()).orElse(null);
-        User user = userRepository.findByEmail(draft.getCreatedBy()).orElse(null);
+        User creator = userRepository.findById(draft.getCreatorId()).orElse(null);
         
         return new DraftResponse(
                 draft.getId(),
-                draft.getTitle(),
+                draft.getName(),
+                draft.getType(),
+                draft.getCreatorId(),
+                creator != null ? creator.getName() : "Unknown",
                 draft.getContent(),
                 draft.getStatus(),
-                draft.getProductId(),
-                product != null ? product.getName() : null,
-                user != null ? user.getId() : null,
-                user != null ? user.getName() : null,
-                draft.getCompanyId(),
                 draft.getCreatedAt(),
-                draft.getUpdatedAt()
+                draft.getCompanyId()
         );
     }
 }

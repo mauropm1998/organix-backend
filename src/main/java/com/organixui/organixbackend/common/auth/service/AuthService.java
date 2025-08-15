@@ -1,6 +1,17 @@
 package com.organixui.organixbackend.common.auth.service;
 
-import com.organixui.organixbackend.common.auth.dto.*;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.organixui.organixbackend.common.auth.dto.CompanyInfoDto;
+import com.organixui.organixbackend.common.auth.dto.JwtResponse;
+import com.organixui.organixbackend.common.auth.dto.LoginRequest;
+import com.organixui.organixbackend.common.auth.dto.SignupRequest;
+import com.organixui.organixbackend.common.auth.dto.UserInfoDto;
 import com.organixui.organixbackend.common.exception.BusinessException;
 import com.organixui.organixbackend.common.security.JwtTokenProvider;
 import com.organixui.organixbackend.common.security.SecurityUtils;
@@ -9,13 +20,8 @@ import com.organixui.organixbackend.company.repository.CompanyRepository;
 import com.organixui.organixbackend.user.model.AdminType;
 import com.organixui.organixbackend.user.model.User;
 import com.organixui.organixbackend.user.repository.UserRepository;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Serviço responsável pela autenticação de usuários.

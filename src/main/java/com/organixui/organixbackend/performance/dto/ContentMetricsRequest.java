@@ -2,43 +2,45 @@ package com.organixui.organixbackend.performance.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Map;
-import java.util.UUID;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Schema(description = "Request DTO para atualização de métricas de conteúdo")
 public class ContentMetricsRequest {
 
-    @NotNull(message = "Content ID is required")
-    @Schema(description = "ID do conteúdo", example = "550e8400-e29b-41d4-a716-446655440000")
-    private UUID contentId;
-
     @Min(value = 0, message = "Views must be non-negative")
     @Schema(description = "Número de visualizações", example = "1500")
-    private Long views;
+    private Integer views;
 
     @Min(value = 0, message = "Likes must be non-negative")
     @Schema(description = "Número de curtidas", example = "150")
-    private Long likes;
-
-    @Min(value = 0, message = "Shares must be non-negative")
-    @Schema(description = "Número de compartilhamentos", example = "25")
-    private Long shares;
-
-    @Min(value = 0, message = "Comments must be non-negative")
-    @Schema(description = "Número de comentários", example = "45")
-    private Long comments;
+    private Integer likes;
 
     @Min(value = 0, message = "Reach must be non-negative")
     @Schema(description = "Alcance do conteúdo", example = "5000")
-    private Long reach;
+    private Integer reach;
+
+    @Min(value = 0, message = "Engagement must be non-negative")
+    @Schema(description = "Taxa de engajamento", example = "350")
+    private Integer engagement;
+
+    @Min(value = 0, message = "Comments must be non-negative")
+    @Schema(description = "Número de comentários", example = "45")
+    private Integer comments;
+
+    @Min(value = 0, message = "Shares must be non-negative")
+    @Schema(description = "Número de compartilhamentos", example = "25")
+    private Integer shares;
 
     @Min(value = 0, message = "Impressions must be non-negative")
     @Schema(description = "Número de impressões", example = "8000")
-    private Long impressions;
+    private Integer impressions;
 
     @Schema(description = "Taxa de engajamento (0.0 a 100.0)", example = "3.5")
     private Double engagementRate;

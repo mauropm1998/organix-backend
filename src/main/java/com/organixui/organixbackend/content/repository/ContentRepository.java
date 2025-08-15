@@ -26,19 +26,41 @@ public interface ContentRepository extends JpaRepository<Content, UUID> {
     List<Content> findByCompanyId(UUID companyId);
     
     /**
+     * Busca conteúdo por empresa ordenado por data de criação (desc).
+     */
+    List<Content> findByCompanyIdOrderByCreationDateDesc(UUID companyId);
+    
+    /**
+     * Busca conteúdo por criador ou produtor ordenado por data de criação (desc).
+     */
+    List<Content> findByCreatorIdOrProducerIdOrderByCreationDateDesc(UUID creatorId, UUID producerId);
+    
+    /**
      * Busca conteúdo por ID e empresa.
      */
     Optional<Content> findByIdAndCompanyId(UUID id, UUID companyId);
     
     /**
-     * Busca conteúdo por draft ID e empresa.
-     */
-    Optional<Content> findByDraftIdAndCompanyId(UUID draftId, UUID companyId);
-    
-    /**
      * Busca conteúdo por criador e empresa.
      */
-    List<Content> findByCreatedByAndCompanyId(String createdBy, UUID companyId);
+    List<Content> findByCreatorIdAndCompanyId(UUID creatorId, UUID companyId);
+    
+    /**
+     * Busca conteúdo por criador ou produtor e empresa.
+     */
+    @Query("SELECT c FROM Content c WHERE c.companyId = :companyId AND (c.creatorId = :creatorId OR c.producerId = :producerId)")
+    List<Content> findByCreatorIdOrProducerIdAndCompanyId(@Param("creatorId") UUID creatorId, @Param("producerId") UUID producerId, @Param("companyId") UUID companyId);
+    
+    /**
+     * Busca conteúdo por status e empresa.
+     */
+    List<Content> findByStatusAndCompanyId(ContentStatus status, UUID companyId);
+    
+    /**
+     * Busca conteúdo por status, criador ou produtor e empresa.
+     */
+    @Query("SELECT c FROM Content c WHERE c.companyId = :companyId AND c.status = :status AND (c.creatorId = :creatorId OR c.producerId = :producerId)")
+    List<Content> findByStatusAndCreatorIdOrProducerIdAndCompanyId(@Param("status") ContentStatus status, @Param("creatorId") UUID creatorId, @Param("producerId") UUID producerId, @Param("companyId") UUID companyId);
     
     /**
      * Busca conteúdo por produto e empresa.
@@ -48,8 +70,8 @@ public interface ContentRepository extends JpaRepository<Content, UUID> {
     /**
      * Busca conteúdo criado em um período específico.
      */
-    @Query("SELECT c FROM Content c WHERE c.companyId = :companyId AND c.createdAt BETWEEN :startDate AND :endDate")
-    List<Content> findByCompanyIdAndCreatedAtBetween(@Param("companyId") UUID companyId, 
+    @Query("SELECT c FROM Content c WHERE c.companyId = :companyId AND c.creationDate BETWEEN :startDate AND :endDate")
+    List<Content> findByCompanyIdAndCreationDateBetween(@Param("companyId") UUID companyId, 
                                                      @Param("startDate") LocalDateTime startDate, 
                                                      @Param("endDate") LocalDateTime endDate);
     
@@ -59,17 +81,11 @@ public interface ContentRepository extends JpaRepository<Content, UUID> {
     long countByCompanyId(UUID companyId);
     
     /**
-     * Conta conteúdo publicado por empresa.
+     * Conta conteúdo por status e empresa.
+    /**
+     * Conta conteúdo por empresa e status.
      */
     long countByCompanyIdAndStatus(UUID companyId, ContentStatus status);
-    
-    /**
-     * Conta conteúdo agendado por empresa.
-     */
-    @Query("SELECT COUNT(c) FROM Content c WHERE c.companyId = :companyId " +
-           "AND c.scheduledDate IS NOT NULL AND c.scheduledDate > :now")
-    long countByCompanyIdAndScheduledDateAfter(@Param("companyId") UUID companyId, 
-                                              @Param("now") LocalDateTime now);
     
     /**
      * Busca conteúdo por empresa - método simples.
@@ -77,43 +93,7 @@ public interface ContentRepository extends JpaRepository<Content, UUID> {
     Page<Content> findByCompanyId(UUID companyId, Pageable pageable);
     
     /**
-     * Busca conteúdo por criador e empresa - método simples.
+     * Busca conteúdo por criador ou produtor com paginação.
      */
-    Page<Content> findByCompanyIdAndCreatedBy(UUID companyId, String createdBy, Pageable pageable);
-    
-    /**
-     * Busca conteúdo com filtros complexos - para Admin.
-     */
-    @Query("SELECT c FROM Content c WHERE c.companyId = :companyId " +
-           "AND (:productId IS NULL OR c.productId = :productId) " +
-           "AND (:status IS NULL OR c.status = :status)")
-    Page<Content> findByCompanyIdWithFilters(@Param("companyId") UUID companyId,
-                                            @Param("productId") UUID productId,
-                                            @Param("status") ContentStatus status,
-                                            Pageable pageable);
-    
-    /**
-     * Busca conteúdo com filtros complexos - para Operator (apenas próprio conteúdo).
-     */
-    @Query("SELECT c FROM Content c WHERE c.companyId = :companyId " +
-           "AND c.createdBy = :createdBy " +
-           "AND (:productId IS NULL OR c.productId = :productId) " +
-           "AND (:status IS NULL OR c.status = :status)")
-    Page<Content> findByCompanyIdAndCreatedByWithFilters(@Param("companyId") UUID companyId,
-                                                        @Param("createdBy") String createdBy,
-                                                        @Param("productId") UUID productId,
-                                                        @Param("status") ContentStatus status,
-                                                        Pageable pageable);
-    
-    /**
-     * Busca conteúdo agendado.
-     */
-    @Query("SELECT c FROM Content c WHERE c.companyId = :companyId " +
-           "AND c.scheduledDate IS NOT NULL " +
-           "AND c.scheduledDate > :now " +
-           "AND (:productId IS NULL OR c.productId = :productId)")
-    Page<Content> findByCompanyIdAndScheduledDateAfter(@Param("companyId") UUID companyId,
-                                                      @Param("productId") UUID productId,
-                                                      @Param("now") LocalDateTime now,
-                                                      Pageable pageable);
+    Page<Content> findByCreatorIdOrProducerId(UUID creatorId, UUID producerId, Pageable pageable);
 }

@@ -1,47 +1,32 @@
 package com.organixui.organixbackend.content.dto;
 
 import com.organixui.organixbackend.content.model.ContentStatus;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import lombok.Data;
-
+/**
+ * DTO de request para conteúdo.
+ */
 @Data
-@Schema(description = "Request DTO para criação/atualização de conteúdo")
+@NoArgsConstructor
+@AllArgsConstructor
 public class ContentRequest {
-
-    @NotBlank(message = "Title is required")
-    @Size(min = 1, max = 200, message = "Title must be between 1 and 200 characters")
-    @Schema(description = "Título do conteúdo", example = "Novo lançamento do produto X")
-    private String title;
-
-    @Size(max = 500, message = "Description must not exceed 500 characters")
-    @Schema(description = "Descrição do conteúdo", example = "Descrição detalhada do novo produto X")
-    private String description;
-
-    @NotBlank(message = "Content is required")
-    @Size(min = 1, max = 10000, message = "Content must be between 1 and 10000 characters")
-    @Schema(description = "Conteúdo completo", example = "Texto completo do conteúdo...")
-    private String content;
-
-    @NotNull(message = "Product ID is required")
-    @Schema(description = "ID do produto relacionado", example = "550e8400-e29b-41d4-a716-446655440000")
+    private String name;
+    private String type;
     private UUID productId;
-
-    @Schema(description = "Lista de canais onde o conteúdo será publicado", example = "[\"instagram\", \"facebook\", \"twitter\"]")
-    private List<String> channels;
-
-    @Schema(description = "Status do conteúdo", example = "DRAFT")
+    
+    @Schema(description = "ID do usuário produtor (opcional, se diferente do criador)")
+    private UUID producerId;
+    
+    @Schema(description = "Status inicial do conteúdo (opcional, padrão: PENDING)")
     private ContentStatus status;
-
-    @Schema(description = "Data de publicação (apenas se status for PUBLISHED)", example = "2024-01-15T10:30:00")
-    private LocalDateTime publishedAt;
-
-    @Schema(description = "Data agendada para publicação", example = "2024-01-15T10:30:00")
-    private LocalDateTime scheduledDate;
+    
+    private LocalDateTime postDate;
+    private List<UUID> channelIds;
 }

@@ -28,7 +28,12 @@ public interface DraftRepository extends JpaRepository<Draft, UUID> {
     /**
      * Busca rascunhos por criador e empresa.
      */
-    List<Draft> findByCreatedByAndCompanyId(String createdBy, UUID companyId);
+    List<Draft> findByCreatorIdAndCompanyId(UUID creatorId, UUID companyId);
+    
+    /**
+     * Busca rascunhos por criador.
+     */
+    List<Draft> findByCreatorId(UUID creatorId);
     
     /**
      * Busca rascunhos por status e empresa.
@@ -36,29 +41,14 @@ public interface DraftRepository extends JpaRepository<Draft, UUID> {
     List<Draft> findByStatusAndCompanyId(DraftStatus status, UUID companyId);
     
     /**
-     * Busca rascunhos por produto e empresa.
+     * Busca rascunhos por status e criador.
      */
-    List<Draft> findByProductIdAndCompanyId(UUID productId, UUID companyId);
+    List<Draft> findByStatusAndCreatorId(DraftStatus status, UUID creatorId);
     
     /**
-     * Busca rascunhos por status, produto e empresa.
+     * Busca rascunhos por status, criador e empresa.
      */
-    List<Draft> findByStatusAndProductIdAndCompanyId(DraftStatus status, UUID productId, UUID companyId);
-    
-    /**
-     * Busca rascunhos por criador, status e empresa.
-     */
-    List<Draft> findByStatusAndCreatedByAndCompanyId(DraftStatus status, String createdBy, UUID companyId);
-    
-    /**
-     * Busca rascunhos por criador, produto e empresa.
-     */
-    List<Draft> findByProductIdAndCreatedByAndCompanyId(UUID productId, String createdBy, UUID companyId);
-    
-    /**
-     * Busca rascunhos por status, produto, criador e empresa.
-     */
-    List<Draft> findByStatusAndProductIdAndCreatedByAndCompanyId(DraftStatus status, UUID productId, String createdBy, UUID companyId);
+    List<Draft> findByStatusAndCreatorIdAndCompanyId(DraftStatus status, UUID creatorId, UUID companyId);
     
     /**
      * Conta total de rascunhos por empresa.

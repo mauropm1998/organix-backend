@@ -54,7 +54,7 @@ public class User implements UserDetails {
     @Column(name = "admin_type", nullable = false)
     private AdminType adminType;
     
-    @Column(name = "company_id", nullable = false, columnDefinition = "BINARY(16)")
+    @Column(name = "company_id", nullable = true)
     private UUID companyId;
     
     // Relacionamento com a empresa (lazy loading para performance)
@@ -71,6 +71,11 @@ public class User implements UserDetails {
     @Override
     public String getUsername() {
         return email;
+    }
+    
+    @Override
+    public String getPassword() {
+        return password;
     }
     
     @Override

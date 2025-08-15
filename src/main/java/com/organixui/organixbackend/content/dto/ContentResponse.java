@@ -1,7 +1,9 @@
 package com.organixui.organixbackend.content.dto;
 
 import com.organixui.organixbackend.content.model.ContentStatus;
+import com.organixui.organixbackend.performance.dto.ContentMetricsResponse;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,21 +15,22 @@ import java.util.UUID;
  * DTO de resposta para conteúdo.
  */
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ContentResponse {
     private UUID id;
-    private String title;
-    private String description;
-    private String content;
+    private String name;
+    private String type;
     private UUID productId;
-    private UUID companyId;
-    private String createdBy;
-    private UUID draftId;
-    private List<String> channels;
+    private UUID creatorId;
+    private String creatorName;
+    private LocalDateTime creationDate;
+    private LocalDateTime postDate;
+    private UUID producerId;
+    private String producerName;
     private ContentStatus status;
-    private LocalDateTime publishedAt;
-    private LocalDateTime scheduledDate;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private List<ChannelResponse> channels;
+    private UUID companyId;
+    private ContentMetricsResponse metrics;
 }

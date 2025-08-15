@@ -59,13 +59,7 @@ public class ProductService {
         
         Product product = new Product();
         product.setName(request.getName());
-        product.setDescription(request.getDescription());
         product.setCompanyId(companyId);
-        
-        // Garantir que o createdAt seja definido se não foi automaticamente
-        if (product.getCreatedAt() == null) {
-            product.setCreatedAt(LocalDateTime.now());
-        }
         
         product = productRepository.saveAndFlush(product);
         return convertToResponse(product);
@@ -81,7 +75,6 @@ public class ProductService {
                 .orElseThrow(() -> ResourceNotFoundException.product(id.toString()));
         
         product.setName(request.getName());
-        product.setDescription(request.getDescription());
         
         product = productRepository.save(product);
         return convertToResponse(product);
@@ -103,19 +96,10 @@ public class ProductService {
      * Converte uma entidade Product para DTO de resposta.
      */
     private ProductResponse convertToResponse(Product product) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        String createdAtFormatted = product.getCreatedAt() != null 
-            ? product.getCreatedAt().format(formatter) 
-            : "";
-        
         return new ProductResponse(
                 product.getId(),
                 product.getName(),
-                product.getDescription(),
-                product.getCompanyId(),
-                product.getCreatedAt(),
-                product.getUpdatedAt(),
-                createdAtFormatted
+                product.getCompanyId()
         );
     }
 }

@@ -50,17 +50,6 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
     
-    @PostMapping("/logout")
-    @Operation(summary = "Logout", description = "Realiza logout invalidando o token")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Logout realizado com sucesso")
-    })
-    public ResponseEntity<Void> logout() {
-        // Para JWT stateless, o logout é tratado no frontend removendo o token
-        // Aqui podemos implementar blacklist de tokens se necessário
-        return ResponseEntity.ok().build();
-    }
-    
     @PostMapping("/refresh")
     @Operation(summary = "Refresh Token", description = "Renova o token JWT")
     @ApiResponses(value = {

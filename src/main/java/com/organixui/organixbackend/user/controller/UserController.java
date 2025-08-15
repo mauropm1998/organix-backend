@@ -1,10 +1,8 @@
 package com.organixui.organixbackend.user.controller;
 
+import java.util.List;
 import java.util.UUID;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -46,24 +44,23 @@ public class UserController {
     
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Listar usuários", description = "Lista todos os usuários da empresa com paginação")
+    @Operation(summary = "Listar usuários", description = "Lista todos os usuários da empresa")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Lista de usuários retornada com sucesso"),
-        @ApiResponse(responseCode = "403", description = "Acesso negado - apenas administradores podem listar usuários")
+        @ApiResponse(responseCode = "403", description = "Acesso negado - apenas administradores")
     })
-    public ResponseEntity<Page<UserResponse>> getAllUsers(
-            @PageableDefault(size = 20) Pageable pageable) {
-        Page<UserResponse> users = userService.getAllUsers(pageable);
+    public ResponseEntity<List<UserResponse>> getAllUsers() {
+        List<UserResponse> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
     }
     
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or principal.id == #id")
-    @Operation(summary = "Buscar usuário por ID", description = "Busca um usuário específico por ID")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Obter usuário", description = "Obtém um usuário específico pelo ID")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Usuário encontrado"),
         @ApiResponse(responseCode = "404", description = "Usuário não encontrado"),
-        @ApiResponse(responseCode = "403", description = "Acesso negado - usuários só podem ver seus próprios dados")
+        @ApiResponse(responseCode = "403", description = "Acesso negado - apenas administradores")
     })
     public ResponseEntity<UserResponse> getUserById(
             @Parameter(description = "ID do usuário") @PathVariable UUID id) {
@@ -86,29 +83,28 @@ public class UserController {
     }
     
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or principal.id == #id")
-    @Operation(summary = "Atualizar usuário", description = "Atualiza os dados de um usuário existente")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Atualizar usuário", description = "Atualiza um usuário existente")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Usuário atualizado com sucesso"),
-        @ApiResponse(responseCode = "400", description = "Dados inválidos ou email já em uso"),
         @ApiResponse(responseCode = "404", description = "Usuário não encontrado"),
-        @ApiResponse(responseCode = "403", description = "Acesso negado - usuários só podem atualizar seus próprios dados")
+        @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+        @ApiResponse(responseCode = "403", description = "Acesso negado - apenas administradores")
     })
     public ResponseEntity<UserResponse> updateUser(
             @Parameter(description = "ID do usuário") @PathVariable UUID id,
-            @Parameter(description = "Novos dados do usuário") @Valid @RequestBody UpdateUserRequest request) {
+            @Parameter(description = "Dados para atualização") @Valid @RequestBody UpdateUserRequest request) {
         UserResponse user = userService.updateUser(id, request);
         return ResponseEntity.ok(user);
     }
     
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Excluir usuário", description = "Exclui um usuário da empresa")
+    @Operation(summary = "Excluir usuário", description = "Exclui um usuário")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "204", description = "Usuário excluído com sucesso"),
         @ApiResponse(responseCode = "404", description = "Usuário não encontrado"),
-        @ApiResponse(responseCode = "400", description = "Não é possível excluir o administrador da empresa"),
-        @ApiResponse(responseCode = "403", description = "Acesso negado - apenas administradores podem excluir usuários")
+        @ApiResponse(responseCode = "403", description = "Acesso negado - apenas administradores")
     })
     public ResponseEntity<Void> deleteUser(
             @Parameter(description = "ID do usuário") @PathVariable UUID id) {

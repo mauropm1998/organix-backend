@@ -23,6 +23,5 @@ public class CompanyStatsResponse {
     private long pendingDrafts;
     private long approvedDrafts;
     private long totalContent;
-    private long publishedContent;
-    private long scheduledContent;
+    private long postedContent;
 }

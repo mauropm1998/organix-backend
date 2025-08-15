@@ -16,11 +16,6 @@ import java.util.UUID;
 public class CompanyResponse {
     private UUID id;
     private String name;
-    private String industry;
-    private String size;
-    private String website;
-    private String description;
     private UUID adminId;
     private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 }
