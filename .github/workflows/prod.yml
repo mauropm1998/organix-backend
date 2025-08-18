@@ -35,5 +35,5 @@ jobs:
     steps:
       - name: Running image using Docker Swarm through SSH
         run: |
-          cd /opt/organix.ss-cloud.co/
+          cd /opt/app.organix.agency/
           docker stack deploy -d -c docker-compose.yml organix
