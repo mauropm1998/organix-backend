@@ -16,4 +16,4 @@ application:
   uploads:
     path: /app/data
   backend:
-    url: https://organix.ss-cloud.co
+    url: https://app.organix.agency
