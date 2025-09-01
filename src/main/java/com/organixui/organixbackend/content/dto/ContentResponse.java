@@ -22,6 +22,7 @@ public class ContentResponse {
     private UUID id;
     private String name;
     private String type;
+    private String content;
     private UUID productId;
     private UUID creatorId;
     private String creatorName;

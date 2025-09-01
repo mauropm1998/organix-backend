@@ -19,6 +19,7 @@ import java.util.UUID;
 public class ContentRequest {
     private String name;
     private String type;
+    private String content;
     private UUID productId;
     
     @Schema(description = "ID do usuário produtor (opcional, se diferente do criador)")

@@ -1,1 +1,0 @@
-import{G as s}from"./index-krPxap5C.js";const n={async getAllUsers(){return(await s.get("/api/users")).data},async createUser(e){return(await s.post("/api/users",e)).data},async updateUser(e,a){return(await s.put(`/api/users/${e}`,a)).data},async deleteUser(e){await s.delete(`/api/users/${e}`)}};export{n as u};

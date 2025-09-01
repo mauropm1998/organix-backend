@@ -33,30 +33,16 @@ public class DraftService {
 
     /**
      * Lista rascunhos baseado no role do usuário.
-     * ADMIN: vê todos os rascunhos da empresa
-     * OPERATOR: vê apenas seus próprios rascunhos
+     * ADMIN e OPERATOR: vê todos os rascunhos da empresa (OPERATOR somente leitura)
      */
     public List<DraftResponse> getAllDrafts(String status) {
         UUID companyId = SecurityUtils.getCurrentUserCompanyId();
-        UUID currentUserId = SecurityUtils.getCurrentUserId();
-        User currentUser = getCurrentUser();
-        
         List<Draft> drafts;
-        
-        if (currentUser.getAdminType() == AdminType.ADMIN) {
-            // Admin vê todos os rascunhos da empresa
-            if (status != null) {
-                drafts = draftRepository.findByStatusAndCompanyId(DraftStatus.valueOf(status.toUpperCase()), companyId);
-            } else {
-                drafts = draftRepository.findByCompanyId(companyId);
-            }
+        // Ambos veem todos os rascunhos da empresa
+        if (status != null) {
+            drafts = draftRepository.findByStatusAndCompanyId(DraftStatus.valueOf(status.toUpperCase()), companyId);
         } else {
-            // Operator vê apenas seus próprios rascunhos
-            if (status != null) {
-                drafts = draftRepository.findByStatusAndCreatorId(DraftStatus.valueOf(status.toUpperCase()), currentUserId);
-            } else {
-                drafts = draftRepository.findByCreatorId(currentUserId);
-            }
+            drafts = draftRepository.findByCompanyId(companyId);
         }
         
         return drafts.stream()
@@ -73,7 +59,7 @@ public class DraftService {
         Draft draft = draftRepository.findByIdAndCompanyId(id, companyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Rascunho não encontrado"));
         
-        validateUserCanAccessDraft(draft);
+    // Operador agora pode visualizar qualquer rascunho da empresa (somente leitura)
         
         return convertToResponse(draft);
     }
@@ -142,23 +128,7 @@ public class DraftService {
         draftRepository.delete(draft);
     }
 
-    /**
-     * Valida se o usuário atual pode acessar o rascunho.
-     */
-    private void validateUserCanAccessDraft(Draft draft) {
-        UUID currentUserId = SecurityUtils.getCurrentUserId();
-        User currentUser = getCurrentUser();
-        
-        // Admin pode acessar qualquer rascunho da empresa
-        if (currentUser.getAdminType() == AdminType.ADMIN) {
-            return;
-        }
-        
-        // Operator só pode acessar seus próprios rascunhos
-        if (!draft.getCreatorId().equals(currentUserId)) {
-            throw new BusinessException("Você não tem permissão para acessar este rascunho");
-        }
-    }
+    // Removida validação restritiva de acesso para leitura; mantida restrição para modificar
 
     /**
      * Valida se o usuário atual pode modificar o rascunho.

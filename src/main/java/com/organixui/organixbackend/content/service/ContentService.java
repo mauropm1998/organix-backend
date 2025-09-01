@@ -64,20 +64,10 @@ public class ContentService {
     }
 
     public List<ContentResponse> getAllContent(ContentStatus status, UUID channelId, UUID productId, UUID userId) {
-        UUID currentUserId = SecurityUtils.getCurrentUserId();
         UUID companyId = SecurityUtils.getCurrentUserCompanyId();
         
-        User currentUser = userRepository.findById(currentUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        
-        List<Content> contentList;
-        
-        // ADMIN pode ver todo conteúdo da empresa, OPERATOR apenas o próprio
-        if (currentUser.getAdminType() == AdminType.ADMIN) {
-            contentList = contentRepository.findByCompanyIdOrderByCreationDateDesc(companyId);
-        } else {
-            contentList = contentRepository.findByCreatorIdOrProducerIdOrderByCreationDateDesc(currentUserId, currentUserId);
-        }
+    // ADMIN e OPERATOR podem ver todo conteúdo da empresa (somente leitura para OPERATOR)
+    List<Content> contentList = contentRepository.findByCompanyIdOrderByCreationDateDesc(companyId);
         
         // Aplica filtros se fornecidos
         if (status != null) {
@@ -155,23 +145,10 @@ public class ContentService {
     }
 
     public ContentResponse getContentById(UUID id) {
-        UUID currentUserId = SecurityUtils.getCurrentUserId();
         UUID companyId = SecurityUtils.getCurrentUserCompanyId();
         
         Content content = contentRepository.findByIdAndCompanyId(id, companyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Content not found"));
-        
-        // Verifica se o usuário pode acessar este conteúdo
-        User currentUser = userRepository.findById(currentUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        
-        if (currentUser.getAdminType() != AdminType.ADMIN) {
-            // OPERATOR só pode acessar conteúdo onde é creator ou producer
-            if (!content.getCreatorId().equals(currentUserId) && 
-                !currentUserId.equals(content.getProducerId())) {
-                throw new BusinessException("You can only access your own content");
-            }
-        }
         
         return convertToResponse(content);
     }
@@ -205,6 +182,7 @@ public class ContentService {
         Content content = new Content();
         content.setName(request.getName());
         content.setType(request.getType());
+    content.setContent(request.getContent());
         content.setProductId(request.getProductId());
         content.setCreatorId(currentUserId);
         content.setProducerId(request.getProducerId());
@@ -225,20 +203,18 @@ public class ContentService {
 
     @Transactional
     public ContentResponse updateContent(UUID id, UpdateContentRequest request) {
-        UUID currentUserId = SecurityUtils.getCurrentUserId();
         UUID companyId = SecurityUtils.getCurrentUserCompanyId();
         
         Content content = contentRepository.findByIdAndCompanyId(id, companyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Content not found"));
         
-        // Verifica se o usuário pode atualizar este conteúdo
+        // ADMIN pode atualizar qualquer, OPERATOR apenas se for creator ou producer
+        UUID currentUserId = SecurityUtils.getCurrentUserId();
         User currentUser = userRepository.findById(currentUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        
         if (currentUser.getAdminType() != AdminType.ADMIN) {
-            // OPERATOR só pode atualizar conteúdo onde é creator ou producer
-            if (!content.getCreatorId().equals(currentUserId) && 
-                !currentUserId.equals(content.getProducerId())) {
+            if (!content.getCreatorId().equals(currentUserId) &&
+                (content.getProducerId() == null || !content.getProducerId().equals(currentUserId))) {
                 throw new BusinessException("You can only update your own content");
             }
         }
@@ -272,6 +248,10 @@ public class ContentService {
             content.setType(request.getType());
         }
         
+        if (request.getContent() != null) {
+            content.setContent(request.getContent());
+        }
+
         if (request.getProductId() != null) {
             content.setProductId(request.getProductId());
         }
@@ -321,7 +301,8 @@ public class ContentService {
         Content content = contentRepository.findByIdAndCompanyId(id, companyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Content not found"));
         
-        validateStatusChange(content, newStatus);
+    // Usa as regras de validação existentes (admin pode tudo; operador somente se for produtor e transição válida)
+    validateStatusChange(content, newStatus);
         
         content.setStatus(newStatus);
         
@@ -337,14 +318,13 @@ public class ContentService {
     public void deleteContent(UUID id) {
         UUID companyId = SecurityUtils.getCurrentUserCompanyId();
         UUID currentUserId = SecurityUtils.getCurrentUserId();
-        
         Content content = contentRepository.findByIdAndCompanyId(id, companyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Content not found"));
         
         User currentUser = userRepository.findById(currentUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         
-        if (currentUser.getAdminType() != AdminType.ADMIN && 
+        if (currentUser.getAdminType() != AdminType.ADMIN &&
             !content.getCreatorId().equals(currentUserId)) {
             throw new BusinessException("You can only delete content you created");
         }
@@ -435,6 +415,7 @@ public class ContentService {
         Content content = new Content();
         content.setName(draft.getName());
         content.setType(draft.getType());
+    content.setContent(draft.getContent());
         content.setProductId(request.getProductId());
         content.setCreatorId(draft.getCreatorId());
         content.setProducerId(request.getProducerId());
@@ -475,6 +456,7 @@ public class ContentService {
                 .id(content.getId())
                 .name(content.getName())
                 .type(content.getType())
+                .content(content.getContent())
                 .productId(content.getProductId())
                 .creatorId(content.getCreatorId())
                 .creatorName(creator != null ? creator.getName() : null)
@@ -495,19 +477,16 @@ public class ContentService {
         Content content = contentRepository.findById(contentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Conteúdo não encontrado"));
         
-        // Verifica permissões: ADMIN acessa todos da empresa, OPERATOR apenas os próprios
+        // ADMIN (mesma empresa) ou OPERATOR (se creator/producer) podem alterar
         User currentUser = userRepository.findByEmail(SecurityUtils.getCurrentUserEmail())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-        
-        if (!currentUser.getAdminType().equals(AdminType.ADMIN)) {
-            // OPERATOR só pode acessar conteúdo que criou ou produziu
-            if (!content.getCreatorId().equals(currentUser.getId()) && 
-                !content.getProducerId().equals(currentUser.getId())) {
+        if (currentUser.getAdminType().equals(AdminType.ADMIN)) {
+            if (!content.getCompanyId().equals(currentUser.getCompanyId())) {
                 throw new BusinessException("Acesso negado a este conteúdo");
             }
         } else {
-            // ADMIN só pode acessar conteúdo da mesma empresa
-            if (!content.getCompanyId().equals(currentUser.getCompanyId())) {
+            if (!content.getCreatorId().equals(currentUser.getId()) &&
+                !content.getProducerId().equals(currentUser.getId())) {
                 throw new BusinessException("Acesso negado a este conteúdo");
             }
         }
@@ -569,17 +548,16 @@ public class ContentService {
         Content content = contentRepository.findById(contentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Conteúdo não encontrado"));
         
-        // Verifica permissões
+        // ADMIN (mesma empresa) ou OPERATOR (se creator/producer) podem atualizar
         User currentUser = userRepository.findByEmail(SecurityUtils.getCurrentUserEmail())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-        
-        if (!currentUser.getAdminType().equals(AdminType.ADMIN)) {
-            if (!content.getCreatorId().equals(currentUser.getId()) && 
-                !content.getProducerId().equals(currentUser.getId())) {
+        if (currentUser.getAdminType().equals(AdminType.ADMIN)) {
+            if (!content.getCompanyId().equals(currentUser.getCompanyId())) {
                 throw new BusinessException("Acesso negado a este conteúdo");
             }
         } else {
-            if (!content.getCompanyId().equals(currentUser.getCompanyId())) {
+            if (!content.getCreatorId().equals(currentUser.getId()) &&
+                !content.getProducerId().equals(currentUser.getId())) {
                 throw new BusinessException("Acesso negado a este conteúdo");
             }
         }
@@ -616,17 +594,16 @@ public class ContentService {
         Content content = contentRepository.findById(contentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Conteúdo não encontrado"));
         
-        // Verifica permissões
+        // ADMIN (mesma empresa) ou OPERATOR (se creator/producer) podem atualizar
         User currentUser = userRepository.findByEmail(SecurityUtils.getCurrentUserEmail())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-        
-        if (!currentUser.getAdminType().equals(AdminType.ADMIN)) {
-            if (!content.getCreatorId().equals(currentUser.getId()) && 
-                !content.getProducerId().equals(currentUser.getId())) {
+        if (currentUser.getAdminType().equals(AdminType.ADMIN)) {
+            if (!content.getCompanyId().equals(currentUser.getCompanyId())) {
                 throw new BusinessException("Acesso negado a este conteúdo");
             }
         } else {
-            if (!content.getCompanyId().equals(currentUser.getCompanyId())) {
+            if (!content.getCreatorId().equals(currentUser.getId()) &&
+                !content.getProducerId().equals(currentUser.getId())) {
                 throw new BusinessException("Acesso negado a este conteúdo");
             }
         }
@@ -697,17 +674,16 @@ public class ContentService {
         Content content = contentRepository.findById(contentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Conteúdo não encontrado"));
         
-        // Verifica permissões
+        // ADMIN (mesma empresa) ou OPERATOR (se creator/producer) podem atualizar
         User currentUser = userRepository.findByEmail(SecurityUtils.getCurrentUserEmail())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-        
-        if (!currentUser.getAdminType().equals(AdminType.ADMIN)) {
-            if (!content.getCreatorId().equals(currentUser.getId()) && 
-                !content.getProducerId().equals(currentUser.getId())) {
+        if (currentUser.getAdminType().equals(AdminType.ADMIN)) {
+            if (!content.getCompanyId().equals(currentUser.getCompanyId())) {
                 throw new BusinessException("Acesso negado a este conteúdo");
             }
         } else {
-            if (!content.getCompanyId().equals(currentUser.getCompanyId())) {
+            if (!content.getCreatorId().equals(currentUser.getId()) &&
+                !content.getProducerId().equals(currentUser.getId())) {
                 throw new BusinessException("Acesso negado a este conteúdo");
             }
         }

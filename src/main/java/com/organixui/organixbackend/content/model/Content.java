@@ -58,6 +58,11 @@ public class Content {
         inverseJoinColumns = @JoinColumn(name = "channel_id")
     )
     private List<Channel> channels;
+
+    // Texto/conteúdo do post
+    @Lob
+    @Column(name = "content", columnDefinition = "TEXT")
+    private String content;
     
     @PrePersist
     protected void onCreate() {
