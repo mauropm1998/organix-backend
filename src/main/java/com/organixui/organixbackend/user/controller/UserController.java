@@ -43,7 +43,7 @@ public class UserController {
     private final UserService userService;
     
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
     @Operation(summary = "Listar usuários", description = "Lista todos os usuários da empresa")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Lista de usuários retornada com sucesso"),
@@ -55,7 +55,7 @@ public class UserController {
     }
     
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
     @Operation(summary = "Obter usuário", description = "Obtém um usuário específico pelo ID")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Usuário encontrado"),
