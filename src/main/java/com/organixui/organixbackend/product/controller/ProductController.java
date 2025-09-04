@@ -28,7 +28,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Tag(name = "Products", description = "Product management endpoints")
 @SecurityRequirement(name = "bearerAuth")
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
 public class ProductController {
     
     private final ProductService productService;
@@ -58,6 +58,7 @@ public class ProductController {
     }
     
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Criar produto", description = "Cria um novo produto na empresa")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Produto criado com sucesso"),
@@ -71,6 +72,7 @@ public class ProductController {
     }
     
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Atualizar produto", description = "Atualiza um produto existente")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Produto atualizado com sucesso"),
@@ -86,6 +88,7 @@ public class ProductController {
     }
     
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Excluir produto", description = "Exclui um produto")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "204", description = "Produto excluído com sucesso"),
