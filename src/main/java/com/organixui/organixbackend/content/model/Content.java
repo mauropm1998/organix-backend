@@ -11,7 +11,11 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "content")
+@Table(name = "content", indexes = {
+    @Index(name = "idx_content_company_creation_date", columnList = "company_id,creation_date"),
+    @Index(name = "idx_content_company_status", columnList = "company_id,status"),
+    @Index(name = "idx_content_company_product", columnList = "company_id,product_id")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -50,6 +54,18 @@ public class Content {
     
     @Column(name = "post_date")
     private LocalDateTime postDate;
+
+    // Início da produção do conteúdo
+    @Column(name = "production_start_date")
+    private LocalDateTime productionStartDate;
+
+    // Término da produção do conteúdo
+    @Column(name = "production_end_date")
+    private LocalDateTime productionEndDate;
+
+    // Identificador único no Meta Ads (opcional)
+    @Column(name = "meta_ads_id")
+    private String metaAdsId;
     
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(

@@ -14,7 +14,11 @@ import java.util.UUID;
  * Rascunhos são criados pelos usuários e podem ser aprovados para se tornarem conteúdo.
  */
 @Entity
-@Table(name = "drafts")
+@Table(name = "drafts", indexes = {
+    @Index(name = "idx_drafts_company_created_at", columnList = "company_id,created_at"),
+    @Index(name = "idx_drafts_company_status", columnList = "company_id,status"),
+    @Index(name = "idx_drafts_company_creator", columnList = "company_id,creator_id")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

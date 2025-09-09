@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -38,16 +40,32 @@ public class DraftService {
     public List<DraftResponse> getAllDrafts(String status) {
         UUID companyId = SecurityUtils.getCurrentUserCompanyId();
         List<Draft> drafts;
+    java.time.LocalDateTime fromDate = java.time.LocalDateTime.now().minusDays(7);
         // Ambos veem todos os rascunhos da empresa
         if (status != null) {
             drafts = draftRepository.findByStatusAndCompanyId(DraftStatus.valueOf(status.toUpperCase()), companyId);
         } else {
             drafts = draftRepository.findByCompanyId(companyId);
         }
+    // Filtra últimos 7 dias em memória (consultas simples existentes)
+    drafts = drafts.stream()
+        .filter(d -> d.getCreatedAt() != null && d.getCreatedAt().isAfter(fromDate))
+        .collect(Collectors.toList());
         
         return drafts.stream()
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
+    }
+
+    public Page<DraftResponse> getAllDrafts(String status, UUID creatorId, Pageable pageable) {
+        UUID companyId = SecurityUtils.getCurrentUserCompanyId();
+        DraftStatus st = null;
+        if (status != null) {
+            try { st = DraftStatus.valueOf(status.toUpperCase()); } catch (IllegalArgumentException e) { throw new BusinessException("Status inválido"); }
+        }
+    java.time.LocalDateTime fromDate = java.time.LocalDateTime.now().minusDays(7);
+    Page<Draft> page = draftRepository.searchDrafts(companyId, st, creatorId, fromDate, pageable);
+        return page.map(this::convertToResponse);
     }
 
     /**
@@ -62,6 +80,23 @@ public class DraftService {
     // Operador agora pode visualizar qualquer rascunho da empresa (somente leitura)
         
         return convertToResponse(draft);
+    }
+
+    public List<DraftResponse> getRecentDrafts(int days) {
+        UUID companyId = SecurityUtils.getCurrentUserCompanyId();
+        java.time.LocalDateTime from = java.time.LocalDateTime.now().minusDays(days);
+        return draftRepository.findByCompanyIdAndCreatedAtGreaterThanEqualOrderByCreatedAtDesc(companyId, from)
+                .stream().map(this::convertToResponse).collect(Collectors.toList());
+    }
+
+    public com.organixui.organixbackend.draft.dto.DraftStatsResponse getDraftStats() {
+        UUID companyId = SecurityUtils.getCurrentUserCompanyId();
+        long total = draftRepository.countByCompanyId(companyId);
+        long approved = draftRepository.countByCompanyIdAndStatus(companyId, DraftStatus.APPROVED);
+        return com.organixui.organixbackend.draft.dto.DraftStatsResponse.builder()
+                .total(total)
+                .approved(approved)
+                .build();
     }
 
     /**

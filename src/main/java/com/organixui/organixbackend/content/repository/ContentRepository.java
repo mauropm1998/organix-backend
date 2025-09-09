@@ -96,4 +96,35 @@ public interface ContentRepository extends JpaRepository<Content, UUID> {
      * Busca conteúdo por criador ou produtor com paginação.
      */
     Page<Content> findByCreatorIdOrProducerId(UUID creatorId, UUID producerId, Pageable pageable);
+
+    @Query("SELECT DISTINCT c FROM Content c LEFT JOIN c.channels ch WHERE c.companyId = :companyId " +
+        "AND (:status IS NULL OR c.status = :status) " +
+        "AND (:productId IS NULL OR c.productId = :productId) " +
+        "AND (:userId IS NULL OR c.creatorId = :userId OR c.producerId = :userId) " +
+            "AND (:channelId IS NULL OR ch.id = :channelId) ORDER BY c.creationDate DESC")
+    List<Content> searchContent(@Param("companyId") UUID companyId,
+                @Param("status") ContentStatus status,
+                @Param("channelId") UUID channelId,
+                @Param("productId") UUID productId,
+                                @Param("userId") UUID userId);
+
+    @Query(value = "SELECT DISTINCT c FROM Content c LEFT JOIN c.channels ch WHERE c.companyId = :companyId " +
+        "AND (:status IS NULL OR c.status = :status) " +
+        "AND (:productId IS NULL OR c.productId = :productId) " +
+        "AND (:userId IS NULL OR c.creatorId = :userId OR c.producerId = :userId) " +
+        "AND (:channelId IS NULL OR ch.id = :channelId)",
+        countQuery = "SELECT COUNT(DISTINCT c) FROM Content c LEFT JOIN c.channels ch WHERE c.companyId = :companyId " +
+            "AND (:status IS NULL OR c.status = :status) " +
+            "AND (:productId IS NULL OR c.productId = :productId) " +
+            "AND (:userId IS NULL OR c.creatorId = :userId OR c.producerId = :userId) " +
+            "AND (:channelId IS NULL OR ch.id = :channelId)")
+    Page<Content> searchContentPage(@Param("companyId") UUID companyId,
+                    @Param("status") ContentStatus status,
+                    @Param("channelId") UUID channelId,
+                    @Param("productId") UUID productId,
+                    @Param("userId") UUID userId,
+                    Pageable pageable);
+
+    // Recent last N days (used by recent endpoint)
+    List<Content> findByCompanyIdAndCreationDateGreaterThanEqualOrderByCreationDateDesc(UUID companyId, java.time.LocalDateTime date);
 }

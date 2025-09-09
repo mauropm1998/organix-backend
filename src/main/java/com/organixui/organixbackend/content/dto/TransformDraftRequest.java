@@ -31,4 +31,13 @@ public class TransformDraftRequest {
 
     @Schema(description = "ID do usuário produtor (opcional, se diferente do criador)")
     private UUID producerId;
+
+    @Schema(description = "Data/hora de início da produção", example = "2025-09-10T09:00:00")
+    private LocalDateTime productionStartDate;
+
+    @Schema(description = "Data/hora de término da produção", example = "2025-09-12T18:00:00")
+    private LocalDateTime productionEndDate;
+
+    @Schema(description = "Identificador único no Meta Ads (opcional)", example = "123456789012345")
+    private String metaAdsId;
 }

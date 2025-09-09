@@ -29,6 +29,11 @@ import com.organixui.organixbackend.user.model.User;
 import com.organixui.organixbackend.user.model.AdminType;
 import com.organixui.organixbackend.user.repository.UserRepository;
 import com.organixui.organixbackend.product.repository.ProductRepository;
+import com.organixui.organixbackend.content.history.model.ContentStatusHistory;
+import com.organixui.organixbackend.content.history.repository.ContentStatusHistoryRepository;
+import com.organixui.organixbackend.content.history.model.ContentAuditLog;
+import com.organixui.organixbackend.content.history.repository.ContentAuditLogRepository;
+import com.organixui.organixbackend.content.history.dto.ContentStatusHistoryResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -54,6 +59,8 @@ public class ContentService {
     private final ProductRepository productRepository;
     private final DraftRepository draftRepository;
     private final ContentMetricsRepository contentMetricsRepository;
+    private final ContentStatusHistoryRepository contentStatusHistoryRepository;
+    private final ContentAuditLogRepository contentAuditLogRepository;
 
     public List<ContentResponse> getAllContent() {
         UUID companyId = SecurityUtils.getCurrentUserCompanyId();
@@ -65,47 +72,37 @@ public class ContentService {
 
     public List<ContentResponse> getAllContent(ContentStatus status, UUID channelId, UUID productId, UUID userId) {
         UUID companyId = SecurityUtils.getCurrentUserCompanyId();
-        
-    // ADMIN e OPERATOR podem ver todo conteúdo da empresa (somente leitura para OPERATOR)
-    List<Content> contentList = contentRepository.findByCompanyIdOrderByCreationDateDesc(companyId);
-        
-        // Aplica filtros se fornecidos
-        if (status != null) {
-            contentList = contentList.stream()
-                    .filter(content -> content.getStatus() == status)
-                    .collect(Collectors.toList());
-        }
-        
-        if (channelId != null) {
-            contentList = contentList.stream()
-                    .filter(content -> content.getChannels() != null && 
-                            content.getChannels().stream()
-                                    .anyMatch(c -> channelId.equals(c.getId())))
-                    .collect(Collectors.toList());
-        }
-        
-        if (productId != null) {
-            contentList = contentList.stream()
-                    .filter(content -> productId.equals(content.getProductId()))
-                    .collect(Collectors.toList());
-        }
-        
-        if (userId != null) {
-            contentList = contentList.stream()
-                    .filter(content -> userId.equals(content.getCreatorId()) || 
-                            userId.equals(content.getProducerId()))
-                    .collect(Collectors.toList());
-        }
-        
-        return contentList.stream()
-                .map(this::convertToResponse)
-                .collect(java.util.stream.Collectors.toList());
+    List<Content> contentList = contentRepository.searchContent(companyId, status, channelId, productId, userId);
+    return contentList.stream().map(this::convertToResponse).collect(Collectors.toList());
+    }
+
+    public com.organixui.organixbackend.content.dto.ContentStatsResponse getContentStats() {
+        UUID companyId = SecurityUtils.getCurrentUserCompanyId();
+        long total = contentRepository.countByCompanyId(companyId);
+        long inProduction = contentRepository.countByCompanyIdAndStatus(companyId, ContentStatus.IN_PRODUCTION);
+        return com.organixui.organixbackend.content.dto.ContentStatsResponse.builder()
+                .total(total)
+                .inProduction(inProduction)
+                .build();
     }
 
     public Page<ContentResponse> getAllContent(Pageable pageable) {
         UUID companyId = SecurityUtils.getCurrentUserCompanyId();
         Page<Content> contentPage = contentRepository.findByCompanyId(companyId, pageable);
         return contentPage.map(this::convertToResponse);
+    }
+
+    public Page<ContentResponse> getAllContent(ContentStatus status, UUID channelId, UUID productId, UUID userId, Pageable pageable) {
+        UUID companyId = SecurityUtils.getCurrentUserCompanyId();
+        Page<Content> page = contentRepository.searchContentPage(companyId, status, channelId, productId, userId, pageable);
+        return page.map(this::convertToResponse);
+    }
+
+    public List<ContentResponse> getRecentContent(int days) {
+        UUID companyId = SecurityUtils.getCurrentUserCompanyId();
+        java.time.LocalDateTime from = java.time.LocalDateTime.now().minusDays(days);
+        List<Content> list = contentRepository.findByCompanyIdAndCreationDateGreaterThanEqualOrderByCreationDateDesc(companyId, from);
+        return list.stream().map(this::convertToResponse).collect(Collectors.toList());
     }
 
     public List<ContentResponse> getMyContent() {
@@ -196,8 +193,22 @@ public class ContentService {
         if (request.getPostDate() != null) {
             content.setPostDate(request.getPostDate());
         }
+        if (request.getProductionStartDate() != null) {
+            content.setProductionStartDate(request.getProductionStartDate());
+        }
+        if (request.getProductionEndDate() != null) {
+            content.setProductionEndDate(request.getProductionEndDate());
+        }
+        if (request.getMetaAdsId() != null) {
+            content.setMetaAdsId(request.getMetaAdsId());
+        }
+        if (request.getMetaAdsId() != null) {
+            content.setMetaAdsId(request.getMetaAdsId());
+        }
         
         Content savedContent = contentRepository.save(content);
+    // Cria histórico inicial
+    createStatusHistory(savedContent, currentUserId, null, savedContent.getStatus());
         return convertToResponse(savedContent);
     }
 
@@ -240,35 +251,58 @@ public class ContentService {
                     .orElseThrow(() -> new BusinessException("Producer not found or doesn't belong to your company"));
         }
         
-        if (request.getName() != null) {
+        if (request.getName() != null && !request.getName().equals(content.getName())) {
+            audit(content, currentUserId, "name", content.getName(), request.getName());
             content.setName(request.getName());
         }
         
-        if (request.getType() != null) {
+        if (request.getType() != null && !request.getType().equals(content.getType())) {
+            audit(content, currentUserId, "type", content.getType(), request.getType());
             content.setType(request.getType());
         }
         
-        if (request.getContent() != null) {
+        if (request.getContent() != null && !request.getContent().equals(content.getContent())) {
+            audit(content, currentUserId, "content", truncate(content.getContent()), truncate(request.getContent()));
             content.setContent(request.getContent());
         }
 
-        if (request.getProductId() != null) {
+        if (request.getProductId() != null && (content.getProductId() == null || !request.getProductId().equals(content.getProductId()))) {
+            audit(content, currentUserId, "productId", String.valueOf(content.getProductId()), String.valueOf(request.getProductId()));
             content.setProductId(request.getProductId());
         }
         
-        if (request.getProducerId() != null) {
+        if (request.getProducerId() != null && (content.getProducerId() == null || !request.getProducerId().equals(content.getProducerId()))) {
+            audit(content, currentUserId, "producerId", String.valueOf(content.getProducerId()), String.valueOf(request.getProducerId()));
             content.setProducerId(request.getProducerId());
         }
         
-        if (request.getStatus() != null) {
+        ContentStatus previousStatus = content.getStatus();
+        if (request.getStatus() != null && request.getStatus() != content.getStatus()) {
+            audit(content, currentUserId, "status", String.valueOf(content.getStatus()), String.valueOf(request.getStatus()));
             content.setStatus(request.getStatus());
         }
         
-        if (request.getPostDate() != null) {
+        if (request.getPostDate() != null && !request.getPostDate().equals(content.getPostDate())) {
+            audit(content, currentUserId, "postDate", String.valueOf(content.getPostDate()), String.valueOf(request.getPostDate()));
             content.setPostDate(request.getPostDate());
+        }
+        if (request.getProductionStartDate() != null && !request.getProductionStartDate().equals(content.getProductionStartDate())) {
+            audit(content, currentUserId, "productionStartDate", String.valueOf(content.getProductionStartDate()), String.valueOf(request.getProductionStartDate()));
+            content.setProductionStartDate(request.getProductionStartDate());
+        }
+        if (request.getProductionEndDate() != null && !request.getProductionEndDate().equals(content.getProductionEndDate())) {
+            audit(content, currentUserId, "productionEndDate", String.valueOf(content.getProductionEndDate()), String.valueOf(request.getProductionEndDate()));
+            content.setProductionEndDate(request.getProductionEndDate());
+        }
+        if (request.getMetaAdsId() != null && !request.getMetaAdsId().equals(content.getMetaAdsId())) {
+            audit(content, currentUserId, "metaAdsId", content.getMetaAdsId(), request.getMetaAdsId());
+            content.setMetaAdsId(request.getMetaAdsId());
         }
         
         Content savedContent = contentRepository.save(content);
+        if (request.getStatus() != null && previousStatus != savedContent.getStatus()) {
+            createStatusHistory(savedContent, currentUserId, previousStatus, savedContent.getStatus());
+        }
         return convertToResponse(savedContent);
     }
 
@@ -291,7 +325,8 @@ public class ContentService {
         
         content.setProducerId(producerId);
         
-        Content savedContent = contentRepository.save(content);
+    Content savedContent = contentRepository.save(content);
+    createStatusHistory(savedContent, SecurityUtils.getCurrentUserId(), null, savedContent.getStatus());
         return convertToResponse(savedContent);
     }
 
@@ -309,6 +344,7 @@ public class ContentService {
         if (newStatus == ContentStatus.POSTED && content.getPostDate() == null) {
             content.setPostDate(LocalDateTime.now());
         }
+    // Não altera automaticamente datas de produção: ficam como foram informadas (regras futuras podem preencher aqui)
         
         Content savedContent = contentRepository.save(content);
         return convertToResponse(savedContent);
@@ -423,8 +459,16 @@ public class ContentService {
         content.setStatus(request.getStatus());
         content.setPostDate(request.getPostDate());
         content.setChannels(channels);
+        if (request.getProductionStartDate() != null) {
+            content.setProductionStartDate(request.getProductionStartDate());
+        }
+        if (request.getProductionEndDate() != null) {
+            content.setProductionEndDate(request.getProductionEndDate());
+        }
         
         content = contentRepository.save(content);
+        // histórico inicial
+    createStatusHistory(content, currentUserId, null, content.getStatus());
         
         // Remove o rascunho original
         draftRepository.delete(draft);
@@ -452,7 +496,22 @@ public class ContentService {
             metricsResponse = convertMetricsToResponse(metricsOpt.get());
         }
         
-        return ContentResponse.builder()
+    // Histórico de status
+    List<ContentStatusHistoryResponse> historyResponses = contentStatusHistoryRepository
+        .findByContentIdOrderByChangedAtAsc(content.getId())
+        .stream()
+        .map(h -> ContentStatusHistoryResponse.builder()
+            .id(h.getId())
+            .contentId(content.getId())
+            .userId(h.getUserId())
+            .userName(userRepository.findById(h.getUserId()).map(User::getName).orElse(null))
+            .newStatus(h.getNewStatus())
+            .previousStatus(h.getPreviousStatus())
+            .changedAt(h.getChangedAt())
+            .build())
+        .collect(Collectors.toList());
+
+    return ContentResponse.builder()
                 .id(content.getId())
                 .name(content.getName())
                 .type(content.getType())
@@ -462,12 +521,16 @@ public class ContentService {
                 .creatorName(creator != null ? creator.getName() : null)
                 .creationDate(content.getCreationDate())
                 .postDate(content.getPostDate())
+                .productionStartDate(content.getProductionStartDate())
+                .productionEndDate(content.getProductionEndDate())
+                .metaAdsId(content.getMetaAdsId())
                 .producerId(content.getProducerId())
                 .producerName(producer != null ? producer.getName() : null)
                 .status(content.getStatus())
                 .channels(channelResponses)
                 .companyId(content.getCompanyId())
                 .metrics(metricsResponse)
+                .history(historyResponses)
                 .build();
     }
     
@@ -491,9 +554,20 @@ public class ContentService {
             }
         }
         
-        // Atualiza o status
-        content.setStatus(request.getStatus());
+        // Captura status anterior e atualiza
+        ContentStatus previousStatus = content.getStatus();
+        ContentStatus newStatus = request.getStatus();
+        if (newStatus == null) {
+            throw new BusinessException("Novo status não pode ser nulo");
+        }
+        if (previousStatus == newStatus) {
+            // Nada a fazer além de retornar
+            return convertToResponse(content);
+        }
+        content.setStatus(newStatus);
         content = contentRepository.save(content);
+        // Cria histórico
+        createStatusHistory(content, currentUser.getId(), previousStatus, newStatus);
         
         log.info("Status do conteúdo {} atualizado para {} pelo usuário {}", 
                 contentId, request.getStatus(), currentUser.getEmail());
@@ -526,6 +600,42 @@ public class ContentService {
                 .shares(metrics.getShares())
                 .channelMetrics(channelMetrics)
                 .build();
+    }
+
+    private void createStatusHistory(Content content, UUID userId, ContentStatus previousStatus, ContentStatus newStatus) {
+        try {
+            ContentStatusHistory history = ContentStatusHistory.builder()
+                    .content(content)
+                    .userId(userId)
+                    .newStatus(newStatus)
+                    .previousStatus(previousStatus)
+                    .companyId(content.getCompanyId())
+                    .build();
+            contentStatusHistoryRepository.save(history);
+        } catch (Exception e) {
+            log.error("Failed to persist content status history for content {}: {}", content.getId(), e.getMessage());
+        }
+    }
+
+    private void audit(Content content, UUID userId, String field, String oldVal, String newVal) {
+        try {
+            ContentAuditLog logEntry = ContentAuditLog.builder()
+                    .contentId(content.getId())
+                    .fieldName(field)
+                    .oldValue(oldVal)
+                    .newValue(newVal)
+                    .userId(userId)
+                    .companyId(content.getCompanyId())
+                    .build();
+            contentAuditLogRepository.save(logEntry);
+        } catch (Exception e) {
+            log.error("Failed to persist audit log for content {} field {}: {}", content.getId(), field, e.getMessage());
+        }
+    }
+
+    private String truncate(String value) {
+        if (value == null) return null;
+        return value.length() > 500 ? value.substring(0, 497) + "..." : value;
     }
     
     private ChannelMetricResponse convertChannelMetricToResponse(ChannelMetricData channelData) {

@@ -16,6 +16,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Payload para atualização parcial de conteúdo")
 public class UpdateContentRequest {
     private String name;
     private String type;
@@ -29,6 +30,13 @@ public class UpdateContentRequest {
             allowableValues = {"PENDING", "CANCELED", "POSTED", "IN_PRODUCTION", "FINISHED"})
     private ContentStatus status;
     
+    @Schema(description = "Nova data/hora de publicação (opcional)", example = "2025-09-02T14:00:00")
     private LocalDateTime postDate;
+    @Schema(description = "Nova data/hora de início de produção (opcional)", example = "2025-08-26T08:15:00")
+    private LocalDateTime productionStartDate;
+    @Schema(description = "Nova data/hora de término de produção (opcional)", example = "2025-08-28T17:30:00")
+    private LocalDateTime productionEndDate;
+    @Schema(description = "Identificador no Meta Ads (opcional)", example = "123456789012345")
+    private String metaAdsId;
     private List<UUID> channelIds;
 }

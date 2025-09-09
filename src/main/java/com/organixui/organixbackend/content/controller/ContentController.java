@@ -2,6 +2,10 @@ package com.organixui.organixbackend.content.controller;
 
 import com.organixui.organixbackend.content.dto.ContentRequest;
 import com.organixui.organixbackend.content.dto.ContentResponse;
+import com.organixui.organixbackend.content.history.dto.ContentStatusHistoryResponse;
+import com.organixui.organixbackend.content.history.repository.ContentStatusHistoryRepository;
+import com.organixui.organixbackend.content.history.model.ContentStatusHistory;
+import com.organixui.organixbackend.user.repository.UserRepository;
 import com.organixui.organixbackend.content.dto.UpdateContentRequest;
 import com.organixui.organixbackend.content.dto.TransformDraftRequest;
 import com.organixui.organixbackend.content.dto.UpdateContentStatusRequest;
@@ -13,6 +17,9 @@ import com.organixui.organixbackend.performance.dto.UpdateContentMetricsRequest;
 import com.organixui.organixbackend.performance.dto.UpdateChannelMetricRequest;
 import com.organixui.organixbackend.performance.dto.UpdateContentChannelMetricsRequest;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -39,24 +46,38 @@ import java.util.UUID;
 public class ContentController {
     
     private final ContentService contentService;
+    private final ContentStatusHistoryRepository contentStatusHistoryRepository;
+    private final UserRepository userRepository;
     
     @GetMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
-    @Operation(summary = "Listar conteúdo", description = "Lista conteúdo da empresa com filtros opcionais")
+    @Operation(summary = "Listar conteúdo", description = "Lista conteúdo da empresa com filtros opcionais e paginação (?page=&size=)")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Lista de conteúdo retornada com sucesso")
+        @ApiResponse(responseCode = "200", description = "Conteúdo retornado com sucesso")
     })
-    public ResponseEntity<List<ContentResponse>> getAllContent(
-            @Parameter(description = "Filtro por status do conteúdo")
-            @RequestParam(required = false) ContentStatus status,
-            @Parameter(description = "Filtro por canal específico (ID do canal)")
-            @RequestParam(required = false) UUID channelId,
-            @Parameter(description = "Filtro por produto específico")
-            @RequestParam(required = false) UUID productId,
-            @Parameter(description = "Filtro por usuário específico (creator ou producer)")
-            @RequestParam(required = false) UUID userId) {
-        List<ContentResponse> content = contentService.getAllContent(status, channelId, productId, userId);
-        return ResponseEntity.ok(content);
+    public ResponseEntity<?> getAllContent(
+            @Parameter(description = "Filtro por status do conteúdo") @RequestParam(required = false) ContentStatus status,
+            @Parameter(description = "Filtro por canal específico (ID do canal)") @RequestParam(required = false) UUID channelId,
+            @Parameter(description = "Filtro por produto específico") @RequestParam(required = false) UUID productId,
+            @Parameter(description = "Filtro por usuário específico (creator ou producer)") @RequestParam(required = false) UUID userId,
+            @Parameter(description = "Número da página (0-based)") @RequestParam(required = false) Integer page,
+            @Parameter(description = "Tamanho da página") @RequestParam(required = false) Integer size) {
+        if (page != null || size != null) {
+            int p = page != null ? page : 0;
+            int s = size != null ? size : 20;
+            var pageable = org.springframework.data.domain.PageRequest.of(p, s);
+            return ResponseEntity.ok(contentService.getAllContent(status, channelId, productId, userId, pageable));
+        }
+        return ResponseEntity.ok(contentService.getAllContent(status, channelId, productId, userId));
+    }
+
+    @GetMapping("/recent")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
+    @Operation(summary = "Conteúdos recentes", description = "Lista conteúdos criados nos últimos N dias (padrão 7)")
+    public ResponseEntity<List<ContentResponse>> getRecentContent(
+            @Parameter(description = "Quantidade de dias para trás") @RequestParam(required = false) Integer days) {
+        int d = (days == null || days <= 0) ? 7 : Math.min(days, 30);
+        return ResponseEntity.ok(contentService.getRecentContent(d));
     }
     
     @GetMapping("/my")
@@ -68,6 +89,22 @@ public class ContentController {
     public ResponseEntity<List<ContentResponse>> getMyContent() {
         List<ContentResponse> content = contentService.getMyContent();
         return ResponseEntity.ok(content);
+    }
+
+    @GetMapping("/stats")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
+    @Operation(summary = "Estatísticas de conteúdo", description = "Retorna total de conteúdo e total em produção (IN_PRODUCTION)")
+    @ApiResponses(value = {
+    @ApiResponse(responseCode = "200", description = "Estatísticas retornadas com sucesso",
+        content = @io.swagger.v3.oas.annotations.media.Content(
+            mediaType = "application/json",
+            schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = com.organixui.organixbackend.content.dto.ContentStatsResponse.class),
+            examples = @io.swagger.v3.oas.annotations.media.ExampleObject(name = "contentStatsExample",
+                summary = "Exemplo de estatísticas de conteúdo",
+                value = "{\n  'total': 128,\n  'inProduction': 37\n}")))
+    })
+    public ResponseEntity<com.organixui.organixbackend.content.dto.ContentStatsResponse> getContentStats() {
+        return ResponseEntity.ok(contentService.getContentStats());
     }
     
     @GetMapping("/{id}")
@@ -83,12 +120,42 @@ public class ContentController {
         ContentResponse content = contentService.getContentById(id);
         return ResponseEntity.ok(content);
     }
+
+    @GetMapping("/{id}/history")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
+    @Operation(summary = "Histórico de status", description = "Lista o histórico de mudanças de status do conteúdo, incluindo status anterior e novo")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Histórico retornado"),
+        @ApiResponse(responseCode = "404", description = "Conteúdo não encontrado"),
+        @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<List<ContentStatusHistoryResponse>> getHistory(
+            @Parameter(description = "ID do conteúdo") @PathVariable UUID id) {
+        List<ContentStatusHistory> history = contentStatusHistoryRepository.findByContentIdOrderByChangedAtAsc(id);
+        List<ContentStatusHistoryResponse> response = history.stream().map(h -> {
+            String userName = userRepository.findById(h.getUserId()).map(u -> u.getName()).orElse(null);
+            return ContentStatusHistoryResponse.builder()
+                    .id(h.getId())
+                    .contentId(id)
+                    .userId(h.getUserId())
+                    .userName(userName)
+                    .newStatus(h.getNewStatus())
+                    .changedAt(h.getChangedAt())
+                    .build();
+        }).toList();
+        return ResponseEntity.ok(response);
+    }
     
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
     @Operation(summary = "Criar conteúdo", description = "Cria um novo conteúdo com status inicial customizável. Se não especificado, o status será PENDING")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Conteúdo criado com sucesso"),
+        @ApiResponse(responseCode = "200", description = "Conteúdo criado com sucesso",
+                content = @Content(mediaType = "application/json",
+                        schema = @Schema(implementation = ContentResponse.class),
+                        examples = @ExampleObject(name = "contentCreated",
+                                summary = "Exemplo de conteúdo criado",
+                                value = "{\n  'id': '3b8d2a1c-7e4f-4f2a-9c6d-1e2b3a4c5d6e',\n  'name': 'Post de Campanha Primavera',\n  'type': 'SOCIAL_POST',\n  'content': 'Texto do post...',\n  'productId': '11111111-2222-3333-4444-555555555555',\n  'creatorId': 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',\n  'creatorName': 'Maria Silva',\n  'creationDate': '2025-08-25T09:05:12',\n  'postDate': '2025-09-01T10:30:00',\n  'productionStartDate': '2025-08-25T09:00:00',\n  'productionEndDate': '2025-08-27T18:45:00',\n  'metaAdsId': '123456789012345',\n  'producerId': 'bbbbbbbb-cccc-dddd-eeee-ffffffffffff',\n  'producerName': 'João Almeida',\n  'status': 'PENDING',\n  'channels': [],\n  'companyId': '99999999-8888-7777-6666-555555555555',\n  'metrics': null,\n  'history': [ { 'newStatus': 'PENDING', 'previousStatus': null, 'changedAt': '2025-08-25T09:05:12', 'userId': 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee' } ]\n}"))),
         @ApiResponse(responseCode = "400", description = "Dados inválidos")
     })
     public ResponseEntity<ContentResponse> createContent(
@@ -101,7 +168,12 @@ public class ContentController {
     @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
     @Operation(summary = "Atualizar conteúdo", description = "Atualiza um conteúdo existente, incluindo status")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Conteúdo atualizado com sucesso"),
+        @ApiResponse(responseCode = "200", description = "Conteúdo atualizado com sucesso",
+                content = @Content(mediaType = "application/json",
+                        schema = @Schema(implementation = ContentResponse.class),
+                        examples = @ExampleObject(name = "contentUpdated",
+                                summary = "Exemplo de conteúdo atualizado",
+                                value = "{\n  'id': '3b8d2a1c-7e4f-4f2a-9c6d-1e2b3a4c5d6e',\n  'name': 'Post de Campanha Primavera (Revisto)',\n  'type': 'SOCIAL_POST',\n  'content': 'Texto revisado...',\n  'productId': '11111111-2222-3333-4444-555555555555',\n  'creatorId': 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',\n  'creatorName': 'Maria Silva',\n  'creationDate': '2025-08-25T09:05:12',\n  'postDate': '2025-09-01T10:30:00',\n  'productionStartDate': '2025-08-25T09:00:00',\n  'productionEndDate': '2025-08-27T18:45:00',\n  'metaAdsId': '123456789012345',\n  'producerId': 'bbbbbbbb-cccc-dddd-eeee-ffffffffffff',\n  'producerName': 'João Almeida',\n  'status': 'IN_PRODUCTION',\n  'channels': [],\n  'companyId': '99999999-8888-7777-6666-555555555555',\n  'metrics': null,\n  'history': [ { 'newStatus': 'PENDING', 'previousStatus': null, 'changedAt': '2025-08-25T09:05:12' }, { 'newStatus': 'IN_PRODUCTION', 'previousStatus': 'PENDING', 'changedAt': '2025-08-26T09:15:00' } ]\n}"))),
         @ApiResponse(responseCode = "404", description = "Conteúdo não encontrado"),
         @ApiResponse(responseCode = "400", description = "Dados inválidos"),
         @ApiResponse(responseCode = "403", description = "Acesso negado")
@@ -131,14 +203,22 @@ public class ContentController {
     @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
     @Operation(summary = "Transformar rascunho em conteúdo", description = "Transforma um rascunho aprovado em conteúdo")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Conteúdo criado com sucesso a partir do rascunho"),
+        @ApiResponse(responseCode = "200", description = "Conteúdo criado com sucesso a partir do rascunho",
+            content = @Content(mediaType = "application/json",
+                schema = @Schema(implementation = ContentResponse.class),
+                examples = @ExampleObject(name = "transformDraftResponse",
+                    summary = "Exemplo de resposta ao transformar rascunho",
+                    value = "{\n  'id': '7d8e9f10-1112-1314-1516-171819202122',\n  'name': 'Landing Page Promo Setembro',\n  'type': 'LANDING_PAGE',\n  'content': '<html>...</html>',\n  'productId': '22222222-3333-4444-5555-666666666666',\n  'creatorId': 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',\n  'creatorName': 'Maria Silva',\n  'creationDate': '2025-09-09T09:12:30',\n  'postDate': '2025-09-15T10:00:00',\n  'productionStartDate': '2025-09-10T09:00:00',\n  'productionEndDate': '2025-09-12T18:00:00',\n  'metaAdsId': '123456789012345',\n  'producerId': 'bbbbbbbb-cccc-dddd-eeee-ffffffffffff',\n  'producerName': 'João Almeida',\n  'status': 'IN_PRODUCTION',\n  'channels': [ { 'id': '99999999-8888-7777-6666-555555555555', 'name': 'Instagram' } ],\n  'companyId': '12121212-3434-4545-5656-676767676767',\n  'metrics': null,\n  'history': [ { 'id': '55555555-6666-7777-8888-999999999999', 'contentId': '7d8e9f10-1112-1314-1516-171819202122', 'userId': 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee', 'userName': 'Maria Silva', 'previousStatus': null, 'newStatus': 'IN_PRODUCTION', 'changedAt': '2025-09-09T09:12:30' } ]\n}"))),
         @ApiResponse(responseCode = "404", description = "Rascunho não encontrado"),
         @ApiResponse(responseCode = "400", description = "Rascunho não está aprovado ou dados inválidos"),
         @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<ContentResponse> transformDraftToContent(
             @Parameter(description = "ID do rascunho") @PathVariable UUID draftId,
-            @Parameter(description = "Dados adicionais para o conteúdo") @Valid @RequestBody TransformDraftRequest request) {
+            @Parameter(description = "Dados adicionais para o conteúdo",
+                examples = @ExampleObject(name = "transformDraftRequest",
+                    summary = "Exemplo de request para transformar rascunho",
+                    value = "{\n  'status': 'IN_PRODUCTION',\n  'channelIds': [ '99999999-8888-7777-6666-555555555555' ],\n  'postDate': '2025-09-15T10:00:00',\n  'productId': '22222222-3333-4444-5555-666666666666',\n  'producerId': 'bbbbbbbb-cccc-dddd-eeee-ffffffffffff',\n  'productionStartDate': '2025-09-10T09:00:00',\n  'productionEndDate': '2025-09-12T18:00:00',\n  'metaAdsId': '123456789012345'\n}")) @Valid @RequestBody TransformDraftRequest request) {
         ContentResponse content = contentService.transformDraftToContent(draftId, request);
         return ResponseEntity.ok(content);
     }

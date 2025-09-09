@@ -36,7 +36,8 @@ public class DataInitializationRunner implements CommandLineRunner {
                 "LinkedIn", 
                 "YouTube",
                 "Instagram",
-                "TikTok"
+                "TikTok",
+                "Meta Ads"
         );
 
         for (String channelName : defaultChannelNames) {

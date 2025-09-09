@@ -1,9 +1,24 @@
 package com.organixui.organixbackend.draft.controller;
 
+import java.util.UUID;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.organixui.organixbackend.draft.dto.CreateDraftRequest;
 import com.organixui.organixbackend.draft.dto.DraftResponse;
+import com.organixui.organixbackend.draft.dto.DraftStatsResponse;
 import com.organixui.organixbackend.draft.dto.UpdateDraftRequest;
 import com.organixui.organixbackend.draft.service.DraftService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -12,11 +27,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.UUID;
 
 /**
  * Controller REST para gerenciamento de rascunhos.
@@ -36,10 +46,26 @@ public class DraftController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Lista de rascunhos retornada com sucesso")
     })
-    public ResponseEntity<List<DraftResponse>> getAllDrafts(
-            @Parameter(description = "Filtrar por status") @RequestParam(required = false) String status) {
-        List<DraftResponse> drafts = draftService.getAllDrafts(status);
-        return ResponseEntity.ok(drafts);
+    public ResponseEntity<?> getAllDrafts(
+            @Parameter(description = "Filtrar por status") @RequestParam(required = false) String status,
+            @Parameter(description = "Filtrar por criador") @RequestParam(required = false) UUID creatorId,
+            @Parameter(description = "Número da página (0-based)") @RequestParam(required = false) Integer page,
+            @Parameter(description = "Tamanho da página") @RequestParam(required = false) Integer size) {
+        if (page != null || size != null) {
+            int p = page != null ? page : 0;
+            int s = size != null ? size : 20;
+            var pageable = org.springframework.data.domain.PageRequest.of(p, s);
+            return ResponseEntity.ok(draftService.getAllDrafts(status, creatorId, pageable));
+        }
+        return ResponseEntity.ok(draftService.getAllDrafts(status));
+    }
+
+    @GetMapping("/recent")
+    @Operation(summary = "Rascunhos recentes", description = "Lista rascunhos criados nos últimos N dias (padrão 7)")
+    public ResponseEntity<?> getRecentDrafts(
+            @Parameter(description = "Quantidade de dias para trás") @RequestParam(required = false) Integer days) {
+        int d = (days == null || days <= 0) ? 7 : Math.min(days, 30);
+        return ResponseEntity.ok(draftService.getRecentDrafts(d));
     }
     
     @GetMapping("/{id}")
@@ -53,6 +79,21 @@ public class DraftController {
             @Parameter(description = "ID do rascunho") @PathVariable UUID id) {
         DraftResponse draft = draftService.getDraftById(id);
         return ResponseEntity.ok(draft);
+    }
+
+    @GetMapping("/stats")
+    @Operation(summary = "Estatísticas de rascunhos", description = "Retorna total de rascunhos e total aprovados (APPROVED)")
+    @ApiResponses(value = {
+    @ApiResponse(responseCode = "200", description = "Estatísticas retornadas com sucesso",
+        content = @io.swagger.v3.oas.annotations.media.Content(
+            mediaType = "application/json",
+            schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = DraftStatsResponse.class),
+            examples = @io.swagger.v3.oas.annotations.media.ExampleObject(name = "draftStatsExample",
+                summary = "Exemplo de estatísticas de rascunhos",
+                value = "{\n  'total': 54,\n  'approved': 18\n}")))
+    })
+    public ResponseEntity<DraftStatsResponse> getDraftStats() {
+        return ResponseEntity.ok(draftService.getDraftStats());
     }
     
     @PostMapping

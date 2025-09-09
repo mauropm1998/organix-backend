@@ -16,6 +16,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Payload para criação de conteúdo")
 public class ContentRequest {
     private String name;
     private String type;
@@ -28,6 +29,13 @@ public class ContentRequest {
     @Schema(description = "Status inicial do conteúdo (opcional, padrão: PENDING)")
     private ContentStatus status;
     
+    @Schema(description = "Data/hora planejada de publicação (opcional)", example = "2025-09-01T10:30:00")
     private LocalDateTime postDate;
+    @Schema(description = "Data/hora de início da produção (opcional)", example = "2025-08-25T09:00:00")
+    private LocalDateTime productionStartDate;
+    @Schema(description = "Data/hora de término da produção (opcional)", example = "2025-08-27T18:45:00")
+    private LocalDateTime productionEndDate;
+    @Schema(description = "Identificador único no Meta Ads (opcional)", example = "123456789012345")
+    private String metaAdsId;
     private List<UUID> channelIds;
 }
