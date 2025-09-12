@@ -44,6 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -294,7 +295,7 @@ public class ContentService {
             audit(content, currentUserId, "productionEndDate", String.valueOf(content.getProductionEndDate()), String.valueOf(request.getProductionEndDate()));
             content.setProductionEndDate(request.getProductionEndDate());
         }
-        if (request.getMetaAdsId() != null && !request.getMetaAdsId().equals(content.getMetaAdsId())) {
+        if (!Objects.equals(request.getMetaAdsId(), content.getMetaAdsId())) {
             audit(content, currentUserId, "metaAdsId", content.getMetaAdsId(), request.getMetaAdsId());
             content.setMetaAdsId(request.getMetaAdsId());
         }
@@ -464,6 +465,9 @@ public class ContentService {
         }
         if (request.getProductionEndDate() != null) {
             content.setProductionEndDate(request.getProductionEndDate());
+        }
+        if (request.getMetaAdsId() != null) {
+            content.setMetaAdsId(request.getMetaAdsId());
         }
         
         content = contentRepository.save(content);
