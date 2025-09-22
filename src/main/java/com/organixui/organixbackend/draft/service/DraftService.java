@@ -32,6 +32,7 @@ public class DraftService {
     
     private final DraftRepository draftRepository;
     private final UserRepository userRepository;
+    private final com.organixui.organixbackend.product.repository.ProductRepository productRepository;
 
     /**
      * Lista rascunhos baseado no role do usuário.
@@ -50,6 +51,7 @@ public class DraftService {
     // Filtra últimos 7 dias em memória (consultas simples existentes)
     drafts = drafts.stream()
         .filter(d -> d.getCreatedAt() != null && d.getCreatedAt().isAfter(fromDate))
+        .sorted(java.util.Comparator.comparing(Draft::getCreatedAt).reversed())
         .collect(Collectors.toList());
         
         return drafts.stream()
@@ -57,14 +59,14 @@ public class DraftService {
                 .collect(Collectors.toList());
     }
 
-    public Page<DraftResponse> getAllDrafts(String status, UUID creatorId, Pageable pageable) {
+    public Page<DraftResponse> getAllDrafts(String status, UUID creatorId, UUID productId, Pageable pageable) {
         UUID companyId = SecurityUtils.getCurrentUserCompanyId();
         DraftStatus st = null;
         if (status != null) {
             try { st = DraftStatus.valueOf(status.toUpperCase()); } catch (IllegalArgumentException e) { throw new BusinessException("Status inválido"); }
         }
     java.time.LocalDateTime fromDate = java.time.LocalDateTime.now().minusDays(7);
-    Page<Draft> page = draftRepository.searchDrafts(companyId, st, creatorId, fromDate, pageable);
+    Page<Draft> page = draftRepository.searchDrafts(companyId, st, creatorId, productId, fromDate, pageable);
         return page.map(this::convertToResponse);
     }
 
@@ -107,10 +109,11 @@ public class DraftService {
         UUID currentUserId = SecurityUtils.getCurrentUserId();
         UUID companyId = SecurityUtils.getCurrentUserCompanyId();
         
-        Draft draft = new Draft();
-        draft.setName(request.getName());
-        draft.setType(request.getType());
-        draft.setContent(request.getContent());
+    Draft draft = new Draft();
+    draft.setName(request.getName());
+    draft.setType(request.getType());
+    draft.setProductId(request.getProductId());
+    draft.setContent(request.getContent());
         draft.setCreatorId(currentUserId);
         draft.setCompanyId(companyId);
         draft.setStatus(request.getStatus() != null ? request.getStatus() : DraftStatus.PENDING);
@@ -136,6 +139,9 @@ public class DraftService {
         }
         if (request.getType() != null) {
             draft.setType(request.getType());
+        }
+        if (request.getProductId() != null) {
+            draft.setProductId(request.getProductId());
         }
         if (request.getContent() != null) {
             draft.setContent(request.getContent());
@@ -198,16 +204,23 @@ public class DraftService {
     private DraftResponse convertToResponse(Draft draft) {
         User creator = userRepository.findById(draft.getCreatorId()).orElse(null);
         
-        return new DraftResponse(
-                draft.getId(),
-                draft.getName(),
-                draft.getType(),
-                draft.getCreatorId(),
-                creator != null ? creator.getName() : "Unknown",
-                draft.getContent(),
-                draft.getStatus(),
-                draft.getCreatedAt(),
-                draft.getCompanyId()
-        );
+    String productName = null;
+    if (draft.getProductId() != null) {
+        productName = productRepository.findById(draft.getProductId()).map(p -> p.getName()).orElse(null);
+    }
+
+    return DraftResponse.builder()
+        .id(draft.getId())
+        .name(draft.getName())
+        .type(draft.getType())
+        .productId(draft.getProductId())
+        .productName(productName)
+        .creatorId(draft.getCreatorId())
+        .creatorName(creator != null ? creator.getName() : "Unknown")
+        .content(draft.getContent())
+        .status(draft.getStatus())
+        .createdAt(draft.getCreatedAt())
+        .companyId(draft.getCompanyId())
+        .build();
     }
 }

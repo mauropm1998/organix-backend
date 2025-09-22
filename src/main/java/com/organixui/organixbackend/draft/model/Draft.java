@@ -33,6 +33,9 @@ public class Draft {
     
     @Column(nullable = false)
     private String type;
+
+    @Column(name = "product_id")
+    private UUID productId;
     
     @Column(name = "creator_id", nullable = false)
     private UUID creatorId;

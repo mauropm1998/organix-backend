@@ -181,7 +181,7 @@ public class ContentService {
         content.setName(request.getName());
         content.setType(request.getType());
     content.setContent(request.getContent());
-        content.setProductId(request.getProductId());
+    content.setProductId(request.getProductId());
         content.setCreatorId(currentUserId);
         content.setProducerId(request.getProducerId());
         content.setChannels(channels);
@@ -515,12 +515,18 @@ public class ContentService {
             .build())
         .collect(Collectors.toList());
 
+        String productName = null;
+        if (content.getProductId() != null) {
+            productName = productRepository.findById(content.getProductId()).map(p -> p.getName()).orElse(null);
+        }
+
     return ContentResponse.builder()
                 .id(content.getId())
                 .name(content.getName())
                 .type(content.getType())
                 .content(content.getContent())
                 .productId(content.getProductId())
+                .productName(productName)
                 .creatorId(content.getCreatorId())
                 .creatorName(creator != null ? creator.getName() : null)
                 .creationDate(content.getCreationDate())

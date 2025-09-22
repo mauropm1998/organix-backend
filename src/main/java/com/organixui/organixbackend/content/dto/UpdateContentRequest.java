@@ -27,7 +27,7 @@ public class UpdateContentRequest {
     private UUID producerId;
     
     @Schema(description = "Status do conteúdo", 
-            allowableValues = {"PENDING", "CANCELED", "POSTED", "IN_PRODUCTION", "FINISHED"})
+        allowableValues = {"PENDING", "CANCELED", "POSTED", "IN_PRODUCTION", "PRODUCTION_FINISHED", "FINISHED"})
     private ContentStatus status;
     
     @Schema(description = "Nova data/hora de publicação (opcional)", example = "2025-09-02T14:00:00")

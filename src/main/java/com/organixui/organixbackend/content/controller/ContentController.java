@@ -51,14 +51,31 @@ public class ContentController {
     
     @GetMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
-    @Operation(summary = "Listar conteúdo", description = "Lista conteúdo da empresa com filtros opcionais e paginação (?page=&size=)")
+    @Operation(summary = "Listar conteúdo", description = "Lista conteúdo da empresa com filtros opcionais, ordenado por creationDate desc. Suporta paginação (?page=&size=)")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Conteúdo retornado com sucesso")
+        @ApiResponse(responseCode = "200", description = "Conteúdo retornado com sucesso",
+            content = {
+                @Content(
+                    mediaType = "application/json",
+                    array = @io.swagger.v3.oas.annotations.media.ArraySchema(schema = @Schema(implementation = ContentResponse.class)),
+                    examples = @ExampleObject(name = "contentList",
+                        summary = "Exemplo de listagem (não paginada)",
+                        value = "[\n  { \"id\": \"3b8d2a1c-7e4f-4f2a-9c6d-1e2b3a4c5d6e\", \"name\": \"Post Primavera\", \"type\": \"SOCIAL_POST\", \"content\": \"Texto...\", \"productId\": \"11111111-2222-3333-4444-555555555555\", \"creatorId\": \"aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee\", \"creatorName\": \"Maria Silva\", \"creationDate\": \"2025-09-22T10:05:00\", \"status\": \"IN_PRODUCTION\", \"companyId\": \"99999999-8888-7777-6666-555555555555\" }\n]")),
+                @Content(
+                    mediaType = "application/json",
+                    examples = @ExampleObject(name = "contentPage",
+                        summary = "Exemplo de listagem paginada (Page)",
+                        value = "{\n  \"content\": [\n    { \"id\": \"3b8d2a1c-7e4f-4f2a-9c6d-1e2b3a4c5d6e\", \"name\": \"Post Primavera\", \"type\": \"SOCIAL_POST\", \"content\": \"Texto...\", \"productId\": \"11111111-2222-3333-4444-555555555555\", \"creatorId\": \"aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee\", \"creatorName\": \"Maria Silva\", \"creationDate\": \"2025-09-22T10:05:00\", \"status\": \"IN_PRODUCTION\", \"companyId\": \"99999999-8888-7777-6666-555555555555\" }\n  ],\n  \"pageable\": { \"pageNumber\": 0, \"pageSize\": 20, \"sort\": { \"sorted\": true, \"unsorted\": false, \"empty\": false } },\n  \"totalElements\": 128,\n  \"totalPages\": 7,\n  \"size\": 20,\n  \"number\": 0,\n  \"sort\": { \"sorted\": true, \"unsorted\": false, \"empty\": false },\n  \"first\": true,\n  \"last\": false,\n  \"numberOfElements\": 20,\n  \"empty\": false\n}"))
+            }
+        )
     })
     public ResponseEntity<?> getAllContent(
-            @Parameter(description = "Filtro por status do conteúdo") @RequestParam(required = false) ContentStatus status,
+        @Parameter(description = "Filtro por status do conteúdo",
+            schema = @Schema(allowableValues = {"PENDING","IN_PRODUCTION","POSTED","PRODUCTION_FINISHED","FINISHED","CANCELED"}))
+        @RequestParam(required = false) ContentStatus status,
             @Parameter(description = "Filtro por canal específico (ID do canal)") @RequestParam(required = false) UUID channelId,
-            @Parameter(description = "Filtro por produto específico") @RequestParam(required = false) UUID productId,
+            @Parameter(description = "Filtro por produto específico", example = "11111111-2222-3333-4444-555555555555")
+            @RequestParam(required = false) UUID productId,
             @Parameter(description = "Filtro por usuário específico (creator ou producer)") @RequestParam(required = false) UUID userId,
             @Parameter(description = "Número da página (0-based)") @RequestParam(required = false) Integer page,
             @Parameter(description = "Tamanho da página") @RequestParam(required = false) Integer size) {

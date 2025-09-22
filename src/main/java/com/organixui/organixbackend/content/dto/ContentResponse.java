@@ -26,6 +26,7 @@ public class ContentResponse {
     private String type;
     private String content;
     private UUID productId;
+    private String productName;
     private UUID creatorId;
     private String creatorName;
     private LocalDateTime creationDate;
@@ -39,6 +40,8 @@ public class ContentResponse {
     private String metaAdsId;
     private UUID producerId;
     private String producerName;
+    @Schema(description = "Status do conteúdo",
+        allowableValues = {"PENDING","IN_PRODUCTION","POSTED","PRODUCTION_FINISHED","FINISHED","CANCELED"})
     private ContentStatus status;
     private List<ChannelResponse> channels;
     private UUID companyId;

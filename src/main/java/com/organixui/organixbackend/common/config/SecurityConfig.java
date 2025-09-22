@@ -62,7 +62,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authz -> authz
 
                         .requestMatchers("/",
-                                "/login", "/signup", "/drafts", "/content", "/performance", "/users", "/products",
+                                "/login", "/signup", "/drafts", "/content/**", "/performance", "/users", "/products",
                                 "/chat/**",
                                 "/index.html",
                                 "/images/**",

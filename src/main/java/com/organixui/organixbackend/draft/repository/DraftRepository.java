@@ -69,10 +69,12 @@ public interface DraftRepository extends JpaRepository<Draft, UUID> {
     @Query("SELECT d FROM Draft d WHERE d.companyId = :companyId " +
         "AND (:status IS NULL OR d.status = :status) " +
             "AND (:creatorId IS NULL OR d.creatorId = :creatorId) " +
+            "AND (:productId IS NULL OR d.productId = :productId) " +
             "AND d.createdAt >= :fromDate ORDER BY d.createdAt DESC")
     Page<Draft> searchDrafts(@Param("companyId") UUID companyId,
                  @Param("status") DraftStatus status,
                  @Param("creatorId") UUID creatorId,
+                             @Param("productId") UUID productId,
                              @Param("fromDate") java.time.LocalDateTime fromDate,
                  Pageable pageable);
 }

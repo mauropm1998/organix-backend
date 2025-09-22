@@ -16,7 +16,9 @@ import java.util.UUID;
 @Schema(description = "Dados para transformar um rascunho em conteúdo")
 public class TransformDraftRequest {
 
-    @Schema(description = "Status inicial do conteúdo", example = "PENDING")
+    @Schema(description = "Status inicial do conteúdo",
+        example = "PENDING",
+        allowableValues = {"PENDING","IN_PRODUCTION","POSTED","PRODUCTION_FINISHED","FINISHED","CANCELED"})
     private ContentStatus status = ContentStatus.PENDING;
 
     @Schema(description = "IDs dos canais onde o conteúdo será publicado", required = true)

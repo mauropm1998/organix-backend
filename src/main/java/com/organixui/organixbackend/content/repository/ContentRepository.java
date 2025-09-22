@@ -112,7 +112,7 @@ public interface ContentRepository extends JpaRepository<Content, UUID> {
         "AND (:status IS NULL OR c.status = :status) " +
         "AND (:productId IS NULL OR c.productId = :productId) " +
         "AND (:userId IS NULL OR c.creatorId = :userId OR c.producerId = :userId) " +
-        "AND (:channelId IS NULL OR ch.id = :channelId)",
+        "AND (:channelId IS NULL OR ch.id = :channelId) ORDER BY c.creationDate DESC",
         countQuery = "SELECT COUNT(DISTINCT c) FROM Content c LEFT JOIN c.channels ch WHERE c.companyId = :companyId " +
             "AND (:status IS NULL OR c.status = :status) " +
             "AND (:productId IS NULL OR c.productId = :productId) " +

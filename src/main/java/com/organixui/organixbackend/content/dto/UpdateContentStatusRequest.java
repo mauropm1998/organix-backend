@@ -17,6 +17,8 @@ import lombok.NoArgsConstructor;
 public class UpdateContentStatusRequest {
     
     @NotNull(message = "Status é obrigatório")
-    @Schema(description = "Novo status do conteúdo", example = "POSTED")
+    @Schema(description = "Novo status do conteúdo",
+        example = "POSTED",
+        allowableValues = {"PENDING","IN_PRODUCTION","POSTED","PRODUCTION_FINISHED","FINISHED","CANCELED"})
     private ContentStatus status;
 }

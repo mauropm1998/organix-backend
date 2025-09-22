@@ -8,5 +8,6 @@ public enum ContentStatus {
     CANCELED,       // Cancelado
     POSTED,         // Postado
     IN_PRODUCTION,  // Em produção
-    FINISHED        // Finalizado
+    PRODUCTION_FINISHED, // Produção finalizada
+    FINISHED        // Finalizado (pós-publicação)
 }

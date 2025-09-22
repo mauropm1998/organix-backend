@@ -24,6 +24,9 @@ public class CreateDraftRequest {
     @NotBlank(message = "Tipo é obrigatório")
     private String type;
     
+    @Schema(description = "ID do produto associado (opcional)")
+    private java.util.UUID productId;
+
     @NotNull(message = "ID do criador é obrigatório")
     private UUID creatorId;
     

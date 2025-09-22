@@ -1,6 +1,7 @@
 package com.organixui.organixbackend.draft.dto;
 
 import com.organixui.organixbackend.draft.model.DraftStatus;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,6 +20,9 @@ public class UpdateDraftRequest {
     
     @NotBlank(message = "Tipo é obrigatório") 
     private String type;
+    
+    @Schema(description = "ID do produto associado (opcional)")
+    private java.util.UUID productId;
     
     private String content;
     
