@@ -41,18 +41,18 @@ public class DraftService {
     public List<DraftResponse> getAllDrafts(String status) {
         UUID companyId = SecurityUtils.getCurrentUserCompanyId();
         List<Draft> drafts;
-    java.time.LocalDateTime fromDate = java.time.LocalDateTime.now().minusDays(7);
+        
         // Ambos veem todos os rascunhos da empresa
         if (status != null) {
             drafts = draftRepository.findByStatusAndCompanyId(DraftStatus.valueOf(status.toUpperCase()), companyId);
         } else {
             drafts = draftRepository.findByCompanyId(companyId);
         }
-    // Filtra últimos 7 dias em memória (consultas simples existentes)
-    drafts = drafts.stream()
-        .filter(d -> d.getCreatedAt() != null && d.getCreatedAt().isAfter(fromDate))
-        .sorted(java.util.Comparator.comparing(Draft::getCreatedAt).reversed())
-        .collect(Collectors.toList());
+        
+        // Ordena por data de criação (mais recentes primeiro)
+        drafts = drafts.stream()
+                .sorted(java.util.Comparator.comparing(Draft::getCreatedAt).reversed())
+                .collect(Collectors.toList());
         
         return drafts.stream()
                 .map(this::convertToResponse)
@@ -65,8 +65,8 @@ public class DraftService {
         if (status != null) {
             try { st = DraftStatus.valueOf(status.toUpperCase()); } catch (IllegalArgumentException e) { throw new BusinessException("Status inválido"); }
         }
-    java.time.LocalDateTime fromDate = java.time.LocalDateTime.now().minusDays(7);
-    Page<Draft> page = draftRepository.searchDrafts(companyId, st, creatorId, productId, fromDate, pageable);
+        
+        Page<Draft> page = draftRepository.searchDrafts(companyId, st, creatorId, productId, pageable);
         return page.map(this::convertToResponse);
     }
 
