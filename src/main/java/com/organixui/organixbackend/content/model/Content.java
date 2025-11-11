@@ -14,7 +14,8 @@ import java.util.UUID;
 @Table(name = "content", indexes = {
     @Index(name = "idx_content_company_creation_date", columnList = "company_id,creation_date"),
     @Index(name = "idx_content_company_status", columnList = "company_id,status"),
-    @Index(name = "idx_content_company_product", columnList = "company_id,product_id")
+    @Index(name = "idx_content_company_product", columnList = "company_id,product_id"),
+    @Index(name = "idx_content_company_traffic_type", columnList = "company_id,traffic_type")
 })
 @Data
 @NoArgsConstructor
@@ -48,6 +49,10 @@ public class Content {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ContentStatus status;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "traffic_type")
+    private TrafficType trafficType;
     
     @Column(name = "creation_date", nullable = false)
     private LocalDateTime creationDate;

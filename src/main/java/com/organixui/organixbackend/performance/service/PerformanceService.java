@@ -2,6 +2,7 @@ package com.organixui.organixbackend.performance.service;
 
 import com.organixui.organixbackend.common.exception.ResourceNotFoundException;
 import com.organixui.organixbackend.common.security.SecurityUtils;
+import com.organixui.organixbackend.content.model.TrafficType;
 import com.organixui.organixbackend.content.repository.ContentRepository;
 import com.organixui.organixbackend.performance.dto.*;
 import com.organixui.organixbackend.performance.model.ContentMetrics;
@@ -94,6 +95,13 @@ public class PerformanceService {
      * Obtém resumo geral de performance da empresa com filtros opcionais.
      */
     public PerformanceSummaryResponse getPerformanceSummary(LocalDate startDate, LocalDate endDate, String channel, String productId) {
+        return getPerformanceSummary(startDate, endDate, channel, productId, null);
+    }
+
+    /**
+     * Obtém resumo geral de performance da empresa com filtros opcionais incluindo tipo de tráfego.
+     */
+    public PerformanceSummaryResponse getPerformanceSummary(LocalDate startDate, LocalDate endDate, String channel, String productId, TrafficType trafficType) {
         UUID companyId = SecurityUtils.getCurrentUserCompanyId();
         log.debug("Fetching performance summary for company: {}", companyId);
         
@@ -114,7 +122,7 @@ public class PerformanceService {
         
         // Busca métricas agregadas do banco de dados
         Object[] result = contentMetricsRepository.findAggregatedMetrics(
-            companyId, startDateTime, endDateTime, channel, productUuid);
+            companyId, startDateTime, endDateTime, channel, productUuid, trafficType);
         
         if (result == null || result.length < 6) {
             // Retorna valores zerados se não houver dados
@@ -183,6 +191,13 @@ public class PerformanceService {
      * Obtém top conteúdos por performance com filtros opcionais (sem paginação).
      */
     public List<TopContentResponse> getTopContent(LocalDate startDate, LocalDate endDate, String channel, String productId) {
+        return getTopContent(startDate, endDate, channel, productId, null);
+    }
+
+    /**
+     * Obtém top conteúdos por performance com filtros opcionais incluindo tipo de tráfego (sem paginação).
+     */
+    public List<TopContentResponse> getTopContent(LocalDate startDate, LocalDate endDate, String channel, String productId, TrafficType trafficType) {
         UUID companyId = SecurityUtils.getCurrentUserCompanyId();
         log.debug("Fetching top content for company: {}", companyId);
         
@@ -202,7 +217,7 @@ public class PerformanceService {
         
         // Busca top conteúdos do banco de dados
         List<Object[]> results = contentMetricsRepository.findTopContent(
-            companyId, startDateTime, endDateTime, channel, productUuid);
+            companyId, startDateTime, endDateTime, channel, productUuid, trafficType);
         
         return results.stream().map(result -> {
             String contentId = result[0] != null ? result[0].toString() : "";

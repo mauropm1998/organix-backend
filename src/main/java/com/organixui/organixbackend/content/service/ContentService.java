@@ -11,6 +11,7 @@ import com.organixui.organixbackend.content.dto.UpdateContentStatusRequest;
 import com.organixui.organixbackend.content.dto.ChannelResponse;
 import com.organixui.organixbackend.content.model.Content;
 import com.organixui.organixbackend.content.model.ContentStatus;
+import com.organixui.organixbackend.content.model.TrafficType;
 import com.organixui.organixbackend.content.model.Channel;
 import com.organixui.organixbackend.content.repository.ContentRepository;
 import com.organixui.organixbackend.content.repository.ChannelRepository;
@@ -73,7 +74,13 @@ public class ContentService {
 
     public List<ContentResponse> getAllContent(ContentStatus status, UUID channelId, UUID productId, UUID userId) {
         UUID companyId = SecurityUtils.getCurrentUserCompanyId();
-    List<Content> contentList = contentRepository.searchContent(companyId, status, channelId, productId, userId);
+    List<Content> contentList = contentRepository.searchContent(companyId, status, channelId, productId, userId, null);
+    return contentList.stream().map(this::convertToResponse).collect(Collectors.toList());
+    }
+
+    public List<ContentResponse> getAllContent(ContentStatus status, UUID channelId, UUID productId, UUID userId, TrafficType trafficType) {
+        UUID companyId = SecurityUtils.getCurrentUserCompanyId();
+    List<Content> contentList = contentRepository.searchContent(companyId, status, channelId, productId, userId, trafficType);
     return contentList.stream().map(this::convertToResponse).collect(Collectors.toList());
     }
 
@@ -95,7 +102,13 @@ public class ContentService {
 
     public Page<ContentResponse> getAllContent(ContentStatus status, UUID channelId, UUID productId, UUID userId, Pageable pageable) {
         UUID companyId = SecurityUtils.getCurrentUserCompanyId();
-        Page<Content> page = contentRepository.searchContentPage(companyId, status, channelId, productId, userId, pageable);
+        Page<Content> page = contentRepository.searchContentPage(companyId, status, channelId, productId, userId, null, pageable);
+        return page.map(this::convertToResponse);
+    }
+
+    public Page<ContentResponse> getAllContent(ContentStatus status, UUID channelId, UUID productId, UUID userId, TrafficType trafficType, Pageable pageable) {
+        UUID companyId = SecurityUtils.getCurrentUserCompanyId();
+        Page<Content> page = contentRepository.searchContentPage(companyId, status, channelId, productId, userId, trafficType, pageable);
         return page.map(this::convertToResponse);
     }
 
@@ -203,9 +216,11 @@ public class ContentService {
         if (request.getMetaAdsId() != null) {
             content.setMetaAdsId(request.getMetaAdsId());
         }
-        if (request.getMetaAdsId() != null) {
-            content.setMetaAdsId(request.getMetaAdsId());
-        }
+
+        TrafficType resolvedTrafficType = request.getTrafficType() != null
+                ? request.getTrafficType()
+                : TrafficType.ORGANIC;
+        content.setTrafficType(resolvedTrafficType);
         
         Content savedContent = contentRepository.save(content);
     // Cria histórico inicial
@@ -300,6 +315,15 @@ public class ContentService {
             content.setMetaAdsId(request.getMetaAdsId());
         }
         
+        if (request.getTrafficType() != null && request.getTrafficType() != content.getTrafficType()) {
+            audit(content, currentUserId, "trafficType", String.valueOf(content.getTrafficType()), String.valueOf(request.getTrafficType()));
+            content.setTrafficType(request.getTrafficType());
+        }
+
+        if (content.getTrafficType() == null) {
+            content.setTrafficType(TrafficType.ORGANIC);
+        }
+        
         Content savedContent = contentRepository.save(content);
         if (request.getStatus() != null && previousStatus != savedContent.getStatus()) {
             createStatusHistory(savedContent, currentUserId, previousStatus, savedContent.getStatus());
@@ -366,7 +390,22 @@ public class ContentService {
             throw new BusinessException("You can only delete content you created");
         }
         
+        // Deleta métricas associadas
+        contentMetricsRepository.deleteByContentId(id);
+        
+        // Deleta histórico de status
+        contentStatusHistoryRepository.deleteByContentId(id);
+        
+        // Deleta audit logs
+        contentAuditLogRepository.deleteByContentId(id);
+        
+        // Limpa canais (remove a relação many-to-many)
+        content.setChannels(null);
+        
+        // Finalmente, deleta o conteúdo
         contentRepository.delete(content);
+        
+        log.info("Content {} deleted successfully by user {}", id, currentUserId);
     }
 
     private void validateStatusChange(Content content, ContentStatus newStatus) {
@@ -470,6 +509,11 @@ public class ContentService {
             content.setMetaAdsId(request.getMetaAdsId());
         }
         
+        TrafficType resolvedTrafficType = request.getTrafficType() != null
+                ? request.getTrafficType()
+                : TrafficType.ORGANIC;
+        content.setTrafficType(resolvedTrafficType);
+        
         content = contentRepository.save(content);
         // histórico inicial
     createStatusHistory(content, currentUserId, null, content.getStatus());
@@ -537,6 +581,7 @@ public class ContentService {
                 .producerId(content.getProducerId())
                 .producerName(producer != null ? producer.getName() : null)
                 .status(content.getStatus())
+                .trafficType(content.getTrafficType())
                 .channels(channelResponses)
                 .companyId(content.getCompanyId())
                 .metrics(metricsResponse)

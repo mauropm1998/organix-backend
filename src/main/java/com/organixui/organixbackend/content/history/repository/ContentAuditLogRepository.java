@@ -8,4 +8,6 @@ import java.util.UUID;
 
 public interface ContentAuditLogRepository extends JpaRepository<ContentAuditLog, UUID> {
     List<ContentAuditLog> findByContentIdOrderByChangedAtAsc(UUID contentId);
+    
+    void deleteByContentId(UUID contentId);
 }

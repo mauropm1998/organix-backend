@@ -1,6 +1,7 @@
 package com.organixui.organixbackend.content.dto;
 
 import com.organixui.organixbackend.content.model.ContentStatus;
+import com.organixui.organixbackend.content.model.TrafficType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -38,5 +39,7 @@ public class UpdateContentRequest {
     private LocalDateTime productionEndDate;
     @Schema(description = "Identificador no Meta Ads (opcional)", example = "123456789012345")
     private String metaAdsId;
+    @Schema(description = "Tipo de tráfego (PAID ou ORGANIC)")
+    private TrafficType trafficType;
     private List<UUID> channelIds;
 }

@@ -8,4 +8,6 @@ import java.util.UUID;
 
 public interface ContentStatusHistoryRepository extends JpaRepository<ContentStatusHistory, UUID> {
     List<ContentStatusHistory> findByContentIdOrderByChangedAtAsc(UUID contentId);
+    
+    void deleteByContentId(UUID contentId);
 }

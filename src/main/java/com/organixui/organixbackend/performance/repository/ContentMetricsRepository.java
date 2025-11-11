@@ -1,5 +1,6 @@
 package com.organixui.organixbackend.performance.repository;
 
+import com.organixui.organixbackend.content.model.TrafficType;
 import com.organixui.organixbackend.performance.model.ContentMetrics;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -67,6 +68,32 @@ public interface ContentMetricsRepository extends JpaRepository<ContentMetrics, 
                                   @Param("productId") UUID productId);
 
     /**
+     * Busca métricas agregadas por empresa com filtros opcionais incluindo tipo de tráfego.
+     */
+    @Query("SELECT " +
+           "COALESCE(SUM(cm.views), 0) as totalViews, " +
+           "COALESCE(SUM(cm.likes), 0) as totalLikes, " +
+           "COALESCE(SUM(cm.comments), 0) as totalComments, " +
+           "COALESCE(SUM(cm.shares), 0) as totalShares, " +
+           "COALESCE(SUM(cm.reach), 0) as totalReach, " +
+           "CASE WHEN COUNT(cm) > 0 THEN COALESCE(AVG(CAST(cm.engagement AS double)), 0.0) ELSE 0.0 END as avgEngagement " +
+           "FROM ContentMetrics cm " +
+           "JOIN Content c ON cm.contentId = c.id " +
+           "LEFT JOIN c.channels ch " +
+           "WHERE c.companyId = :companyId " +
+           "AND (:startDate IS NULL OR c.postDate >= :startDate) " +
+           "AND (:endDate IS NULL OR c.postDate <= :endDate) " +
+           "AND (:channel IS NULL OR ch.name = :channel) " +
+           "AND (:productId IS NULL OR c.productId = :productId) " +
+           "AND (:trafficType IS NULL OR c.trafficType = :trafficType)")
+    Object[] findAggregatedMetrics(@Param("companyId") UUID companyId, 
+                                  @Param("startDate") java.time.LocalDateTime startDate, 
+                                  @Param("endDate") java.time.LocalDateTime endDate, 
+                                  @Param("channel") String channel, 
+                                  @Param("productId") UUID productId,
+                                  @Param("trafficType") TrafficType trafficType);
+
+    /**
      * Busca métricas por canal para uma empresa.
      */
     @Query("SELECT ch.name as channelName, " +
@@ -121,4 +148,43 @@ public interface ContentMetricsRepository extends JpaRepository<ContentMetrics, 
                                  @Param("endDate") java.time.LocalDateTime endDate, 
                                  @Param("channel") String channel, 
                                  @Param("productId") UUID productId);
+
+    /**
+     * Busca top conteúdos por performance com filtros opcionais incluindo tipo de tráfego.
+     * Retorna métricas específicas por canal.
+     */
+    @Query("SELECT c.id as contentId, " +
+           "c.name as contentName, " +
+           "c.type as contentType, " +
+           "c.productId as productId, " +
+           "(SELECT p.name FROM Product p WHERE p.id = c.productId) as productName, " +
+           "cmd.channelName as channelName, " +
+           "COALESCE(cmd.likes, 0) as channelLikes, " +
+           "COALESCE(cmd.comments, 0) as channelComments, " +
+           "COALESCE(cmd.shares, 0) as channelShares, " +
+           "COALESCE(cmd.siteVisits, 0) as channelSiteVisits, " +
+           "COALESCE(cmd.newAccounts, 0) as channelNewAccounts, " +
+           "COALESCE(cmd.postClicks, 0) as channelPostClicks, " +
+           "c.postDate as publishDate, " +
+           "(" +
+           "  COALESCE(cmd.likes, 0) * 0.3 + " +
+           "  COALESCE(cmd.comments, 0) * 0.4 + " +
+           "  COALESCE(cmd.shares, 0) * 0.3" +
+           ") as performanceScore " +
+           "FROM ContentMetrics cm " +
+           "JOIN Content c ON cm.contentId = c.id " +
+           "JOIN cm.channelMetrics cmd " +
+           "WHERE c.companyId = :companyId " +
+           "AND (:startDate IS NULL OR c.postDate >= :startDate) " +
+           "AND (:endDate IS NULL OR c.postDate <= :endDate) " +
+           "AND (:channel IS NULL OR cmd.channelName = :channel) " +
+           "AND (:productId IS NULL OR c.productId = :productId) " +
+           "AND (:trafficType IS NULL OR c.trafficType = :trafficType) " +
+           "ORDER BY performanceScore DESC")
+    List<Object[]> findTopContent(@Param("companyId") UUID companyId, 
+                                 @Param("startDate") java.time.LocalDateTime startDate, 
+                                 @Param("endDate") java.time.LocalDateTime endDate, 
+                                 @Param("channel") String channel, 
+                                 @Param("productId") UUID productId,
+                                 @Param("trafficType") TrafficType trafficType);
 }

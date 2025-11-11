@@ -1,6 +1,7 @@
 package com.organixui.organixbackend.content.dto;
 
 import com.organixui.organixbackend.content.model.ContentStatus;
+import com.organixui.organixbackend.content.model.TrafficType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import com.organixui.organixbackend.performance.dto.ContentMetricsResponse;
 import lombok.AllArgsConstructor;
@@ -43,6 +44,8 @@ public class ContentResponse {
     @Schema(description = "Status do conteúdo",
         allowableValues = {"PENDING","IN_PRODUCTION","POSTED","PRODUCTION_FINISHED","FINISHED","CANCELED"})
     private ContentStatus status;
+    @Schema(description = "Tipo de tráfego (PAID ou ORGANIC)")
+    private TrafficType trafficType;
     private List<ChannelResponse> channels;
     private UUID companyId;
     private ContentMetricsResponse metrics;

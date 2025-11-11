@@ -10,6 +10,7 @@ import com.organixui.organixbackend.content.dto.UpdateContentRequest;
 import com.organixui.organixbackend.content.dto.TransformDraftRequest;
 import com.organixui.organixbackend.content.dto.UpdateContentStatusRequest;
 import com.organixui.organixbackend.content.model.ContentStatus;
+import com.organixui.organixbackend.content.model.TrafficType;
 import com.organixui.organixbackend.content.service.ContentService;
 import com.organixui.organixbackend.performance.dto.ContentMetricsResponse;
 import com.organixui.organixbackend.performance.dto.ChannelMetricResponse;
@@ -51,21 +52,23 @@ public class ContentController {
     
     @GetMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
-    @Operation(summary = "Listar conteúdo", description = "Lista conteúdo da empresa com filtros opcionais, ordenado por creationDate desc. Suporta paginação (?page=&size=)")
+    @Operation(summary = "Listar conteúdo", 
+        description = "Lista conteúdo da empresa com filtros opcionais, ordenado por creationDate desc. Suporta paginação (?page=&size=). " +
+            "Permite filtrar por status, canal, produto, usuário e tipo de tráfego (PAID ou ORGANIC).")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Conteúdo retornado com sucesso",
             content = {
                 @Content(
                     mediaType = "application/json",
                     array = @io.swagger.v3.oas.annotations.media.ArraySchema(schema = @Schema(implementation = ContentResponse.class)),
-                    examples = @ExampleObject(name = "contentList",
-                        summary = "Exemplo de listagem (não paginada)",
-                        value = "[\n  { \"id\": \"3b8d2a1c-7e4f-4f2a-9c6d-1e2b3a4c5d6e\", \"name\": \"Post Primavera\", \"type\": \"SOCIAL_POST\", \"content\": \"Texto...\", \"productId\": \"11111111-2222-3333-4444-555555555555\", \"creatorId\": \"aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee\", \"creatorName\": \"Maria Silva\", \"creationDate\": \"2025-09-22T10:05:00\", \"status\": \"IN_PRODUCTION\", \"companyId\": \"99999999-8888-7777-6666-555555555555\" }\n]")),
+                    examples = @ExampleObject(name = "contentListWithTraffic",
+                        summary = "Exemplo de listagem com tipo de tráfego",
+                        value = "[\n  { \"id\": \"3b8d2a1c-7e4f-4f2a-9c6d-1e2b3a4c5d6e\", \"name\": \"Campanha Paga\", \"type\": \"SOCIAL_POST\", \"trafficType\": \"PAID\", \"content\": \"Post pago...\", \"productId\": \"11111111-2222-3333-4444-555555555555\", \"creatorId\": \"aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee\", \"creatorName\": \"Maria Silva\", \"creationDate\": \"2025-09-22T10:05:00\", \"status\": \"POSTED\", \"companyId\": \"99999999-8888-7777-6666-555555555555\" },\n  { \"id\": \"4c9e3b2d-8f5g-5g3b-0d7e-2f3c5a6d7e8f\", \"name\": \"Post Orgânico\", \"type\": \"SOCIAL_POST\", \"trafficType\": \"ORGANIC\", \"content\": \"Post orgânico...\", \"productId\": \"11111111-2222-3333-4444-555555555555\", \"creatorId\": \"bbbbbbbb-cccc-dddd-eeee-ffffffffffff\", \"creatorName\": \"João Silva\", \"creationDate\": \"2025-09-20T14:30:00\", \"status\": \"POSTED\", \"companyId\": \"99999999-8888-7777-6666-555555555555\" }\n]")),
                 @Content(
                     mediaType = "application/json",
                     examples = @ExampleObject(name = "contentPage",
                         summary = "Exemplo de listagem paginada (Page)",
-                        value = "{\n  \"content\": [\n    { \"id\": \"3b8d2a1c-7e4f-4f2a-9c6d-1e2b3a4c5d6e\", \"name\": \"Post Primavera\", \"type\": \"SOCIAL_POST\", \"content\": \"Texto...\", \"productId\": \"11111111-2222-3333-4444-555555555555\", \"creatorId\": \"aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee\", \"creatorName\": \"Maria Silva\", \"creationDate\": \"2025-09-22T10:05:00\", \"status\": \"IN_PRODUCTION\", \"companyId\": \"99999999-8888-7777-6666-555555555555\" }\n  ],\n  \"pageable\": { \"pageNumber\": 0, \"pageSize\": 20, \"sort\": { \"sorted\": true, \"unsorted\": false, \"empty\": false } },\n  \"totalElements\": 128,\n  \"totalPages\": 7,\n  \"size\": 20,\n  \"number\": 0,\n  \"sort\": { \"sorted\": true, \"unsorted\": false, \"empty\": false },\n  \"first\": true,\n  \"last\": false,\n  \"numberOfElements\": 20,\n  \"empty\": false\n}"))
+                        value = "{\n  \"content\": [\n    { \"id\": \"3b8d2a1c-7e4f-4f2a-9c6d-1e2b3a4c5d6e\", \"name\": \"Post Primavera\", \"type\": \"SOCIAL_POST\", \"trafficType\": \"PAID\", \"content\": \"Texto...\", \"productId\": \"11111111-2222-3333-4444-555555555555\", \"creatorId\": \"aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee\", \"creatorName\": \"Maria Silva\", \"creationDate\": \"2025-09-22T10:05:00\", \"status\": \"IN_PRODUCTION\", \"companyId\": \"99999999-8888-7777-6666-555555555555\" }\n  ],\n  \"pageable\": { \"pageNumber\": 0, \"pageSize\": 20, \"sort\": { \"sorted\": true, \"unsorted\": false, \"empty\": false } },\n  \"totalElements\": 128,\n  \"totalPages\": 7,\n  \"size\": 20,\n  \"number\": 0,\n  \"sort\": { \"sorted\": true, \"unsorted\": false, \"empty\": false },\n  \"first\": true,\n  \"last\": false,\n  \"numberOfElements\": 20,\n  \"empty\": false\n}"))
             }
         )
     })
@@ -77,15 +80,19 @@ public class ContentController {
             @Parameter(description = "Filtro por produto específico", example = "11111111-2222-3333-4444-555555555555")
             @RequestParam(required = false) UUID productId,
             @Parameter(description = "Filtro por usuário específico (creator ou producer)") @RequestParam(required = false) UUID userId,
-            @Parameter(description = "Número da página (0-based)") @RequestParam(required = false) Integer page,
-            @Parameter(description = "Tamanho da página") @RequestParam(required = false) Integer size) {
+            @Parameter(description = "Filtro por tipo de tráfego", 
+                schema = @Schema(allowableValues = {"PAID", "ORGANIC"}),
+                example = "PAID")
+            @RequestParam(required = false) TrafficType trafficType,
+            @Parameter(description = "Número da página (0-based)", example = "0") @RequestParam(required = false) Integer page,
+            @Parameter(description = "Tamanho da página", example = "20") @RequestParam(required = false) Integer size) {
         if (page != null || size != null) {
             int p = page != null ? page : 0;
             int s = size != null ? size : 20;
             var pageable = org.springframework.data.domain.PageRequest.of(p, s);
-            return ResponseEntity.ok(contentService.getAllContent(status, channelId, productId, userId, pageable));
+            return ResponseEntity.ok(contentService.getAllContent(status, channelId, productId, userId, trafficType, pageable));
         }
-        return ResponseEntity.ok(contentService.getAllContent(status, channelId, productId, userId));
+        return ResponseEntity.ok(contentService.getAllContent(status, channelId, productId, userId, trafficType));
     }
 
     @GetMapping("/recent")
@@ -165,53 +172,59 @@ public class ContentController {
     
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
-    @Operation(summary = "Criar conteúdo", description = "Cria um novo conteúdo com status inicial customizável. Se não especificado, o status será PENDING")
+    @Operation(summary = "Criar conteúdo", 
+        description = "Cria um novo conteúdo com status inicial customizável (PENDING por padrão). " +
+            "Suporta configuração de tipo de tráfego (PAID ou ORGANIC) para melhor segmentação de análises.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Conteúdo criado com sucesso",
                 content = @Content(mediaType = "application/json",
                         schema = @Schema(implementation = ContentResponse.class),
-                        examples = @ExampleObject(name = "contentCreated",
-                                summary = "Exemplo de conteúdo criado",
-                                value = "{\n  'id': '3b8d2a1c-7e4f-4f2a-9c6d-1e2b3a4c5d6e',\n  'name': 'Post de Campanha Primavera',\n  'type': 'SOCIAL_POST',\n  'content': 'Texto do post...',\n  'productId': '11111111-2222-3333-4444-555555555555',\n  'creatorId': 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',\n  'creatorName': 'Maria Silva',\n  'creationDate': '2025-08-25T09:05:12',\n  'postDate': '2025-09-01T10:30:00',\n  'productionStartDate': '2025-08-25T09:00:00',\n  'productionEndDate': '2025-08-27T18:45:00',\n  'metaAdsId': '123456789012345',\n  'producerId': 'bbbbbbbb-cccc-dddd-eeee-ffffffffffff',\n  'producerName': 'João Almeida',\n  'status': 'PENDING',\n  'channels': [],\n  'companyId': '99999999-8888-7777-6666-555555555555',\n  'metrics': null,\n  'history': [ { 'newStatus': 'PENDING', 'previousStatus': null, 'changedAt': '2025-08-25T09:05:12', 'userId': 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee' } ]\n}"))),
-        @ApiResponse(responseCode = "400", description = "Dados inválidos")
+                        examples = @ExampleObject(name = "contentCreatedWithTraffic",
+                                summary = "Exemplo de conteúdo pago criado",
+                                value = "{\n  'id': '3b8d2a1c-7e4f-4f2a-9c6d-1e2b3a4c5d6e',\n  'name': 'Campanha Paga Primavera',\n  'type': 'SOCIAL_POST',\n  'trafficType': 'PAID',\n  'content': 'Texto do post pago...',\n  'productId': '11111111-2222-3333-4444-555555555555',\n  'creatorId': 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',\n  'creatorName': 'Maria Silva',\n  'creationDate': '2025-08-25T09:05:12',\n  'postDate': '2025-09-01T10:30:00',\n  'productionStartDate': '2025-08-25T09:00:00',\n  'productionEndDate': '2025-08-27T18:45:00',\n  'metaAdsId': '123456789012345',\n  'producerId': 'bbbbbbbb-cccc-dddd-eeee-ffffffffffff',\n  'producerName': 'João Almeida',\n  'status': 'PENDING',\n  'channels': [],\n  'companyId': '99999999-8888-7777-6666-555555555555',\n  'metrics': null\n}"))),
+        @ApiResponse(responseCode = "400", description = "Dados inválidos ou tipo de tráfego inválido (deve ser PAID ou ORGANIC)")
     })
     public ResponseEntity<ContentResponse> createContent(
-            @Parameter(description = "Dados do conteúdo (status opcional, padrão: PENDING)") @Valid @RequestBody ContentRequest request) {
+            @Parameter(description = "Dados do conteúdo (trafficType e status opcionais)") @Valid @RequestBody ContentRequest request) {
         ContentResponse content = contentService.createContent(request);
         return ResponseEntity.ok(content);
     }
     
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
-    @Operation(summary = "Atualizar conteúdo", description = "Atualiza um conteúdo existente, incluindo status")
+    @Operation(summary = "Atualizar conteúdo", 
+        description = "Atualiza um conteúdo existente, incluindo status e tipo de tráfego. " +
+            "Permite alterar de PAID para ORGANIC ou vice-versa.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Conteúdo atualizado com sucesso",
                 content = @Content(mediaType = "application/json",
                         schema = @Schema(implementation = ContentResponse.class),
                         examples = @ExampleObject(name = "contentUpdated",
                                 summary = "Exemplo de conteúdo atualizado",
-                                value = "{\n  'id': '3b8d2a1c-7e4f-4f2a-9c6d-1e2b3a4c5d6e',\n  'name': 'Post de Campanha Primavera (Revisto)',\n  'type': 'SOCIAL_POST',\n  'content': 'Texto revisado...',\n  'productId': '11111111-2222-3333-4444-555555555555',\n  'creatorId': 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',\n  'creatorName': 'Maria Silva',\n  'creationDate': '2025-08-25T09:05:12',\n  'postDate': '2025-09-01T10:30:00',\n  'productionStartDate': '2025-08-25T09:00:00',\n  'productionEndDate': '2025-08-27T18:45:00',\n  'metaAdsId': '123456789012345',\n  'producerId': 'bbbbbbbb-cccc-dddd-eeee-ffffffffffff',\n  'producerName': 'João Almeida',\n  'status': 'IN_PRODUCTION',\n  'channels': [],\n  'companyId': '99999999-8888-7777-6666-555555555555',\n  'metrics': null,\n  'history': [ { 'newStatus': 'PENDING', 'previousStatus': null, 'changedAt': '2025-08-25T09:05:12' }, { 'newStatus': 'IN_PRODUCTION', 'previousStatus': 'PENDING', 'changedAt': '2025-08-26T09:15:00' } ]\n}"))),
+                                value = "{\n  'id': '3b8d2a1c-7e4f-4f2a-9c6d-1e2b3a4c5d6e',\n  'name': 'Post de Campanha Primavera (Revisto)',\n  'type': 'SOCIAL_POST',\n  'trafficType': 'ORGANIC',\n  'content': 'Texto revisado...',\n  'productId': '11111111-2222-3333-4444-555555555555',\n  'creatorId': 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',\n  'creatorName': 'Maria Silva',\n  'creationDate': '2025-08-25T09:05:12',\n  'postDate': '2025-09-01T10:30:00',\n  'status': 'POSTED',\n  'channels': [],\n  'companyId': '99999999-8888-7777-6666-555555555555'\n}"))),
         @ApiResponse(responseCode = "404", description = "Conteúdo não encontrado"),
-        @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+        @ApiResponse(responseCode = "400", description = "Dados inválidos ou tipo de tráfego inválido"),
         @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<ContentResponse> updateContent(
             @Parameter(description = "ID do conteúdo") @PathVariable UUID id,
-            @Parameter(description = "Dados para atualização") @Valid @RequestBody UpdateContentRequest request) {
+            @Parameter(description = "Dados para atualização (qualquer campo é opcional)") @Valid @RequestBody UpdateContentRequest request) {
         ContentResponse content = contentService.updateContent(id, request);
         return ResponseEntity.ok(content);
     }
     
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
-    @Operation(summary = "Excluir conteúdo", description = "Exclui um conteúdo")
+    @Operation(summary = "Excluir conteúdo", 
+        description = "Exclui um conteúdo de forma completa. Remove também métricas, histórico de status, audit logs e associações com canais. " +
+            "Apenas ADMIN ou o criador do conteúdo podem deletar.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "204", description = "Conteúdo excluído com sucesso"),
+        @ApiResponse(responseCode = "204", description = "Conteúdo excluído com sucesso (inclusive métricas, histórico e auditoria)"),
         @ApiResponse(responseCode = "404", description = "Conteúdo não encontrado"),
-        @ApiResponse(responseCode = "403", description = "Acesso negado")
+        @ApiResponse(responseCode = "403", description = "Acesso negado (apenas ADMIN ou criador)")
     })
     public ResponseEntity<Void> deleteContent(
-            @Parameter(description = "ID do conteúdo") @PathVariable UUID id) {
+            @Parameter(description = "ID do conteúdo a ser deletado", example = "3b8d2a1c-7e4f-4f2a-9c6d-1e2b3a4c5d6e") @PathVariable UUID id) {
         contentService.deleteContent(id);
         return ResponseEntity.noContent().build();
     }

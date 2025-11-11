@@ -2,6 +2,7 @@ package com.organixui.organixbackend.content.repository;
 
 import com.organixui.organixbackend.content.model.Content;
 import com.organixui.organixbackend.content.model.ContentStatus;
+import com.organixui.organixbackend.content.model.TrafficType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -101,28 +102,33 @@ public interface ContentRepository extends JpaRepository<Content, UUID> {
         "AND (:status IS NULL OR c.status = :status) " +
         "AND (:productId IS NULL OR c.productId = :productId) " +
         "AND (:userId IS NULL OR c.creatorId = :userId OR c.producerId = :userId) " +
-            "AND (:channelId IS NULL OR ch.id = :channelId) ORDER BY c.creationDate DESC")
+        "AND (:channelId IS NULL OR ch.id = :channelId) " +
+        "AND (:trafficType IS NULL OR c.trafficType = :trafficType) ORDER BY c.creationDate DESC")
     List<Content> searchContent(@Param("companyId") UUID companyId,
                 @Param("status") ContentStatus status,
                 @Param("channelId") UUID channelId,
                 @Param("productId") UUID productId,
-                                @Param("userId") UUID userId);
+                                @Param("userId") UUID userId,
+                                @Param("trafficType") TrafficType trafficType);
 
     @Query(value = "SELECT DISTINCT c FROM Content c LEFT JOIN c.channels ch WHERE c.companyId = :companyId " +
         "AND (:status IS NULL OR c.status = :status) " +
         "AND (:productId IS NULL OR c.productId = :productId) " +
         "AND (:userId IS NULL OR c.creatorId = :userId OR c.producerId = :userId) " +
-        "AND (:channelId IS NULL OR ch.id = :channelId) ORDER BY c.creationDate DESC",
+        "AND (:channelId IS NULL OR ch.id = :channelId) " +
+        "AND (:trafficType IS NULL OR c.trafficType = :trafficType) ORDER BY c.creationDate DESC",
         countQuery = "SELECT COUNT(DISTINCT c) FROM Content c LEFT JOIN c.channels ch WHERE c.companyId = :companyId " +
             "AND (:status IS NULL OR c.status = :status) " +
             "AND (:productId IS NULL OR c.productId = :productId) " +
             "AND (:userId IS NULL OR c.creatorId = :userId OR c.producerId = :userId) " +
-            "AND (:channelId IS NULL OR ch.id = :channelId)")
+            "AND (:channelId IS NULL OR ch.id = :channelId) " +
+            "AND (:trafficType IS NULL OR c.trafficType = :trafficType)")
     Page<Content> searchContentPage(@Param("companyId") UUID companyId,
                     @Param("status") ContentStatus status,
                     @Param("channelId") UUID channelId,
                     @Param("productId") UUID productId,
                     @Param("userId") UUID userId,
+                    @Param("trafficType") TrafficType trafficType,
                     Pageable pageable);
 
     // Recent last N days (used by recent endpoint)

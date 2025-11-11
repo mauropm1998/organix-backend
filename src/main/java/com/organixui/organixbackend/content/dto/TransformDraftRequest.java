@@ -1,6 +1,7 @@
 package com.organixui.organixbackend.content.dto;
 
 import com.organixui.organixbackend.content.model.ContentStatus;
+import com.organixui.organixbackend.content.model.TrafficType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
@@ -42,4 +43,9 @@ public class TransformDraftRequest {
 
     @Schema(description = "Identificador único no Meta Ads (opcional)", example = "123456789012345")
     private String metaAdsId;
+
+    @Schema(description = "Tipo de tráfego (PAID ou ORGANIC)", 
+        allowableValues = {"PAID", "ORGANIC"},
+        example = "ORGANIC")
+    private TrafficType trafficType;
 }

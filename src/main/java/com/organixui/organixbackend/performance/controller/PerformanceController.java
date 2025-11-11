@@ -1,5 +1,6 @@
 package com.organixui.organixbackend.performance.controller;
 
+import com.organixui.organixbackend.content.model.TrafficType;
 import com.organixui.organixbackend.performance.dto.PerformanceSummaryResponse;
 import com.organixui.organixbackend.performance.dto.ChannelPerformanceResponse;
 import com.organixui.organixbackend.performance.dto.TopContentResponse;
@@ -36,20 +37,26 @@ public class PerformanceController {
     
     @GetMapping("/summary")
     @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
-    @Operation(summary = "Métricas agregadas", description = "Retorna métricas agregadas com filtros opcionais")
+    @Operation(summary = "Obter métricas agregadas", 
+        description = "Retorna métricas agregadas de performance com filtros opcionais. Pode filtrar por período de data, canal específico, produto e tipo de tráfego (PAID/ORGANIC). " +
+            "Sem filtros, retorna métricas gerais de toda a empresa.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Métricas retornadas com sucesso")
+        @ApiResponse(responseCode = "200", description = "Métricas retornadas com sucesso. Exemplos: ?startDate=2024-01-01&endDate=2024-01-31&trafficType=PAID")
     })
     public ResponseEntity<PerformanceSummaryResponse> getPerformanceSummary(
-            @Parameter(description = "Data de início do período (YYYY-MM-DD)")
+            @Parameter(description = "Data de início do período em formato YYYY-MM-DD (ex: 2024-01-01)", example = "2024-01-01")
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @Parameter(description = "Data de fim do período (YYYY-MM-DD)")
+            @Parameter(description = "Data de fim do período em formato YYYY-MM-DD (ex: 2024-01-31)", example = "2024-01-31")
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @Parameter(description = "Nome do canal específico")
+            @Parameter(description = "Nome ou identificador do canal para filtrar (ex: Instagram, Facebook)")
             @RequestParam(required = false) String channel,
-            @Parameter(description = "ID do produto específico")
-            @RequestParam(required = false) String productId) {
-        PerformanceSummaryResponse summary = performanceService.getPerformanceSummary(startDate, endDate, channel, productId);
+            @Parameter(description = "UUID do produto para filtrar métricas")
+            @RequestParam(required = false) String productId,
+            @Parameter(description = "Tipo de tráfego para filtrar", 
+                schema = @io.swagger.v3.oas.annotations.media.Schema(allowableValues = {"PAID", "ORGANIC"}),
+                example = "PAID")
+            @RequestParam(required = false) TrafficType trafficType) {
+        PerformanceSummaryResponse summary = performanceService.getPerformanceSummary(startDate, endDate, channel, productId, trafficType);
         return ResponseEntity.ok(summary);
     }
     
@@ -66,20 +73,27 @@ public class PerformanceController {
     
     @GetMapping("/top-content")
     @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
-    @Operation(summary = "Conteúdo com melhor performance", description = "Retorna lista de conteúdo com melhor performance com filtros")
+    @Operation(summary = "Listar conteúdo com melhor performance", 
+        description = "Retorna lista de conteúdos ordenados por performance com filtros opcionais. " +
+            "Pode filtrar por período de data, canal, produto e tipo de tráfego (PAID/ORGANIC). " +
+            "Útil para identificar qual conteúdo está gerando melhor engajamento/retorno.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Top content retornado com sucesso")
+        @ApiResponse(responseCode = "200", description = "Top content retornado com sucesso. Exemplos: ?startDate=2024-01-01&trafficType=ORGANIC ou ?channel=Instagram")
     })
     public ResponseEntity<List<TopContentResponse>> getTopContent(
-            @Parameter(description = "Data de início do período (YYYY-MM-DD)")
+            @Parameter(description = "Data de início do período em formato YYYY-MM-DD", example = "2024-01-01")
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @Parameter(description = "Data de fim do período (YYYY-MM-DD)")
+            @Parameter(description = "Data de fim do período em formato YYYY-MM-DD", example = "2024-12-31")
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @Parameter(description = "Nome do canal específico")
+            @Parameter(description = "Nome ou identificador do canal para filtrar (ex: Instagram, YouTube)")
             @RequestParam(required = false) String channel,
-            @Parameter(description = "ID do produto específico")
-            @RequestParam(required = false) String productId) {
-        List<TopContentResponse> topContent = performanceService.getTopContent(startDate, endDate, channel, productId);
+            @Parameter(description = "UUID do produto para filtrar análise de performance")
+            @RequestParam(required = false) String productId,
+            @Parameter(description = "Filtrar por tipo de tráfego gerado pelo conteúdo", 
+                schema = @io.swagger.v3.oas.annotations.media.Schema(allowableValues = {"PAID", "ORGANIC"}),
+                example = "ORGANIC")
+            @RequestParam(required = false) TrafficType trafficType) {
+        List<TopContentResponse> topContent = performanceService.getTopContent(startDate, endDate, channel, productId, trafficType);
         return ResponseEntity.ok(topContent);
     }
     
