@@ -13,9 +13,11 @@ import java.util.UUID;
 @Entity
 @Table(name = "content", indexes = {
     @Index(name = "idx_content_company_creation_date", columnList = "company_id,creation_date"),
+    @Index(name = "idx_content_company_post_date", columnList = "company_id,post_date"),
     @Index(name = "idx_content_company_status", columnList = "company_id,status"),
     @Index(name = "idx_content_company_product", columnList = "company_id,product_id"),
-    @Index(name = "idx_content_company_traffic_type", columnList = "company_id,traffic_type")
+    @Index(name = "idx_content_company_traffic_type", columnList = "company_id,traffic_type"),
+    @Index(name = "idx_content_company_creator", columnList = "company_id,creator_id")
 })
 @Data
 @NoArgsConstructor

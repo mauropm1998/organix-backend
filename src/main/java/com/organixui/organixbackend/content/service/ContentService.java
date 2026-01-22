@@ -66,21 +66,21 @@ public class ContentService {
 
     public List<ContentResponse> getAllContent() {
         UUID companyId = SecurityUtils.getCurrentUserCompanyId();
-        List<Content> contentList = contentRepository.findByCompanyIdOrderByCreationDateDesc(companyId);
+        List<Content> contentList = contentRepository.findByCompanyIdOrderByPostDateDesc(companyId);
         return contentList.stream()
                 .map(this::convertToResponse)
                 .collect(java.util.stream.Collectors.toList());
     }
 
-    public List<ContentResponse> getAllContent(ContentStatus status, UUID channelId, UUID productId, UUID userId) {
+    public List<ContentResponse> getAllContent(ContentStatus status, UUID channelId, UUID productId, UUID userId, UUID creatorId) {
         UUID companyId = SecurityUtils.getCurrentUserCompanyId();
-    List<Content> contentList = contentRepository.searchContent(companyId, status, channelId, productId, userId, null);
+    List<Content> contentList = contentRepository.searchContent(companyId, status, channelId, productId, userId, creatorId, null);
     return contentList.stream().map(this::convertToResponse).collect(Collectors.toList());
     }
 
-    public List<ContentResponse> getAllContent(ContentStatus status, UUID channelId, UUID productId, UUID userId, TrafficType trafficType) {
+    public List<ContentResponse> getAllContent(ContentStatus status, UUID channelId, UUID productId, UUID userId, UUID creatorId, TrafficType trafficType) {
         UUID companyId = SecurityUtils.getCurrentUserCompanyId();
-    List<Content> contentList = contentRepository.searchContent(companyId, status, channelId, productId, userId, trafficType);
+    List<Content> contentList = contentRepository.searchContent(companyId, status, channelId, productId, userId, creatorId, trafficType);
     return contentList.stream().map(this::convertToResponse).collect(Collectors.toList());
     }
 
@@ -100,22 +100,22 @@ public class ContentService {
         return contentPage.map(this::convertToResponse);
     }
 
-    public Page<ContentResponse> getAllContent(ContentStatus status, UUID channelId, UUID productId, UUID userId, Pageable pageable) {
+    public Page<ContentResponse> getAllContent(ContentStatus status, UUID channelId, UUID productId, UUID userId, UUID creatorId, Pageable pageable) {
         UUID companyId = SecurityUtils.getCurrentUserCompanyId();
-        Page<Content> page = contentRepository.searchContentPage(companyId, status, channelId, productId, userId, null, pageable);
+        Page<Content> page = contentRepository.searchContentPage(companyId, status, channelId, productId, userId, creatorId, null, pageable);
         return page.map(this::convertToResponse);
     }
 
-    public Page<ContentResponse> getAllContent(ContentStatus status, UUID channelId, UUID productId, UUID userId, TrafficType trafficType, Pageable pageable) {
+    public Page<ContentResponse> getAllContent(ContentStatus status, UUID channelId, UUID productId, UUID userId, UUID creatorId, TrafficType trafficType, Pageable pageable) {
         UUID companyId = SecurityUtils.getCurrentUserCompanyId();
-        Page<Content> page = contentRepository.searchContentPage(companyId, status, channelId, productId, userId, trafficType, pageable);
+        Page<Content> page = contentRepository.searchContentPage(companyId, status, channelId, productId, userId, creatorId, trafficType, pageable);
         return page.map(this::convertToResponse);
     }
 
     public List<ContentResponse> getRecentContent(int days) {
         UUID companyId = SecurityUtils.getCurrentUserCompanyId();
         java.time.LocalDateTime from = java.time.LocalDateTime.now().minusDays(days);
-        List<Content> list = contentRepository.findByCompanyIdAndCreationDateGreaterThanEqualOrderByCreationDateDesc(companyId, from);
+        List<Content> list = contentRepository.findByCompanyIdAndPostDateGreaterThanEqualOrderByPostDateDesc(companyId, from);
         return list.stream().map(this::convertToResponse).collect(Collectors.toList());
     }
 
@@ -128,9 +128,9 @@ public class ContentService {
         
         List<Content> contentList;
         if (currentUser.getAdminType() == AdminType.ADMIN) {
-            contentList = contentRepository.findByCompanyIdOrderByCreationDateDesc(companyId);
+            contentList = contentRepository.findByCompanyIdOrderByPostDateDesc(companyId);
         } else {
-            contentList = contentRepository.findByCreatorIdOrProducerIdOrderByCreationDateDesc(currentUserId, currentUserId);
+            contentList = contentRepository.findByCreatorIdOrProducerIdOrderByPostDateDesc(currentUserId, currentUserId);
         }
         
         return contentList.stream()

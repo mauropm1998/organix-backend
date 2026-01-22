@@ -54,7 +54,7 @@ public class ContentController {
     @PreAuthorize("hasRole('ADMIN') or hasRole('OPERATOR')")
     @Operation(summary = "Listar conteúdo", 
         description = "Lista conteúdo da empresa com filtros opcionais, ordenado por creationDate desc. Suporta paginação (?page=&size=). " +
-            "Permite filtrar por status, canal, produto, usuário e tipo de tráfego (PAID ou ORGANIC).")
+            "Permite filtrar por status, canal, produto, usuário (creator ou producer), criador específico (creatorId) e tipo de tráfego (PAID ou ORGANIC).")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Conteúdo retornado com sucesso",
             content = {
@@ -80,6 +80,8 @@ public class ContentController {
             @Parameter(description = "Filtro por produto específico", example = "11111111-2222-3333-4444-555555555555")
             @RequestParam(required = false) UUID productId,
             @Parameter(description = "Filtro por usuário específico (creator ou producer)") @RequestParam(required = false) UUID userId,
+            @Parameter(description = "Filtro por criador específico (apenas creator)", example = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee") 
+            @RequestParam(required = false) UUID creatorId,
             @Parameter(description = "Filtro por tipo de tráfego", 
                 schema = @Schema(allowableValues = {"PAID", "ORGANIC"}),
                 example = "PAID")
@@ -90,9 +92,9 @@ public class ContentController {
             int p = page != null ? page : 0;
             int s = size != null ? size : 20;
             var pageable = org.springframework.data.domain.PageRequest.of(p, s);
-            return ResponseEntity.ok(contentService.getAllContent(status, channelId, productId, userId, trafficType, pageable));
+            return ResponseEntity.ok(contentService.getAllContent(status, channelId, productId, userId, creatorId, trafficType, pageable));
         }
-        return ResponseEntity.ok(contentService.getAllContent(status, channelId, productId, userId, trafficType));
+        return ResponseEntity.ok(contentService.getAllContent(status, channelId, productId, userId, creatorId, trafficType));
     }
 
     @GetMapping("/recent")

@@ -27,14 +27,14 @@ public interface ContentRepository extends JpaRepository<Content, UUID> {
     List<Content> findByCompanyId(UUID companyId);
     
     /**
-     * Busca conteúdo por empresa ordenado por data de criação (desc).
+     * Busca conteúdo por empresa ordenado por data de publicação (desc - mais recentes primeiro).
      */
-    List<Content> findByCompanyIdOrderByCreationDateDesc(UUID companyId);
+    List<Content> findByCompanyIdOrderByPostDateDesc(UUID companyId);
     
     /**
-     * Busca conteúdo por criador ou produtor ordenado por data de criação (desc).
+     * Busca conteúdo por criador ou produtor ordenado por data de publicação (desc - mais recentes primeiro).
      */
-    List<Content> findByCreatorIdOrProducerIdOrderByCreationDateDesc(UUID creatorId, UUID producerId);
+    List<Content> findByCreatorIdOrProducerIdOrderByPostDateDesc(UUID creatorId, UUID producerId);
     
     /**
      * Busca conteúdo por ID e empresa.
@@ -102,25 +102,29 @@ public interface ContentRepository extends JpaRepository<Content, UUID> {
         "AND (:status IS NULL OR c.status = :status) " +
         "AND (:productId IS NULL OR c.productId = :productId) " +
         "AND (:userId IS NULL OR c.creatorId = :userId OR c.producerId = :userId) " +
+        "AND (:creatorId IS NULL OR c.creatorId = :creatorId) " +
         "AND (:channelId IS NULL OR ch.id = :channelId) " +
-        "AND (:trafficType IS NULL OR c.trafficType = :trafficType) ORDER BY c.creationDate DESC")
+        "AND (:trafficType IS NULL OR c.trafficType = :trafficType) ORDER BY c.postDate DESC")
     List<Content> searchContent(@Param("companyId") UUID companyId,
                 @Param("status") ContentStatus status,
                 @Param("channelId") UUID channelId,
                 @Param("productId") UUID productId,
                                 @Param("userId") UUID userId,
+                                @Param("creatorId") UUID creatorId,
                                 @Param("trafficType") TrafficType trafficType);
 
     @Query(value = "SELECT DISTINCT c FROM Content c LEFT JOIN c.channels ch WHERE c.companyId = :companyId " +
         "AND (:status IS NULL OR c.status = :status) " +
         "AND (:productId IS NULL OR c.productId = :productId) " +
         "AND (:userId IS NULL OR c.creatorId = :userId OR c.producerId = :userId) " +
+        "AND (:creatorId IS NULL OR c.creatorId = :creatorId) " +
         "AND (:channelId IS NULL OR ch.id = :channelId) " +
-        "AND (:trafficType IS NULL OR c.trafficType = :trafficType) ORDER BY c.creationDate DESC",
+        "AND (:trafficType IS NULL OR c.trafficType = :trafficType) ORDER BY c.postDate DESC",
         countQuery = "SELECT COUNT(DISTINCT c) FROM Content c LEFT JOIN c.channels ch WHERE c.companyId = :companyId " +
             "AND (:status IS NULL OR c.status = :status) " +
             "AND (:productId IS NULL OR c.productId = :productId) " +
             "AND (:userId IS NULL OR c.creatorId = :userId OR c.producerId = :userId) " +
+            "AND (:creatorId IS NULL OR c.creatorId = :creatorId) " +
             "AND (:channelId IS NULL OR ch.id = :channelId) " +
             "AND (:trafficType IS NULL OR c.trafficType = :trafficType)")
     Page<Content> searchContentPage(@Param("companyId") UUID companyId,
@@ -128,9 +132,10 @@ public interface ContentRepository extends JpaRepository<Content, UUID> {
                     @Param("channelId") UUID channelId,
                     @Param("productId") UUID productId,
                     @Param("userId") UUID userId,
+                    @Param("creatorId") UUID creatorId,
                     @Param("trafficType") TrafficType trafficType,
                     Pageable pageable);
 
     // Recent last N days (used by recent endpoint)
-    List<Content> findByCompanyIdAndCreationDateGreaterThanEqualOrderByCreationDateDesc(UUID companyId, java.time.LocalDateTime date);
+    List<Content> findByCompanyIdAndPostDateGreaterThanEqualOrderByPostDateDesc(UUID companyId, java.time.LocalDateTime date);
 }
