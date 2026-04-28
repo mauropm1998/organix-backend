@@ -235,16 +235,8 @@ public class ContentService {
         Content content = contentRepository.findByIdAndCompanyId(id, companyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Content not found"));
         
-        // ADMIN pode atualizar qualquer, OPERATOR apenas se for creator ou producer
+        // Qualquer utilizador autenticado da empresa pode atualizar qualquer conteúdo
         UUID currentUserId = SecurityUtils.getCurrentUserId();
-        User currentUser = userRepository.findById(currentUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        if (currentUser.getAdminType() != AdminType.ADMIN) {
-            if (!content.getCreatorId().equals(currentUserId) &&
-                (content.getProducerId() == null || !content.getProducerId().equals(currentUserId))) {
-                throw new BusinessException("You can only update your own content");
-            }
-        }
         
         if (request.getProductId() != null) {
             boolean productExists = productRepository.existsByIdAndCompanyId(request.getProductId(), companyId);
@@ -382,13 +374,7 @@ public class ContentService {
         Content content = contentRepository.findByIdAndCompanyId(id, companyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Content not found"));
         
-        User currentUser = userRepository.findById(currentUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        
-        if (currentUser.getAdminType() != AdminType.ADMIN &&
-            !content.getCreatorId().equals(currentUserId)) {
-            throw new BusinessException("You can only delete content you created");
-        }
+        // Qualquer utilizador autenticado da empresa pode eliminar qualquer conteúdo
         
         // Deleta métricas associadas
         contentMetricsRepository.deleteByContentId(id);
@@ -409,18 +395,7 @@ public class ContentService {
     }
 
     private void validateStatusChange(Content content, ContentStatus newStatus) {
-        UUID currentUserId = SecurityUtils.getCurrentUserId();
-        User currentUser = userRepository.findById(currentUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        
-        if (currentUser.getAdminType() == AdminType.ADMIN) {
-            return;
-        }
-        
-        if (content.getProducerId() == null || !content.getProducerId().equals(currentUserId)) {
-            throw new BusinessException("Only assigned producers can change content status");
-        }
-        
+        // Qualquer utilizador autenticado da empresa pode alterar o estado do conteúdo
         switch (content.getStatus()) {
             case PENDING:
                 if (newStatus != ContentStatus.IN_PRODUCTION && newStatus != ContentStatus.CANCELED) {
@@ -459,14 +434,7 @@ public class ContentService {
             throw new BusinessException("Only approved drafts can be transformed into content");
         }
         
-        // Verifica se o usuário pode transformar este rascunho
-        User currentUser = userRepository.findById(currentUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        
-        if (currentUser.getAdminType() != AdminType.ADMIN && !draft.getCreatorId().equals(currentUserId)) {
-            throw new BusinessException("You can only transform your own drafts");
-        }
-        
+        // Verifica se o utilizador pertence à empresa (validação feita pelo companyId acima)
         // Busca os canais
         List<Channel> channels = channelRepository.findAllById(request.getChannelIds());
         if (channels.size() != request.getChannelIds().size()) {

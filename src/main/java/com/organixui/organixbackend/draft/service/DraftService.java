@@ -9,7 +9,6 @@ import com.organixui.organixbackend.draft.dto.UpdateDraftRequest;
 import com.organixui.organixbackend.draft.model.Draft;
 import com.organixui.organixbackend.draft.model.DraftStatus;
 import com.organixui.organixbackend.draft.repository.DraftRepository;
-import com.organixui.organixbackend.user.model.AdminType;
 import com.organixui.organixbackend.user.model.User;
 import com.organixui.organixbackend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -173,29 +172,10 @@ public class DraftService {
 
     /**
      * Valida se o usuário atual pode modificar o rascunho.
+     * Qualquer utilizador autenticado da empresa pode modificar qualquer rascunho da empresa.
      */
     private void validateUserCanModifyDraft(Draft draft) {
-        UUID currentUserId = SecurityUtils.getCurrentUserId();
-        User currentUser = getCurrentUser();
-        
-        // Admin pode modificar qualquer rascunho da empresa
-        if (currentUser.getAdminType() == AdminType.ADMIN) {
-            return;
-        }
-        
-        // Operator só pode modificar seus próprios rascunhos
-        if (!draft.getCreatorId().equals(currentUserId)) {
-            throw new BusinessException("Você não tem permissão para modificar este rascunho");
-        }
-    }
-
-    /**
-     * Obtém o usuário atual.
-     */
-    private User getCurrentUser() {
-        UUID currentUserId = SecurityUtils.getCurrentUserId();
-        return userRepository.findById(currentUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
+        // Todos os utilizadores autenticados da empresa podem modificar qualquer rascunho
     }
 
     /**
